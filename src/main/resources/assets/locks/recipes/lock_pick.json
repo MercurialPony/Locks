@@ -1,0 +1,22 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"pattern":
+	[
+		"I ",
+		" L"
+	],
+	"key":
+	{
+		"I":
+		{
+			"type": "forge:ore_dict",
+			"ore": "ingotIron"
+		},
+		"L":
+		{
+			"type": "forge:ore_dict",
+			"ore": "leather"
+		}
+	},
+	"result": { "item": "locks:lock_pick" }
+}

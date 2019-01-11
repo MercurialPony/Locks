@@ -1,0 +1,6 @@
+{
+	"recipes":
+	{
+		"lockable_cloning": "melonslise.locks.common.crafting.recipe.RecipeLockableCloning$Factory"
+	}
+}
