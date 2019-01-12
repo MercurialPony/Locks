@@ -5,4 +5,4 @@ The source code for Locks, a small, but unique Minecraft mod that introduces fle
 
 ## Links
 CurseForge: https://minecraft.curseforge.com/projects/locks  
-Minecraft Forum:
+Minecraft Forum: https://www.minecraftforum.net/forums/mapping-and-modding-java-edition/minecraft-mods/2759819-locks-v2-0-dynamic-locking-system-lock-picking
