@@ -13,6 +13,8 @@ import melonslise.locks.common.config.LocksConfiguration;
 import melonslise.locks.common.item.ItemLock;
 import melonslise.locks.common.item.LocksItems;
 import melonslise.locks.common.item.api.lockable.ItemLockable;
+import melonslise.locks.common.network.LocksNetworks;
+import melonslise.locks.common.network.client.MessageConfiguration;
 import melonslise.locks.common.sound.LocksSounds;
 import melonslise.locks.common.world.ListenerLockables;
 import melonslise.locks.common.world.storage.Box;
@@ -29,6 +31,7 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityChest;
 import net.minecraft.util.EnumHand;
@@ -44,6 +47,7 @@ import net.minecraftforge.event.entity.player.PlayerInteractEvent.RightClickBloc
 import net.minecraftforge.event.terraingen.PopulateChunkEvent;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent;
+import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.Event.Result;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -161,5 +165,16 @@ public class LocksEvents
 	{
 		if(!event.getModID().equals(LocksCore.ID)) return;
 		ConfigManager.sync(LocksCore.ID, Config.Type.INSTANCE);
+		MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
+		if(server == null) return;
+		Runnable runnable = new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				LocksNetworks.network.sendToAll(new MessageConfiguration(LocksConfiguration.main));
+			}
+		};
+		server.addScheduledTask(runnable);
 	}
 }
