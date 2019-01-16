@@ -43,6 +43,7 @@ import net.minecraftforge.common.config.Config;
 import net.minecraftforge.common.config.ConfigManager;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent.BreakSpeed;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent.RightClickBlock;
 import net.minecraftforge.event.terraingen.PopulateChunkEvent;
 import net.minecraftforge.event.world.WorldEvent;
@@ -149,6 +150,14 @@ public class LocksEvents
 		player.swingArm(EnumHand.MAIN_HAND);
 		if(world.isRemote) return;
 		for(Lockable lockable : lockables.remove(box)) world.spawnEntity(new EntityItem(world, (double) position.getX() + 0.5D, (double) position.getY() + 0.5D, (double) position.getZ() + 0.5D, ItemLockable.assignID(new ItemStack(LocksItems.lock), lockable.lock.id)));
+	}
+
+	@SubscribeEvent
+	public static void onBlockBreaking(BreakSpeed event)
+	{
+		World world = event.getEntityPlayer().world;
+		if(!LocksConfiguration.getMain(world).unbreakable_locks) return;
+		if(StorageLockables.get(world).contains(Predicates.and(new PredicateIntersecting(new Box(event.getPos())), LocksSelectors.LOCKED))) event.setCanceled(true);
 	}
 
 	@SubscribeEvent

@@ -11,6 +11,7 @@ item.locks.key_ring.name=Keyring
 
 # GUIs
 locks.gui.lockpicking.title=Lock Picking
+locks.gui.lockpicking.open=Press `ESC` to open
 
 # Sounds
 locks.subtitle.key_ring=Keys jingle
@@ -35,6 +36,8 @@ locks.general.main.generate_locks=Generate locked chests
 locks.general.main.generate_locks.tooltip=Generate every new chest with a random lock
 locks.general.main.remove_locks=Allow removing locks
 locks.general.main.remove_locks.tooltip=Open locks can be removed with an empty hand while sneaking
+locks.general.main.unbreakable_locks=Unbreakable locks
+locks.general.main.unbreakable_locks.tooltip=Locked blocks cannot be destroyed in survival mode
 
 locks.general.client=Client Options
 locks.general.client.tooltip=Options that affect only the client

@@ -29,7 +29,7 @@ public class GuiLockPicking extends GuiContainer // TODO EVENTS
 	protected int length;
 
 	public static final ResourceLocation textures = new ResourceLocation(LocksCore.ID, "textures/gui/lockpicking.png");
-	public static final String title = LocksUtilities.prefixLocks("gui.lockpicking.title");
+	public static final String title = LocksUtilities.prefixLocks("gui.lockpicking.title"), hint = LocksUtilities.prefixLocks("gui.lockpicking.open");
 	protected int textureWidth, textureHeight;
 
 	protected Texture outerLock = new Texture(24, 0, 24, 120), innerLock = new Texture(0, 0, 24, 64), spring = new Texture(48, 48, 12, 24), edge = new Texture(0 ,0 , 12, 64), pin = new Texture(48, 0, 12, 48);
@@ -57,7 +57,7 @@ public class GuiLockPicking extends GuiContainer // TODO EVENTS
 	public void drawGuiContainerBackgroundLayer(float partialTick, int mouseX, int mouseY) // TODO Final static constants for texture pos?
 	{
 		this.drawDefaultBackground();
-		GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+		GlStateManager.color(1F, 1F, 1F, 1F);
 		this.mc.getTextureManager().bindTexture(textures);
 		int cornerX = (this.width - this.textureWidth) / 2;
 		int cornerY = (this.height - this.textureHeight) / 2;
@@ -72,6 +72,13 @@ public class GuiLockPicking extends GuiContainer // TODO EVENTS
 		}
 		this.edge.draw(this, cornerX, cornerY);
 		this.drawCenteredString(this.fontRenderer, I18n.format(title), this.width / 2, 10, 0xffffff);
+		if(this.isOpen()) this.drawCenteredString(this.fontRenderer, I18n.format(hint), this.width / 2, cornerY + 96, 0xffffff);
+	}
+
+	public boolean isOpen()
+	{
+		for(SpritePin pin : this.pins) if(pin.isPulled == false) return false;
+		return true;
 	}
 
 	@Override
@@ -123,7 +130,7 @@ public class GuiLockPicking extends GuiContainer // TODO EVENTS
 
 	protected void rotateLockPick(int degrees)
 	{
-		 // Uses a simple physics formula. Angle = (angular velocity) * time.
+		// Uses a simple physics formula. Angle = (angular velocity) * time.
 		int motion = 2 * Integer.signum(degrees);
 		this.lockPick.rotate(motion, degrees/motion);
 	}

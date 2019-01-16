@@ -14,7 +14,7 @@ public class MessageConfiguration implements IMessage
 	private int lock_length, lockable_volume;
 	private float lock_pick_strength;
 	private String[] lockable_blocks;
-	private boolean generate_locks, remove_locks;
+	private boolean generate_locks, remove_locks, unbreakable_locks;
 
 	public MessageConfiguration()
 	{
@@ -28,6 +28,7 @@ public class MessageConfiguration implements IMessage
 		this.lockable_blocks = config.lockable_blocks;
 		this.generate_locks = config.generate_locks;
 		this.remove_locks = config.remove_locks;
+		this.unbreakable_locks = config.unbreakable_locks;
 	}
 
 	@Override
@@ -40,6 +41,7 @@ public class MessageConfiguration implements IMessage
 		for(int a = 0; a < this.lockable_blocks.length; ++a) this.lockable_blocks[a] = ByteBufUtils.readUTF8String(buffer);
 		this.generate_locks = buffer.readBoolean();
 		this.remove_locks = buffer.readBoolean();
+		this.unbreakable_locks = buffer.readBoolean();
 	}
 
 	@Override
@@ -52,6 +54,7 @@ public class MessageConfiguration implements IMessage
 		for(String string : this.lockable_blocks) ByteBufUtils.writeUTF8String(buffer, string);
 		buffer.writeBoolean(this.generate_locks);
 		buffer.writeBoolean(this.remove_locks);
+		buffer.writeBoolean(this.unbreakable_locks);
 	}
 
 
@@ -74,6 +77,7 @@ public class MessageConfiguration implements IMessage
 					config.lockable_blocks = message.lockable_blocks;
 					config.generate_locks = message.generate_locks;
 					config.remove_locks = message.remove_locks;
+					config.unbreakable_locks = message.unbreakable_locks;
 				}
 			};
 			mc.addScheduledTask(runnable);

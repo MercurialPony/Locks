@@ -43,6 +43,9 @@ public class LocksConfiguration
 
 		@Config.Comment("Open locks can be removed with an empty hand while sneaking")
 		public boolean remove_locks = true;
+
+		@Config.Comment("Locked blocks cannot be destroyed in survival mode")
+		public boolean unbreakable_locks = true;
 	}
 
 	public static class ClientConfiguration
