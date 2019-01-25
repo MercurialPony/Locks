@@ -112,10 +112,11 @@ public class LocksEvents
 		ThreadLocalRandom random = ThreadLocalRandom.current();
 		for(Entry<BlockPos, TileEntity> entry : world.getChunkFromChunkCoords(event.getChunkX(), event.getChunkZ()).getTileEntityMap().entrySet())
 		{
-			if(!(entry.getValue() instanceof TileEntityChest)) continue;
+			StorageLockables lockables = StorageLockables.get(world);
 			BlockPos position1 = entry.getKey();
+			if(!(entry.getValue() instanceof TileEntityChest) || lockables.contains(new PredicateIntersecting(new Box(position1)))) continue;
 			BlockPos position2 = LocksUtilities.getAdjacentChest((TileEntityChest) entry.getValue());
-			StorageLockables.get(world).add(new Lockable(new Box(position1, position2 == null ? position1 : position2), new Lock(UUID.randomUUID(), random.nextInt(5, 9), true), world.getBlockState(position1).getValue(BlockChest.FACING)));
+			lockables.add(new Lockable(new Box(position1, position2 == null ? position1 : position2), new Lock(UUID.randomUUID(), random.nextInt(5, 9), true), world.getBlockState(position1).getValue(BlockChest.FACING)));
 		}
 	}
 

@@ -324,6 +324,7 @@ public class LocksUtilities
 	public static BlockPos getAdjacentChest(TileEntityChest chest)
 	{
 		BlockPos position = null;
+		chest.checkForAdjacentChests();
 		if(chest.adjacentChestXNeg != null) position = chest.adjacentChestXNeg.getPos();
 		else if(chest.adjacentChestXPos != null) position = chest.adjacentChestXPos.getPos();
 		else if(chest.adjacentChestZNeg != null) position = chest.adjacentChestZNeg.getPos();
