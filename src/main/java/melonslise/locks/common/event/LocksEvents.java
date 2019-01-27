@@ -46,6 +46,7 @@ import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent.BreakSpeed;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent.RightClickBlock;
 import net.minecraftforge.event.terraingen.PopulateChunkEvent;
+import net.minecraftforge.event.world.BlockEvent.BreakEvent;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent;
 import net.minecraftforge.fml.common.FMLCommonHandler;
@@ -157,8 +158,16 @@ public class LocksEvents
 	public static void onBlockBreaking(BreakSpeed event)
 	{
 		World world = event.getEntityPlayer().world;
-		if(!LocksConfiguration.getMain(world).unbreakable_locks) return;
-		if(StorageLockables.get(world).contains(Predicates.and(new PredicateIntersecting(new Box(event.getPos())), LocksSelectors.LOCKED))) event.setCanceled(true);
+		if(!LocksConfiguration.getMain(world).unbreakable_locks || !StorageLockables.get(world).contains(Predicates.and(new PredicateIntersecting(new Box(event.getPos())), LocksSelectors.LOCKED))) return;
+		event.setCanceled(true);
+	}
+
+	@SubscribeEvent
+	public static void onBlockBreak(BreakEvent event)
+	{
+		World world = event.getPlayer().world;
+		if(!LocksConfiguration.getMain(world).unbreakable_locks || event.getPlayer().isCreative() || !StorageLockables.get(world).contains(Predicates.and(new PredicateIntersecting(new Box(event.getPos())), LocksSelectors.LOCKED))) return;
+		event.setCanceled(true);
 	}
 
 	@SubscribeEvent

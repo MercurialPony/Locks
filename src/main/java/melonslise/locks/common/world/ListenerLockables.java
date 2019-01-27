@@ -23,7 +23,7 @@ public class ListenerLockables implements IWorldEventListener
 	@Override
 	public void notifyBlockUpdate(World world, BlockPos position, IBlockState oldState, IBlockState newState, int flags)
 	{
-		if(oldState.getBlock() == newState.getBlock() || world.isRemote) return;
+		if(world.isRemote || oldState.getBlock() == newState.getBlock()) return;
 		for(Lockable lockable : StorageLockables.get(world).remove(new Box(position)))
 		{
 			world.playSound(null, position, SoundEvents.ENTITY_ITEM_BREAK, SoundCategory.BLOCKS, 0.8F, 0.8F + ThreadLocalRandom.current().nextFloat() * 0.4F);
