@@ -1,0 +1,23 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"pattern":
+	[
+		"I ",
+		" L"
+	],
+	"key":
+	{
+		"I":
+		{
+			"tag": "forge:ingots/iron"
+		},
+		"L":
+		{
+			"tag": "locks:leather"
+		}
+	},
+	"result":
+	{
+		"item": "locks:lock_pick"
+	}
+}

@@ -1,23 +1,21 @@
 package melonslise.locks.utility.predicate;
 
-import java.util.UUID;
+import java.util.function.Predicate;
 
-import com.google.common.base.Predicate;
-
-import melonslise.locks.common.world.storage.Lockable;
+import melonslise.locks.utility.Lockable;
 
 public class PredicateMatching implements Predicate<Lockable>
 {
-	protected UUID id;
+	protected int id;
 
-	public PredicateMatching(UUID id)
+	public PredicateMatching(int id)
 	{
 		this.id = id;
 	}
 
 	@Override
-	public boolean apply(Lockable lockable)
+	public boolean test(Lockable lockable)
 	{
-		return lockable.lock.id == null && this.id == null || lockable.lock.id.equals(this.id);
+		return lockable.lock.id == this.id;
 	}
 }

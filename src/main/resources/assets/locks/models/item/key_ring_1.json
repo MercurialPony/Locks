@@ -2,6 +2,6 @@
 	"parent": "item/generated",
 	"textures":
 	{
-		"layer0": "locks:items/key_ring_1"
+		"layer0": "locks:item/key_ring_1"
 	}
 }

@@ -1,55 +1,62 @@
 package melonslise.locks.common.item;
 
-import melonslise.locks.common.capability.LocksCapabilities;
-import melonslise.locks.common.capability.entity.ICapabilityLockBounds;
 import melonslise.locks.common.config.LocksConfiguration;
-import melonslise.locks.common.item.api.lockable.ItemLockable;
-import melonslise.locks.common.sound.LocksSounds;
-import melonslise.locks.common.world.storage.Box;
-import melonslise.locks.common.world.storage.Lock;
-import melonslise.locks.common.world.storage.Lockable;
-import melonslise.locks.common.world.storage.StorageLockables;
-import melonslise.locks.utility.LocksUtilities;
+import melonslise.locks.common.init.LocksCapabilities;
+import melonslise.locks.common.init.LocksSounds;
+import melonslise.locks.utility.Box;
+import melonslise.locks.utility.Lock;
+import melonslise.locks.utility.Lockable;
 import melonslise.locks.utility.predicate.PredicateIntersecting;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.EnumActionResult;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumHand;
+import net.minecraft.item.ItemUseContext;
+import net.minecraft.util.ActionResultType;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-public class ItemLock extends ItemLockable
+public class ItemLock extends ItemLocking
 {
-	public ItemLock(String name)
-	{
-		super(name);
-	}
+	public final int length;
 
-	public int getLength(World world)
+	public ItemLock(String name, Properties properties, int length)
 	{
-		return LocksConfiguration.getMain(world).lock_length;
+		super(name, properties);
+		this.length = length;
 	}
 
 	// TODO Sound pitch
 	@Override
-	public EnumActionResult onItemUse(EntityPlayer player, World world, BlockPos position, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ)
+	public ActionResultType onItemUse(ItemUseContext context)
 	{
-		StorageLockables lockables = StorageLockables.get(world);
-		ICapabilityLockBounds bounds = LocksCapabilities.getLockBounds(player);
-		BlockPos position1 = bounds.get();
-		if(!LocksUtilities.canLock(world, position) || lockables.contains(new PredicateIntersecting(new Box(position)))) return EnumActionResult.FAIL;
-		if(position1 != null)
+		BlockPos position = context.getPos();
+		World world = context.getWorld();
+		PlayerEntity player = context.getPlayer();
+		ItemStack stack = context.getItem();
+
+		return world.getCapability(LocksCapabilities.LOCKABLES).map(lockables ->
 		{
-			bounds.set(null);
-			if(world.isRemote) return EnumActionResult.SUCCESS;
-			ItemStack stack = player.getHeldItem(hand);
-			if(!lockables.add(new Lockable(new Box(position1, position), new Lock(this.getID(stack), this.getLength(world), true), facing))) return EnumActionResult.SUCCESS;
-			if(!player.isCreative()) stack.shrink(1);
-			world.playSound(null, position, LocksSounds.lock_close, SoundCategory.BLOCKS, 1F, 1F);
-		}
-		else bounds.set(position);
-		return EnumActionResult.SUCCESS;
+			return player.getCapability(LocksCapabilities.LOCK_POSITION).map(lockPosition ->
+			{
+				if(!LocksConfiguration.MAIN.canLock(world, position) || lockables.getLockables().values().stream().anyMatch(new PredicateIntersecting(position))) return ActionResultType.PASS;
+				BlockPos position1 = lockPosition.get();
+				if(position1 == null) lockPosition.set(position);
+				else
+				{
+					lockPosition.set(null);
+					// TODO Go through the add checks here as well
+					if(world.isRemote) return ActionResultType.SUCCESS;
+					if(!lockables.add(new Lockable(new Box(position1, position), this.createLock(stack), context.getFace()))) return ActionResultType.PASS;
+					if(!player.isCreative()) stack.shrink(1);
+					world.playSound(null, position, LocksSounds.LOCK_CLOSE, SoundCategory.BLOCKS, 1F, 1F);
+				}
+				return ActionResultType.SUCCESS;
+			}).orElse(ActionResultType.PASS);
+		}).orElse(ActionResultType.PASS);
+	}
+
+	public Lock createLock(ItemStack stack)
+	{
+		return new Lock(getID(stack), this.length, true);
 	}
 }

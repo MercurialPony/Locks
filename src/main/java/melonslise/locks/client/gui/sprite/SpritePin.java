@@ -1,8 +1,5 @@
 package melonslise.locks.client.gui.sprite;
 
-import melonslise.locks.client.gui.api.sprite.Sprite;
-import melonslise.locks.client.gui.api.sprite.Texture;
-
 public class SpritePin extends Sprite
 {
 	public boolean isPulled = false;

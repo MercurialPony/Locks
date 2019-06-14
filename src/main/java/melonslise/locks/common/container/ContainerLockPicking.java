@@ -1,85 +1,117 @@
 package melonslise.locks.common.container;
 
-import java.util.Iterator;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Consumer;
 
-import io.netty.util.internal.ThreadLocalRandom;
+import melonslise.locks.Locks;
+import melonslise.locks.client.gui.ScreenLockPicking;
+import melonslise.locks.common.init.LocksCapabilities;
+import melonslise.locks.common.init.LocksContainerTypes;
+import melonslise.locks.common.init.LocksItems;
+import melonslise.locks.common.init.LocksNetworks;
+import melonslise.locks.common.init.LocksSounds;
 import melonslise.locks.common.item.ItemLockPick;
-import melonslise.locks.common.network.LocksNetworks;
-import melonslise.locks.common.network.client.MessageCheckPinResult;
-import melonslise.locks.common.sound.LocksSounds;
-import melonslise.locks.common.world.storage.Lockable;
-import melonslise.locks.common.world.storage.StorageLockables;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.inventory.Container;
+import melonslise.locks.common.network.toClient.PacketCheckPinResult;
+import melonslise.locks.utility.Lockable;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.inventory.EquipmentSlotType;
+import net.minecraft.inventory.container.Container;
+import net.minecraft.inventory.container.INamedContainerProvider;
 import net.minecraft.item.ItemStack;
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraftforge.fml.network.IContainerFactory;
+import net.minecraftforge.fml.network.PacketDistributor;
 
-// TODO Sync with client container instead of gui
-// TODO Sound helper, random pitch?
 public class ContainerLockPicking extends Container
 {
-	public final EntityPlayer player;
-	public final BlockPos position;
-	public final Lockable lockable;
-	protected int currentIndex = 0;
-	protected boolean open;
+	public static final ITextComponent TITLE = new TranslationTextComponent(Locks.ID + ".gui.lockpicking.title");
 
-	public ContainerLockPicking(EntityPlayer player, BlockPos position, Lockable lockable)
+	public PlayerEntity player;
+	public BlockPos position;
+	public Lockable lockable;
+	protected int currentIndex = 0;
+
+	public ContainerLockPicking(int id, PlayerEntity player, BlockPos position, Lockable lockable)
 	{
+		super(LocksContainerTypes.LOCK_PICKING, id);
 		this.player = player;
 		this.position = position;
 		this.lockable = lockable;
 	}
 
-	// TODO block exist
-	// TODO Player inventory scan helper
-	@Override
-	public boolean canInteractWith(EntityPlayer player)
+	public int getCurrentIndex()
 	{
-		if(player.getDistanceSqToCenter(this.position) > 9D) return false;
-		Iterator<ItemStack> iterator = player.inventoryContainer.getInventory().iterator();
-		while(iterator.hasNext()) if(iterator.next().getItem() instanceof ItemLockPick) return true;
+		return this.currentIndex;
+	}
+
+	// TODO don't hardcode item
+	@Override
+	public boolean canInteractWith(PlayerEntity player)
+	{
+		for(ItemStack stack : player.getHeldEquipment()) if(stack.getItem() == LocksItems.LOCK_PICK) return true;
 		return false;
 	}
 
+	// SERVER ONLY
 	public void checkPin(int currentPin)
 	{
-		if(this.open || this.player.world.isRemote) return;
+		if(this.isOpen()) return;
 		boolean correct = false, reset = false;
 		if(this.lockable.lock.checkPin(currentIndex, currentPin))
 		{
 			++this.currentIndex;
-			if(this.currentIndex == this.lockable.lock.getLength()) this.open = true;
 			correct = true;
-			this.player.world.playSound(null, this.position, LocksSounds.pin_match, SoundCategory.BLOCKS, 1F, 1F);
+			this.player.world.playSound(null, this.position, LocksSounds.PIN_MATCH, SoundCategory.BLOCKS, 1F, 1F);
 		}
 		else
 		{
-			if(this.breakPick(player))
+			if(!this.breakPick(player)) this.player.world.playSound(null, this.position, LocksSounds.PIN_FAIL, SoundCategory.BLOCKS, 1F, 1F);
+			else
 			{
 				reset = true;
 				this.reset();
 			}
-			this.player.world.playSound(null, this.position, LocksSounds.pin_fail, SoundCategory.BLOCKS, 1F, 1F);
 		}
-		LocksNetworks.network.sendTo(new MessageCheckPinResult(correct, reset), (EntityPlayerMP) this.player);
+		LocksNetworks.MAIN.send(PacketDistributor.PLAYER.with(() -> (ServerPlayerEntity) this.player), new PacketCheckPinResult(correct, reset));
+	}
+
+	// CLIENT ONLY
+	public void handlePin(boolean correct, boolean reset)
+	{
+		Screen screen = Minecraft.getInstance().field_71462_r;
+		if(screen instanceof ScreenLockPicking) ((ScreenLockPicking) screen).handlePin(correct, reset);
+		if(correct) ++this.currentIndex;
+		if(reset) this.reset();
+	}
+
+	public boolean isOpen()
+	{
+		return this.currentIndex == this.lockable.lock.getLength();
 	}
 
 	protected void reset()
 	{
 		this.currentIndex = 0;
-		//if(LocksConfiguration.getMain(this.player.world).reset_combinations) StorageLockables.get(this.player.world).shuffleCombination(this.lockable);
 	}
 
-	protected boolean breakPick(EntityPlayer player)
+	// TODO Ditto
+	// TODO ItemCrack
+	protected boolean breakPick(PlayerEntity player)
 	{
-		for(ItemStack stack : player.inventoryContainer.getInventory())
+		for(EquipmentSlotType slot : EquipmentSlotType.values())
 		{
-			if(!(stack.getItem() instanceof ItemLockPick)) continue;
-			if(ThreadLocalRandom.current().nextFloat() <= ((ItemLockPick) stack.getItem()).getStrength(player.world)) return false;
-			this.player.renderBrokenItemStack(stack);
+			ItemStack stack = player.getItemStackFromSlot(slot);
+			if(slot.getSlotType() != EquipmentSlotType.Group.HAND || stack.getItem() != LocksItems.LOCK_PICK) continue;
+			if(ThreadLocalRandom.current().nextFloat() < ((ItemLockPick) stack.getItem()).strength) return false;
+			this.player.func_213361_c(slot);
 			stack.shrink(1);
 			return true;
 		}
@@ -87,11 +119,64 @@ public class ContainerLockPicking extends Container
 	}
 
 	@Override
-	public void onContainerClosed(EntityPlayer player)
+	public void onContainerClosed(PlayerEntity player)
 	{
 		super.onContainerClosed(player);
-		if(player.world.isRemote || !this.open || !this.lockable.lock.isLocked()) return;
-		StorageLockables.get(player.world).toggle(this.lockable.box);
-		this.player.world.playSound(null, this.position, LocksSounds.lock_open, SoundCategory.BLOCKS, 1F, 1F);
+		if(!this.isOpen() || !this.lockable.lock.isLocked()) return;
+		this.lockable.lock.setLocked(!this.lockable.lock.isLocked());
+		this.player.world.playSound(player, this.position, LocksSounds.LOCK_OPEN, SoundCategory.BLOCKS, 1F, 1F);
+	}
+
+
+
+	public static final IContainerFactory FACTORY = (id, inventory, buffer) ->
+	{
+		BlockPos position = buffer.readBlockPos();
+		Lockable lockable = inventory.player.world.getCapability(LocksCapabilities.LOCKABLES).map(lockables -> lockables.getLockables().get(buffer.readInt())).orElse(null);
+		return new ContainerLockPicking(id, inventory.player, position, lockable);
+	};
+
+	// TODO Move?
+	public static class Provider implements INamedContainerProvider
+	{
+		public final BlockPos position;
+		public final Lockable lockable;
+
+		public Provider(BlockPos position, Lockable lockable)
+		{
+			this.position = position;
+			this.lockable = lockable;
+		}
+
+		@Override
+		public Container createMenu(int id, PlayerInventory inventory, PlayerEntity player)
+		{
+			return new ContainerLockPicking(id, player, this.position, this.lockable);
+		}
+
+		@Override
+		public ITextComponent getDisplayName()
+		{
+			return TITLE;
+		}
+	}
+
+	public static class Writer implements Consumer<PacketBuffer>
+	{
+		public final BlockPos position;
+		public final Lockable lockable;
+
+		public Writer(BlockPos position, Lockable lockable)
+		{
+			this.position = position;
+			this.lockable = lockable;
+		}
+
+		@Override
+		public void accept(PacketBuffer buffer)
+		{
+			buffer.writeBlockPos(this.position);
+			buffer.writeInt(this.lockable.networkID);
+		}
 	}
 }

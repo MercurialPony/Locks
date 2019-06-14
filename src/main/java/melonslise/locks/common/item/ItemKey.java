@@ -1,39 +1,39 @@
 package melonslise.locks.common.item;
 
-import java.util.UUID;
+import java.util.List;
+import java.util.stream.Collectors;
 
-import com.google.common.base.Predicates;
-
-import melonslise.locks.common.item.api.lockable.ItemLockable;
-import melonslise.locks.common.sound.LocksSounds;
-import melonslise.locks.common.world.storage.Box;
-import melonslise.locks.common.world.storage.StorageLockables;
+import melonslise.locks.common.init.LocksCapabilities;
+import melonslise.locks.common.init.LocksSounds;
+import melonslise.locks.utility.Lockable;
 import melonslise.locks.utility.predicate.PredicateIntersecting;
 import melonslise.locks.utility.predicate.PredicateMatching;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.EnumActionResult;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumHand;
+import net.minecraft.item.ItemUseContext;
+import net.minecraft.util.ActionResultType;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-public class ItemKey extends ItemLockable
+public class ItemKey extends ItemLocking
 {
-	public ItemKey(String name)
+	public ItemKey(String name, Properties properties)
 	{
-		super(name);
+		super(name, properties);
 	}
 
-	// TODO Sound helper and random pitch?
+	// TODO Sound pitch
 	@Override
-	public EnumActionResult onItemUse(EntityPlayer player, World world, BlockPos position, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ)
+	public ActionResultType onItemUse(ItemUseContext context)
 	{
-		Box box = new Box(position);
-		UUID id = this.getID(player.getHeldItem(hand));
-		if(world.isRemote) { if(!StorageLockables.get(world).contains(Predicates.and(new PredicateIntersecting(box), new PredicateMatching(id)))) return EnumActionResult.FAIL; }
-		else if(StorageLockables.get(world).toggle(box, id).isEmpty()) return EnumActionResult.FAIL;
-		world.playSound(player, position, LocksSounds.lock_open, SoundCategory.BLOCKS, 1F, 1F);
-		return EnumActionResult.SUCCESS;
+		World world = context.getWorld();
+		BlockPos position = context.getPos();
+		return world.getCapability(LocksCapabilities.LOCKABLES).map(lockables ->
+		{
+			List<Lockable> matching = lockables.getLockables().values().stream().filter(new PredicateIntersecting(position).and(new PredicateMatching(getID(context.getItem())))).collect(Collectors.toList());
+			if(matching.isEmpty()) return ActionResultType.PASS;
+			for(Lockable lockable : matching) lockable.lock.setLocked(!lockable.lock.isLocked());
+			world.playSound(null, position, LocksSounds.LOCK_OPEN, SoundCategory.BLOCKS, 1F, 1F);
+			return ActionResultType.SUCCESS;
+		}).orElse(ActionResultType.PASS);
 	}
 }

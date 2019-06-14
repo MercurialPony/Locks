@@ -2,6 +2,6 @@
 	"parent": "item/generated",
 	"textures":
 	{
-		"layer0": "locks:items/lock"
+		"layer0": "locks:item/lock"
 	}
 }

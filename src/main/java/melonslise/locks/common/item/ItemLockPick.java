@@ -1,51 +1,44 @@
 package melonslise.locks.common.item;
 
-import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
-import com.google.common.base.Predicates;
-
-import melonslise.locks.common.config.LocksConfiguration;
 import melonslise.locks.common.container.ContainerLockPicking;
-import melonslise.locks.common.item.api.LocksItem;
-import melonslise.locks.common.network.LocksNetworks;
-import melonslise.locks.common.network.client.MessageLockPicking;
-import melonslise.locks.common.world.storage.Box;
-import melonslise.locks.common.world.storage.Lockable;
-import melonslise.locks.common.world.storage.StorageLockables;
-import melonslise.locks.utility.LocksUtilities;
-import melonslise.locks.utility.predicate.LocksSelectors;
+import melonslise.locks.common.init.LocksCapabilities;
+import melonslise.locks.utility.Lockable;
+import melonslise.locks.utility.predicate.LocksPredicates;
 import melonslise.locks.utility.predicate.PredicateIntersecting;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.util.EnumActionResult;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumHand;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.item.ItemUseContext;
+import net.minecraft.util.ActionResultType;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.network.NetworkHooks;
 
 public class ItemLockPick extends LocksItem
 {
-	public ItemLockPick(String name)
+	public final float strength;
+
+	public ItemLockPick(String name, Properties properties, float strength)
 	{
-		super(name);
+		super(name, properties);
+		this.strength = strength;
 	}
 
-	public float getStrength(World world)
-	{
-		return LocksConfiguration.getMain(world).lock_pick_strength;
-	}
-
-	// TODO container open event
 	@Override
-	public EnumActionResult onItemUse(EntityPlayer player, World world, BlockPos position, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ)
+	public ActionResultType onItemUse(ItemUseContext context)
 	{
-		ArrayList<Lockable> lockables = StorageLockables.get(world).matching(Predicates.and(new PredicateIntersecting(new Box(position)), LocksSelectors.LOCKED));
-		if(lockables.isEmpty()) return EnumActionResult.FAIL;
-		if(!(player instanceof EntityPlayerMP)) return EnumActionResult.SUCCESS;
-		ContainerLockPicking container = new ContainerLockPicking(player, position, lockables.get(0));
-		if(!container.canInteractWith(player)) return EnumActionResult.FAIL;
-		LocksUtilities.openContainer((EntityPlayerMP) player, container);
-		LocksNetworks.network.sendTo(new MessageLockPicking(container), (EntityPlayerMP) player);
-		return EnumActionResult.SUCCESS;
+		World world = context.getWorld();
+		PlayerEntity player = context.getPlayer();
+		BlockPos position = context.getPos();
+		return world.getCapability(LocksCapabilities.LOCKABLES).map(lockables ->
+		{
+			List<Lockable> matching = lockables.getLockables().values().stream().filter(LocksPredicates.LOCKED.and(new PredicateIntersecting(context.getPos()))).collect(Collectors.toList());
+			if(matching.isEmpty()) return ActionResultType.PASS;
+			if(world.isRemote) return ActionResultType.SUCCESS;
+			NetworkHooks.openGui((ServerPlayerEntity) context.getPlayer(), new ContainerLockPicking.Provider(position, matching.get(0)), new ContainerLockPicking.Writer(position, matching.get(0)));
+			return ActionResultType.SUCCESS;
+		}).orElse(ActionResultType.PASS);
 	}
 }

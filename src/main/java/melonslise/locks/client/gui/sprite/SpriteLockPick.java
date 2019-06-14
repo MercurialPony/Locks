@@ -1,8 +1,5 @@
 package melonslise.locks.client.gui.sprite;
 
-import melonslise.locks.client.gui.api.sprite.SpriteRotatable;
-import melonslise.locks.client.gui.api.sprite.Texture;
-
 public class SpriteLockPick extends SpriteRotatable
 {
 	public SpriteLockPick(Texture texture)

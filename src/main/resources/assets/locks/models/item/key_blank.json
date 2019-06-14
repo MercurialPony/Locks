@@ -2,6 +2,6 @@
 	"parent": "item/generated",
 	"textures":
 	{
-		"layer0": "locks:items/blank"
+		"layer0": "locks:item/key_blank"
 	}
 }

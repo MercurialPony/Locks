@@ -1,56 +1,20 @@
 package melonslise.locks.utility;
 
-import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
-import org.apache.commons.lang3.ArrayUtils;
-
-import io.netty.buffer.ByteBuf;
-import melonslise.locks.LocksCore;
-import melonslise.locks.common.config.LocksConfiguration;
-import melonslise.locks.common.world.storage.Box;
-import melonslise.locks.common.world.storage.Lock;
-import melonslise.locks.common.world.storage.Lockable;
-import net.minecraft.client.Minecraft;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.inventory.Container;
+import net.minecraft.client.renderer.BufferBuilder;
+import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.tileentity.TileEntityChest;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.network.PacketBuffer;
+import net.minecraft.util.Direction;
 import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
 
-public class LocksUtilities
+public final class LocksUtilities
 {
 	private LocksUtilities() {}
-
-
-
-	/*
-	 * 
-	 * Domains
-	 * 
-	 */
-
-	/**
-	 * Prefixes the given path string with the mod's ID.
-	 */
-	public static String prefixLocks(String path)
-	{
-		return String.join(".", LocksCore.ID, path);
-	}
-
-	/**
-	 * Creates a resource location with the mod's ID as the domain and the given path.
-	 */
-	public static ResourceLocation createLocksDomain(String path)
-	{
-		return new ResourceLocation(LocksCore.ID, path);
-	}
 
 
 
@@ -79,30 +43,94 @@ public class LocksUtilities
 
 	/*
 	 * 
-	 * Item stacks
+	 * NBT
 	 * 
 	 */
 
 	/**
-	 * Returns the given stack's NBT tag. Assigns a new NBT tag if the stack doesn't have one.
+	 * Returns the given stack's compound NBT. Assigns a new compound NBT if the stack doesn't have one.
 	 */
-	public static NBTTagCompound getTag(ItemStack stack)
+	public static CompoundNBT getTag(ItemStack stack)
 	{
-		if(!stack.hasTagCompound()) stack.setTagCompound(new NBTTagCompound());
-		return stack.getTagCompound();
+		if(!stack.hasTag()) stack.setTag(new CompoundNBT());
+		return stack.getTag();
 	}
 
 	/**
-	 * Checks if the given stack has an NBT tag and if it contains the given key. Doesn't work with UUIDs.
+	 * Checks if the given stack has an compound NBT and if it contains the given key. Doesn't work with UUIDs.
 	 */
 	public static boolean hasKey(ItemStack stack, String key)
 	{
-		return stack.hasTagCompound() && stack.getTagCompound().hasKey(key);
+		return stack.hasTag() && stack.getTag().contains(key);
 	}
 
-	public static boolean hasUUID(ItemStack stack, String key)
+	// TODO Static final keys
+
+	/**
+	 * Reads a box as 6 consecutive integers from the compound NBT.
+	 */
+	public static Box readBoxFromNBT(CompoundNBT nbt)
 	{
-		return stack.hasTagCompound() && stack.getTagCompound().hasUniqueId(key);
+		return new Box(nbt.getInt("x1"), nbt.getInt("y1"), nbt.getInt("z1"), nbt.getInt("x2"), nbt.getInt("y2"), nbt.getInt("z2"));
+	}
+
+	/**
+	 * Writes the given box as 6 consecutive integers to the given compound NBT.
+	 */
+	public static CompoundNBT writeBoxToNBT(Box box)
+	{
+		CompoundNBT nbt = new CompoundNBT();
+		nbt.putInt("x1", box.x1);
+		nbt.putInt("y1", box.y1);
+		nbt.putInt("z1", box.z1);
+		nbt.putInt("x2", box.x2);
+		nbt.putInt("y2", box.y2);
+		nbt.putInt("z2", box.z2);
+		return nbt;
+	}
+
+	public static final String KEY_ID = "id", KEY_CODE = "code", KEY_LOCKED = "locked";
+
+	/**
+	 * Reads a lock as a consecutive integer, byte array and boolean from the given compound NBT.
+	 */
+	public static Lock readLockFromNBT(CompoundNBT nbt)
+	{
+		return new Lock(nbt.getInt(KEY_ID), nbt.getByteArray(KEY_CODE), nbt.getBoolean(KEY_LOCKED));
+	}
+
+	/**
+	 * Writes a lock as a consecutive integer, byte array and boolean to the given compound NBT.
+	 */
+	public static CompoundNBT writeLockToNBT(Lock lock)
+	{
+		CompoundNBT nbt = new CompoundNBT();
+		nbt.putInt(KEY_ID, lock.id);
+		nbt.putByteArray(KEY_CODE, lock.combination);
+		nbt.putBoolean(KEY_LOCKED, lock.locked);
+		return nbt;
+	}
+
+	public static final String KEY_BOX = "box", KEY_LOCK = "lock", KEY_SIDE = "side";
+
+	/**
+	 * Reads a lockable as a consecutive box, lock and enum from the given compound NBT. Does not include the lockable's network ID.
+	 */
+	public static Lockable readLockableFromNBT(CompoundNBT nbt)
+	{
+		return new Lockable(readBoxFromNBT(nbt.getCompound(KEY_BOX)), readLockFromNBT(nbt.getCompound(KEY_LOCK)), Direction.byIndex((int) nbt.getByte(KEY_SIDE)));
+	}
+
+	/**
+	 * Writes a lockable as a consecutive box, lock and enum to the given compound NBT. Does not include the lockable's network ID.
+	 */
+	public static CompoundNBT writeLockableToNBT(Lockable lockable)
+	{
+		CompoundNBT nbt = new CompoundNBT();
+		nbt.put(KEY_BOX, writeBoxToNBT(lockable.box));
+		nbt.put(KEY_LOCK, writeLockToNBT(lockable.lock));
+		nbt.putByte(KEY_SIDE, (byte) lockable.side.getIndex());
+		return nbt;
 	}
 
 
@@ -114,68 +142,17 @@ public class LocksUtilities
 	 */
 
 	/**
-	 * Reads a UUID as 2 consecutive longs from the given buffer.
-	 */
-	public static UUID readUUID(ByteBuf buffer)
-	{
-		return new UUID(buffer.readLong(), buffer.readLong());
-	}
-
-	/**
-	 * Writes the given UUID as 2 consecutive longs to the given buffer.
-	 */
-	public static void writeUUID(ByteBuf buffer, UUID uuid)
-	{
-		buffer.writeLong(uuid.getMostSignificantBits());
-		buffer.writeLong(uuid.getLeastSignificantBits());
-	}
-
-	/**
-	 * Reads a position as 3 consecutive integers from the given buffer.
-	 */
-	public static BlockPos readPosition(ByteBuf buffer)
-	{
-		return new BlockPos(buffer.readInt(), buffer.readInt(), buffer.readInt());
-	}
-
-	/**
-	 * Writes the given position as 3 consecutive integers to the given buffer.
-	 */
-	public static void writePosition(ByteBuf buffer, BlockPos position)
-	{
-		buffer.writeInt(position.getX());
-		buffer.writeInt(position.getY());
-		buffer.writeInt(position.getZ());
-	}
-
-	/**
-	 * Gets an enum of the given class by reading a byte from the given buffer.
-	 */
-	public static <T extends Enum<T>> T readEnum(ByteBuf buffer, Class<T> c)
-	{
-		return (T) ((Enum[]) c.getEnumConstants())[(int) buffer.readByte()];
-	}
-
-	/**
-	 * Writes the given enum's ordinal as a byte to the given buffer.
-	 */
-	public static void writeEnum(ByteBuf buffer, Enum<?> value)
-	{
-		buffer.writeByte((byte) value.ordinal());
-	}
-
-	/**
 	 * Reads a box as 6 consecutive integers from the given buffer.
 	 */
-	public static Box readBox(ByteBuf buffer)
+	public static Box readBoxFromBuffer(PacketBuffer buffer)
 	{
 		return new Box(buffer.readInt(), buffer.readInt(), buffer.readInt(), buffer.readInt(), buffer.readInt(), buffer.readInt());
 	}
 
 	/**
-	 * Writes the given box as 6 consecutive integers to the given buffer. Does not include the lock's combination.
+	 * Writes the given box as 6 consecutive integers to the given buffer.
 	 */
-	public static void writeBox(ByteBuf buffer, Box box)
+	public static void writeBoxToBuffer(PacketBuffer buffer, Box box)
 	{
 		buffer.writeInt(box.x1);
 		buffer.writeInt(box.y1);
@@ -186,66 +163,40 @@ public class LocksUtilities
 	}
 
 	/**
-	 * Reads a lock as a consecutive UUID, byte and boolean from the given buffer. Does not include the lock's combination.
-	 * 
+	 * Reads a lock as a consecutive integer, byte and boolean from the given buffer. Does not include the lock's combination.
 	 */
-	public static Lock readLock(ByteBuf buffer)
+	public static Lock readLockFromBuffer(PacketBuffer buffer)
 	{
-		return new Lock(readUUID(buffer), (int) buffer.readByte(), buffer.readBoolean());
+		return new Lock(buffer.readInt(), (int) buffer.readByte(), buffer.readBoolean());
 	}
 
 	/**
-	 * Writes a lock as a consecutive UUID, byte and boolean to the given buffer.
+	 * Writes a lock as a consecutive integer, byte and boolean to the given buffer. Does not include the lock's combination.
 	 */
-	public static void writeLock(ByteBuf buffer, Lock lock)
+	public static void writeLockToBuffer(PacketBuffer buffer, Lock lock)
 	{
-		writeUUID(buffer, lock.id);
+		buffer.writeInt(lock.id);
 		buffer.writeByte((int) lock.getLength());
 		buffer.writeBoolean(lock.isLocked());
 	}
 
 	/**
-	 * Reads a lockable as a consecutive box, lock and enum from the given buffer.
+	 * Reads a lockable as a consecutive box, lock, enum and int from the given buffer.
 	 */
-	public static Lockable readLockable(ByteBuf buffer)
+	public static Lockable readLockableFromBuffer(PacketBuffer buffer)
 	{
-		return new Lockable(readBox(buffer), readLock(buffer), readEnum(buffer, EnumFacing.class));
+		return new Lockable(readBoxFromBuffer(buffer), readLockFromBuffer(buffer), buffer.readEnumValue(Direction.class), buffer.readInt());
 	}
 
 	/**
-	 * Writes a lockable as a consecutive box, lock and enum to the given buffer.
+	 * Writes a lockable as a consecutive box, lock, enum and int to the given buffer.
 	 */
-	public static void writeLockable(ByteBuf buffer, Lockable lockable)
+	public static void writeLockableToBuffer(PacketBuffer buffer, Lockable lockable)
 	{
-		writeBox(buffer, lockable.box);
-		writeLock(buffer, lockable.lock);
-		writeEnum(buffer, lockable.side);
-	}
-
-	// TODO
-	public static int openContainer(EntityPlayerMP player, Container container)
-	{
-		player.getNextWindowId();
-		player.openContainer = container;
-		player.openContainer.windowId = player.currentWindowId;
-		player.openContainer.addListener(player);
-		return player.currentWindowId;
-	}
-
-
-
-	/*
-	 * 
-	 * Configuration
-	 * 
-	 */
-
-	/**
-	 * Checks if the block at the given position in the given world is listed in the mod's configuration.
-	 */
-	public static boolean canLock(World world, BlockPos position)
-	{
-		return ArrayUtils.contains(LocksConfiguration.getMain(world).lockable_blocks, world.getBlockState(position).getBlock().getRegistryName().toString());
+		writeBoxToBuffer(buffer, lockable.box);
+		writeLockToBuffer(buffer, lockable.lock);
+		buffer.writeEnumValue(lockable.side);
+		buffer.writeInt(lockable.networkID);
 	}
 
 
@@ -256,30 +207,37 @@ public class LocksUtilities
 	 * 
 	 */
 
-	/**
-	 * Returns the client player's interpolated position.
-	 */
-	public static Vec3d getRenderOrigin(float partialTick)
+	public static void drawTexturedRectangle(float x, float y, int u, int v, int width, int height, int textureWidth, int textureHeight)
 	{
-		Minecraft mc = Minecraft.getMinecraft();
-		return new Vec3d(
-				mc.player.lastTickPosX + (mc.player.posX - mc.player.lastTickPosX) * (double) partialTick,
-				mc.player.lastTickPosY + (mc.player.posY - mc.player.lastTickPosY) * (double) partialTick,
-				mc.player.lastTickPosZ + (mc.player.posZ - mc.player.lastTickPosZ) * (double) partialTick);
+		float f = 1f / (float) textureWidth;
+		float f1 = 1f / (float) textureHeight;
+		Tessellator tessellator = Tessellator.getInstance();
+		BufferBuilder builder = tessellator.getBuffer();
+		builder.begin(7, DefaultVertexFormats.POSITION_TEX);
+		builder.pos((double) x, (double) (y + (float) height), 0d).tex((double) ((float) u * f), (double) ((float) (v + height) * f1)).endVertex();
+		builder.pos((double) (x + (float) width), (double) (y + (float) height), 0d).tex((double) ((float) (u + width) * f), (double) ((float) (v + height) * f1)).endVertex();
+		builder.pos((double) (x + (float) width), (double) y, 0d).tex((double) ((float) (u + width) * f), (double) ((float) v * f1)).endVertex();
+		builder.pos((double) x, (double) y, 0d).tex((double) ((float) u * f), (double) ((float) v * f1)).endVertex();
+		tessellator.draw();
 	}
 
 
 
 	/*
 	 * 
-	 * Bounding boxes
+	 * Ray tracing
 	 * 
 	 */
+
+	public static boolean intersectsInclusive(AxisAlignedBB box1, AxisAlignedBB box2)
+	{
+		return box1.minX <= box2.maxX && box1.maxX >= box2.minX && box1.minY <= box2.maxY && box1.maxY >= box2.minY && box1.minZ <= box2.maxZ && box1.maxZ >= box2.minZ;
+	}
 
 	/**
 	 * Calculates the center point of the given box's side.
 	 */
-	public static Vec3d getBoxSideCenter(Box box, EnumFacing side)
+	public static Vec3d getBoxSideCenter(Box box, Direction side)
 	{
 		switch(side)
 		{
@@ -296,7 +254,7 @@ public class LocksUtilities
 	/**
 	 * Calculates the center point of the given box's side.
 	 */
-	public static Vec3d getBoxSideCenter(AxisAlignedBB box, EnumFacing side)
+	public static Vec3d getBoxSideCenter(AxisAlignedBB box, Direction side)
 	{
 		switch(side)
 		{
@@ -308,27 +266,5 @@ public class LocksUtilities
 		case EAST: return new Vec3d(box.maxX, (box.minY + box.maxY) / 2D, (box.minZ + box.maxZ) / 2D);
 		default: return null;
 		}
-	}
-
-
-
-	/*
-	 * 
-	 * Miscellaneous
-	 * 
-	 */
-
-	/**
-	 * Finds the position of a chest adjacent to the given one or null if none were found.
-	 */
-	public static BlockPos getAdjacentChest(TileEntityChest chest)
-	{
-		BlockPos position = null;
-		chest.checkForAdjacentChests();
-		if(chest.adjacentChestXNeg != null) position = chest.adjacentChestXNeg.getPos();
-		else if(chest.adjacentChestXPos != null) position = chest.adjacentChestXPos.getPos();
-		else if(chest.adjacentChestZNeg != null) position = chest.adjacentChestZNeg.getPos();
-		else if(chest.adjacentChestZPos != null) position = chest.adjacentChestZPos.getPos();
-		return position;
 	}
 }

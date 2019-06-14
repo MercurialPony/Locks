@@ -1,86 +1,104 @@
 buildscript
 {
-    repositories
+	repositories
 	{
-        jcenter()
-        maven { url = "https://files.minecraftforge.net/maven" }
-    }
-    dependencies
+		maven { url = 'https://files.minecraftforge.net/maven' }
+		jcenter()
+		mavenCentral()
+	}
+	dependencies
 	{
-        classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
-    }
+		classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '3.+', changing: true
+	}
 }
-apply plugin: 'net.minecraftforge.gradle.forge'
-//Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
+apply plugin: 'net.minecraftforge.gradle'
+apply plugin: 'eclipse'
+apply plugin: 'maven-publish'
 
+version = '2.3'
+group = 'melonslise.locks'
+archivesBaseName = 'Locks'
 
-version = "2.2.1"
-group = "melonslise.locks" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
-archivesBaseName = "Locks"
-
-sourceCompatibility = targetCompatibility = '1.8' // Need this here so eclipse task generates correctly.
-compileJava
-{
-    sourceCompatibility = targetCompatibility = '1.8'
-}
+sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8'
 
 minecraft
 {
-    version = "1.12.2-14.23.5.2807"
-    runDir = "run"
-    
-    // the mappings can be changed at any time, and must be in the following format.
-    // snapshot_YYYYMMDD   snapshot are built nightly.
-    // stable_#            stables are built at the discretion of the MCP team.
-    // Use non-default mappings at your own risk. they may not always work.
-    // simply re-run your setup task after changing the mappings to update your workspace.
-    mappings = "snapshot_20171003"
-    // makeObfSourceJar = false // an Srg named sources jar is made by default. uncomment this to disable.
+	mappings channel: 'snapshot', version: '20190608-1.14.2'
+
+	runs
+	{
+		client
+		{
+			workingDirectory project.file('run')
+			property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
+			property 'forge.logging.console.level', 'debug'
+			mods
+			{
+				locks
+				{
+					source sourceSets.main
+                }
+            }
+        }
+
+		server
+		{
+			workingDirectory project.file('run')
+			property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
+			property 'forge.logging.console.level', 'debug'
+			mods
+			{
+				locks
+				{
+					source sourceSets.main
+                }
+            }
+        }
+    }
 }
 
 dependencies
 {
-    // you may put jars on which you depend on in ./libs
-    // or you may define them like so..
-    //compile "some.group:artifact:version:classifier"
-    //compile "some.group:artifact:version"
-      
-    // real examples
-    //compile 'com.mod-buildcraft:buildcraft:6.0.8:dev'  // adds buildcraft to the dev env
-    //compile 'com.googlecode.efficient-java-matrix-library:ejml:0.24' // adds ejml to the dev env
-
-    // the 'provided' configuration is for optional dependencies that exist at compile-time but might not at runtime.
-    //provided 'com.mod-buildcraft:buildcraft:6.0.8:dev'
-
-    // the deobf configurations:  'deobfCompile' and 'deobfProvided' are the same as the normal compile and provided,
-    // except that these dependencies get remapped to your current MCP mappings
-    //deobfCompile 'com.mod-buildcraft:buildcraft:6.0.8:dev'
-    //deobfProvided 'com.mod-buildcraft:buildcraft:6.0.8:dev'
-
-    // for more info...
-    // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
-    // http://www.gradle.org/docs/current/userguide/dependency_management.html
-
+	minecraft 'net.minecraftforge:forge:1.14.2-26.0.21'
 }
 
-processResources
+jar
 {
-    // this will ensure that this task is redone when the versions change.
-    inputs.property "version", project.version
-    inputs.property "mcversion", project.minecraft.version
+	manifest
+	{
+		attributes
+		([
+			"Specification-Title": archivesBaseName,
+			"Specification-Vendor": "melonslise",
+			"Specification-Version": version,
+			"Implementation-Title": archivesBaseName,
+			"Implementation-Version": version,
+			"Implementation-Vendor" :"melonslise",
+			"Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+		])
+	}
+}
 
-    // replace stuff in mcmod.info, nothing else
-    from(sourceSets.main.resources.srcDirs)
+def reobfFile = file("$buildDir/reobfJar/output.jar")
+def reobfArtifact = artifacts.add('default', reobfFile)
+{
+	type 'jar'
+	builtBy 'reobfJar'
+}
+publishing
+{
+	publications
 	{
-        include 'mcmod.info'
-                
-        // replace version and mcversion
-        expand 'version':project.version, 'mcversion':project.minecraft.version
-    }
-        
-    // copy everything else except the mcmod.info
-    from(sourceSets.main.resources.srcDirs)
+		mavenJava(MavenPublication)
+		{
+			artifact reobfArtifact
+		}
+	}
+	repositories
 	{
-        exclude 'mcmod.info'
-    }
+		maven
+		{
+			url "file:///${project.projectDir}/mcmodsrepo"
+		}
+	}
 }

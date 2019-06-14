@@ -1,9 +1,10 @@
 package melonslise.locks.utility.predicate;
 
-import com.google.common.base.Predicate;
+import java.util.function.Predicate;
 
-import melonslise.locks.common.world.storage.Box;
-import melonslise.locks.common.world.storage.Lockable;
+import melonslise.locks.utility.Box;
+import melonslise.locks.utility.Lockable;
+import net.minecraft.util.math.BlockPos;
 
 public class PredicateIntersecting implements Predicate<Lockable>
 {
@@ -14,9 +15,14 @@ public class PredicateIntersecting implements Predicate<Lockable>
 		this.box = box;
 	}
 
-	@Override
-	public boolean apply(Lockable lockable)
+	public PredicateIntersecting(BlockPos position)
 	{
-		return lockable.box == null && this.box == null || lockable.box.intersects(this.box);
+		this(new Box(position));
+	}
+
+	@Override
+	public boolean test(Lockable lockable)
+	{
+		return lockable.box.intersects(this.box);
 	}
 }
