@@ -3,7 +3,7 @@ loaderVersion="[26,)"
 issueTrackerURL="https://github.com/Melonslise/Locks/issues"
 [[mods]]
 modId="locks"
-version="2.3"
+version="2.3.1"
 displayName="Locks"
 #updateJSONURL="http://myurl.me/"
 displayURL="https://minecraft.curseforge.com/projects/locks"

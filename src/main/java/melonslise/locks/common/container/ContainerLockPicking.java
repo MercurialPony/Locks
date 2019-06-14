@@ -103,7 +103,6 @@ public class ContainerLockPicking extends Container
 	}
 
 	// TODO Ditto
-	// TODO ItemCrack
 	protected boolean breakPick(PlayerEntity player)
 	{
 		for(EquipmentSlotType slot : EquipmentSlotType.values())
@@ -124,7 +123,7 @@ public class ContainerLockPicking extends Container
 		super.onContainerClosed(player);
 		if(!this.isOpen() || !this.lockable.lock.isLocked()) return;
 		this.lockable.lock.setLocked(!this.lockable.lock.isLocked());
-		this.player.world.playSound(player, this.position, LocksSounds.LOCK_OPEN, SoundCategory.BLOCKS, 1F, 1F);
+		this.player.world.playSound(null, this.position, LocksSounds.LOCK_OPEN, SoundCategory.BLOCKS, 1F, 1F);
 	}
 
 
