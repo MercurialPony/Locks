@@ -86,7 +86,7 @@ public class ContainerLockPicking extends Container
 	// CLIENT ONLY
 	public void handlePin(boolean correct, boolean reset)
 	{
-		Screen screen = Minecraft.getInstance().field_71462_r;
+		Screen screen = Minecraft.getInstance().currentScreen;
 		if(screen instanceof ScreenLockPicking) ((ScreenLockPicking) screen).handlePin(correct, reset);
 		if(correct) ++this.currentIndex;
 		if(reset) this.reset();
@@ -110,7 +110,7 @@ public class ContainerLockPicking extends Container
 			ItemStack stack = player.getItemStackFromSlot(slot);
 			if(slot.getSlotType() != EquipmentSlotType.Group.HAND || stack.getItem() != LocksItems.LOCK_PICK) continue;
 			if(ThreadLocalRandom.current().nextFloat() < ((ItemLockPick) stack.getItem()).strength) return false;
-			this.player.func_213361_c(slot);
+			this.player.sendBreakAnimation(slot);
 			stack.shrink(1);
 			return true;
 		}

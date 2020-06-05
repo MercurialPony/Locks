@@ -59,11 +59,11 @@ import net.minecraftforge.event.world.BlockEvent.BreakEvent;
 import net.minecraftforge.eventbus.api.Event.Result;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.gameevent.PlayerEvent.PlayerChangedDimensionEvent;
-import net.minecraftforge.fml.common.gameevent.PlayerEvent.PlayerLoggedInEvent;
-import net.minecraftforge.fml.common.gameevent.PlayerEvent.PlayerRespawnEvent;
-import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
-import net.minecraftforge.fml.common.gameevent.TickEvent.PlayerTickEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent.PlayerChangedDimensionEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent.PlayerLoggedInEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent.PlayerRespawnEvent;
+import net.minecraftforge.event.TickEvent.Phase;
+import net.minecraftforge.event.TickEvent.PlayerTickEvent;
 import net.minecraftforge.fml.config.ModConfig.Type;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
@@ -205,7 +205,7 @@ public class Locks
 				//player.swingArm(Hand.MAIN_HAND);
 				for(Lockable lockable : matching)
 				{
-					world.func_217376_c(new ItemEntity(world, (double) position.getX() + 0.5d, (double) position.getY() + 0.5d, (double) position.getZ() + 0.5d, ItemLocking.assignID(new ItemStack(LocksItems.LOCK), lockable.lock.id)));
+					world.addEntity(new ItemEntity(world, (double) position.getX() + 0.5d, (double) position.getY() + 0.5d, (double) position.getZ() + 0.5d, ItemLocking.assignID(new ItemStack(LocksItems.LOCK), lockable.lock.id)));
 					lockables.remove(lockable.networkID);
 				}
 			}

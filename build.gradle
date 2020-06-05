@@ -15,7 +15,7 @@ apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 
-version = '2.3.1.1'
+version = '2.3.1.2'
 group = 'melonslise.locks'
 archivesBaseName = 'Locks'
 
@@ -23,7 +23,7 @@ sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = co
 
 minecraft
 {
-	mappings channel: 'snapshot', version: '20190608-1.14.2'
+	mappings channel: 'snapshot', version: '20190815-1.14.3'
 
 	runs
 	{
@@ -59,7 +59,7 @@ minecraft
 
 dependencies
 {
-	minecraft 'net.minecraftforge:forge:1.14.2-26.0.21'
+	minecraft 'net.minecraftforge:forge:1.14.4-28.1.102'
 }
 
 jar

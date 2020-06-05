@@ -23,7 +23,7 @@ public class FeatureLockChest extends Feature<NoFeatureConfig>
 {
 	public FeatureLockChest()
 	{
-		super(NoFeatureConfig::func_214639_a);
+		super(NoFeatureConfig::deserialize);
 	}
 
 	@Override

@@ -11,7 +11,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 
 public final class LocksFeatures
 {
-	public static final ConfiguredFeature<?> LOCKABLES = Biome.func_222280_a(new FeatureLockChest(), new NoFeatureConfig(), new PlacementAtChest(), new NoPlacementConfig());
+	public static final ConfiguredFeature<?> LOCKABLES = Biome.createDecoratedFeature(new FeatureLockChest(), new NoFeatureConfig(), new PlacementAtChest(), new NoPlacementConfig());
 
 	private LocksFeatures() {}
 

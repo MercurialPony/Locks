@@ -17,14 +17,14 @@ public class PlacementAtChest extends Placement<NoPlacementConfig>
 {
 	public PlacementAtChest()
 	{
-		super(NoPlacementConfig::func_214735_a);
+		super(NoPlacementConfig::deserialize);
 	}
 
 	@Override
 	public Stream<BlockPos> getPositions(IWorld region, ChunkGenerator<? extends GenerationSettings> generator, Random random, NoPlacementConfig config, BlockPos regionPosition)
 	{
 		if(!LocksConfiguration.MAIN.generateLocks.get()) return Stream.empty();
-		IChunk chunk = region.func_217349_x(regionPosition);
+		IChunk chunk = region.getChunk(regionPosition);
 		return chunk.getTileEntitiesPos().stream().map(tileEntityPosition -> region.getTileEntity(tileEntityPosition)).filter(tileEntity -> tileEntity.getType() == TileEntityType.CHEST).map(tileEntity -> tileEntity.getPos());
 	}
 }
