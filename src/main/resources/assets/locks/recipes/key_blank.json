@@ -13,5 +13,8 @@
 			"ore": "ingotIron"
 		}
 	},
-	"result": { "item": "locks:key_blank" }
+	"result":
+	{
+		"item": "locks:key_blank"
+	}
 }

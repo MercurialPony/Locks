@@ -1,137 +1,128 @@
 package melonslise.locks.client.event;
 
-import java.util.ArrayList;
-import java.util.Iterator;
+import org.apache.commons.lang3.tuple.Pair;
 
-import com.google.common.collect.Lists;
-
-import melonslise.locks.LocksCore;
-import melonslise.locks.common.capability.LocksCapabilities;
-import melonslise.locks.common.config.LocksConfiguration;
-import melonslise.locks.common.item.LocksItems;
-import melonslise.locks.common.world.storage.Box;
-import melonslise.locks.common.world.storage.Lockable;
-import melonslise.locks.common.world.storage.StorageLockables;
-import melonslise.locks.utility.LocksUtilities;
-import net.minecraft.block.Block;
+import melonslise.locks.Locks;
+import melonslise.locks.client.util.LocksClientUtil;
+import melonslise.locks.common.capability.ILockableStorage;
+import melonslise.locks.common.capability.ISelection;
+import melonslise.locks.common.config.LocksConfig;
+import melonslise.locks.common.init.LocksCapabilities;
+import melonslise.locks.common.init.LocksItems;
+import melonslise.locks.common.util.AttachFace;
+import melonslise.locks.common.util.Cuboid6i;
+import melonslise.locks.common.util.Lockable;
+import melonslise.locks.common.util.Orientation;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderGlobal;
-import net.minecraft.client.renderer.block.model.ItemCameraTransforms.TransformType;
+import net.minecraft.client.renderer.RenderHelper;
+import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
+import net.minecraft.client.renderer.block.model.ModelResourceLocation;
+import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.BlockPos.MutableBlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
+import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.relauncher.Side;
 
-@Mod.EventBusSubscriber(modid = LocksCore.ID, value = Side.CLIENT)
-public class LocksClientEvents
+@Mod.EventBusSubscriber(modid = Locks.ID, value = Side.CLIENT)
+public final class LocksClientEvents
 {
+	private LocksClientEvents() {}
+
 	@SubscribeEvent
 	public static void registerModels(ModelRegistryEvent event)
 	{
-		LocksItems.registerModels(event);
+		for(Item item : LocksItems.ITEMS)
+			ModelLoader.setCustomModelResourceLocation(item, 0, new ModelResourceLocation(item.getRegistryName(), "inventory"));
 	}
 
-	public static boolean intersectsInclusive(AxisAlignedBB box1, AxisAlignedBB box2)
-	{
-		return box1.minX <= box2.maxX && box1.maxX >= box2.minX && box1.minY <= box2.maxY && box1.maxY >= box2.minY && box1.minZ <= box2.maxZ && box1.maxZ >= box2.minZ;
-	}
-
-	// TODO Configurable color
-	// TODO Helpers
-	// TODO Lighting
 	@SubscribeEvent
-	public static void render(RenderWorldLastEvent event)
+	public static void onClientTick(TickEvent.ClientTickEvent event)
 	{
 		Minecraft mc = Minecraft.getMinecraft();
-		Vec3d origin = LocksUtilities.getRenderOrigin(event.getPartialTicks());
-		GlStateManager.pushMatrix();
-		GlStateManager.translate(-origin.x, -origin.y, -origin.z);
-		for(Lockable lockable : StorageLockables.get(mc.world).getLockables())
+		if(event.phase == TickEvent.Phase.END || mc.world == null || mc.isGamePaused())
+			return;
+		mc.world.getCapability(LocksCapabilities.LOCKABLES, null).get().values().forEach(lockable ->
 		{
-			/*
+			if(lockable.box.loaded(mc.world))
+				lockable.tick();
+		});
+	}
+
+	public static final ItemStack LOCK_STACK = new ItemStack(LocksItems.LOCK);
+
+	// TODO Use voxel shapes instead
+	// TODO Move render to Lockable?
+	@SubscribeEvent
+	public static void onRenderWorld(RenderWorldLastEvent event)
+	{
+		Minecraft mc = Minecraft.getMinecraft();
+		ILockableStorage lockables = mc.world.getCapability(LocksCapabilities.LOCKABLES, null);
+		for(Lockable lockable : lockables.get().values())
+		{
+			if(!lockable.box.loaded(mc.world) || !lockable.inRange() || !lockable.box.inView())
+				continue;
+			Pair<Vec3d, Orientation> state = lockable.getLockState(mc.world);
+			if(state == null)
+				continue;
 			GlStateManager.pushMatrix();
-			Vec3d center = LocksUtilities.getBoxSideCenter(lockable.box, lockable.side);
-			GlStateManager.translate(center.x, center.y, center.z);
-			GlStateManager.rotate(lockable.side.getHorizontalAngle(), 0F, 1F, 0F);
-			if(lockable.side == EnumFacing.UP) GlStateManager.rotate(90F, 1F, 0F, 0F);
-			if(lockable.side == EnumFacing.DOWN) GlStateManager.rotate(-90F, 1F, 0F, 0F);
-			GlStateManager.scale(0.5D, 0.5D, 0.5D);
-			mc.getRenderItem().renderItem(new ItemStack(LocksItems.lock), TransformType.FIXED);
-			GlStateManager.popMatrix();
-			 */
-			boolean open = true;
-			ArrayList<AxisAlignedBB> boxes = Lists.newArrayList();
-			for(MutableBlockPos position : BlockPos.getAllInBoxMutable(lockable.box.x1, lockable.box.y1, lockable.box.z1, lockable.box.x2 - 1, lockable.box.y2 - 1, lockable.box.z2 - 1))
-			{
-				AxisAlignedBB box = mc.world.getBlockState(position).getCollisionBoundingBox(mc.world, position);
-				if(box == null || box == Block.NULL_AABB) continue;
-				box = box.offset(position);
-				AxisAlignedBB union = box;
-				Iterator<AxisAlignedBB> iterator = boxes.iterator();
-				while(iterator.hasNext())
-				{
-					AxisAlignedBB box1 = iterator.next();
-					if(intersectsInclusive(union, box1))
-					{
-						union = union.union(box1);
-						iterator.remove();
-					}
-				}
-				boxes.add(union);
-			}
-			if(boxes.isEmpty()) continue;
-			Vec3d center = LocksUtilities.getBoxSideCenter(lockable.box, lockable.side);
-			EnumFacing side = lockable.side;
-			Vec3d point = center;
-			double distanceMinimum = -1D;
-			for(AxisAlignedBB box : boxes) for(EnumFacing side1 : EnumFacing.VALUES)
-			{
-				Vec3d point1 = LocksUtilities.getBoxSideCenter(box, side1).add(new Vec3d(side1.getDirectionVec()).scale(0.05D));
-				double distance = center.squareDistanceTo(point1);
-				if(distanceMinimum != -1D && distance >= distanceMinimum) continue;
-				point = point1;
-				distanceMinimum = distance;
-				side = side1;
-			}
-			GlStateManager.pushMatrix();
-			GlStateManager.translate(point.x, point.y, point.z);
-			GlStateManager.rotate(lockable.side.getHorizontalAngle(), 0F, 1F, 0F);
-			if(lockable.side == EnumFacing.UP) GlStateManager.rotate(90F, 1F, 0F, 0F);
-			if(lockable.side == EnumFacing.DOWN) GlStateManager.rotate(-90F, 1F, 0F, 0F);
-			GlStateManager.scale(0.5D, 0.5D, 0.5D);
+			// For some reason translating by negative player position and then the point coords causes jittering in very big z and x coords. Why? Thus we use 1 translation instead
+			GlStateManager.translate(state.getLeft().x - TileEntityRendererDispatcher.staticPlayerX, state.getLeft().y - TileEntityRendererDispatcher.staticPlayerY, state.getLeft().z - TileEntityRendererDispatcher.staticPlayerZ);
+			GlStateManager.rotate(-state.getRight().dir.getHorizontalAngle() - 180f, 0f, 1f, 0f);
+			if(state.getRight().face != AttachFace.WALL)
+				GlStateManager.rotate(90f, 1f, 0f, 0f);
+			GlStateManager.translate(0d, 0.1d, 0d);
+			GlStateManager.rotate(MathHelper.sin(LocksClientUtil.cubicBezier1d(1f, 1f, LocksClientUtil.lerp(lockable.maxShakeTicks - lockable.prevShakeTicks, lockable.maxShakeTicks - lockable.shakeTicks, event.getPartialTicks()) / (float) lockable.maxShakeTicks) * (float) lockable.maxShakeTicks / 5f * 3.14f) * 10f, 0f, 0f, 1f);
+			GlStateManager.translate(0d, -0.1d, 0d);
+			GlStateManager.scale(0.5f, 0.5f, 0.5f);
+			//int lightValue = mc.world.getCombinedLight(new BlockPos(pair.getLeft()), 0);
+			//GLX.glMultiTexCoord2f(GLX.GL_TEXTURE1, (float) (lightValue % 65536), (float) (lightValue / 65536));
+			//mc.gameRenderer.enableLightmap();
+			GlStateManager.disableLighting();
+			GlStateManager.pushAttrib();
+			RenderHelper.enableStandardItemLighting();
 			mc.entityRenderer.enableLightmap();
-			mc.getRenderItem().renderItem(new ItemStack(LocksItems.lock), TransformType.FIXED);
+			mc.getRenderItem().renderItem(LOCK_STACK, ItemCameraTransforms.TransformType.FIXED);
 			mc.entityRenderer.disableLightmap();
+			RenderHelper.disableStandardItemLighting();
+			GlStateManager.popAttrib();
 			GlStateManager.popMatrix();
 		}
-		if(LocksConfiguration.client.enable_cui)
-		{
-			BlockPos position1 = LocksCapabilities.getLockBounds(mc.player).get();
-			if(position1 != null)
-			{
-				BlockPos position2 = mc.objectMouseOver.getBlockPos() != null ? mc.objectMouseOver.getBlockPos() : position1;
-				Box box = new Box(position1, position2);
-				GlStateManager.enableBlend();
-				GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
-				GlStateManager.glLineWidth(1F);
-				GlStateManager.disableTexture2D();
-				GlStateManager.depthMask(false);
-				GlStateManager.disableDepth();
-				RenderGlobal.drawBoundingBox((double) box.x1, (double) box.y1, (double) box.z1, (double) box.x2, (double) box.y2, (double) box.z2, 0F, 1F, 0F, 1F);
-				GlStateManager.enableDepth();
-				GlStateManager.depthMask(true);
-				GlStateManager.enableTexture2D();
-				GlStateManager.disableBlend();
-			}
-		}
-		GlStateManager.popMatrix();
+
+		ISelection select = mc.player.getCapability(LocksCapabilities.LOCK_SELECTION, null);
+		BlockPos pos1 = select.get();
+		if(pos1 == null)
+			return;
+		BlockPos pos2 = mc.objectMouseOver.getBlockPos() != null ? mc.objectMouseOver.getBlockPos() : pos1;
+		Cuboid6i box = new Cuboid6i(pos1, pos2);
+		float r = 0f, g = 0f;
+		LocksConfig.Server cfg = LocksConfig.getServer(mc.world);
+		if(box.volume() > cfg.maxLockableVolume || !cfg.canLock(mc.world, pos2))
+			r = 1f;
+		else
+			g = 1f;
+		GlStateManager.enableBlend();
+		GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+		GlStateManager.glLineWidth(1F);
+		GlStateManager.disableTexture2D();
+		GlStateManager.depthMask(false);
+		GlStateManager.disableDepth();
+		// Ditto
+		RenderGlobal.drawBoundingBox((double) box.x1 - TileEntityRendererDispatcher.staticPlayerX, (double) box.y1 - TileEntityRendererDispatcher.staticPlayerY, (double) box.z1 - TileEntityRendererDispatcher.staticPlayerZ, (double) box.x2 - TileEntityRendererDispatcher.staticPlayerX, (double) box.y2 - TileEntityRendererDispatcher.staticPlayerY, (double) box.z2 - TileEntityRendererDispatcher.staticPlayerZ, r, g, 0f, 0.5f);
+		GlStateManager.enableDepth();
+		GlStateManager.depthMask(true);
+		GlStateManager.enableTexture2D();
+		GlStateManager.disableBlend();
+
+		GlStateManager.enableLighting();
 	}
 }

@@ -1,0 +1,31 @@
+{
+	"parent": "item/generated",
+	"textures":
+	{
+		"layer0": "locks:item/key_ring_0"
+	},
+	"overrides":
+	[
+		{
+			"predicate":
+			{
+				"locks:keys": 0.1
+			},
+			"model": "locks:item/key_ring_1"
+		},
+		{
+			"predicate":
+			{
+				"locks:keys": 0.21
+			},
+			"model": "locks:item/key_ring_2"
+		},
+		{
+			"predicate":
+			{
+				"locks:keys": 0.32
+			},
+			"model": "locks:item/key_ring_3"
+		}
+	]
+}

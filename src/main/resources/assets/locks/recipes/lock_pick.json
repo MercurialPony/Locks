@@ -18,5 +18,8 @@
 			"ore": "leather"
 		}
 	},
-	"result": { "item": "locks:lock_pick" }
+	"result":
+	{
+		"item": "locks:lock_pick"
+	}
 }

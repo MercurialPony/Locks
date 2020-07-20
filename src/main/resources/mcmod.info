@@ -1,13 +1,13 @@
 [
-{
-	"modid": "locks",
-	"name": "Locks",
-	"description": "Locks is a small, but unique Minecraft mod that introduces flexible and universal locks which can be dynamically attached to multiple blocks of any kind, including other mods, a fun lock picking mechanic as well as lots of other little, but useful tools and utilities.",
-	"version": "2.2.1",
-	"mcversion": "1.12.2",
-	"url": "https://minecraft.curseforge.com/projects/locks",
-	"authorList": [ "Melonslise" ],
-	"credits": "Diesieben07, Choonster, Gigaherz, Draco18s, JamiesWhiteShirt, Shadows, DShadowWolf, Xalcon, DarkCow, KillJoy, Ben, TheRealFarfetchd, JTK222, Cadiboo, Lykrast, Quadraxis, freesound.org",
-	"logoFile": "locks.png"
-}
+	{
+		"modid": "locks",
+		"name": "Locks",
+		"description": "Locks is a small, but unique Minecraft mod that introduces flexible and universal locks which can be dynamically attached to multiple blocks of any kind, including other mods, a fun lock picking mechanic as well as lots of other little, but useful tools and utilities.",
+		"version": "2.4",
+		"mcversion": "1.12.2",
+		"url": "https://minecraft.curseforge.com/projects/lock",
+		"authorList": [ "Melonslise" ],
+		"credits": "Diesieben07, Choonster, Gigaherz, Draco18s, JamiesWhiteShirt, Shadows, DShadowWolf, Xalcon, DarkCow, KillJoy, Ben, TheRealFarfetchd, JTK222, Cadiboo, Lykrast, Quadraxis, Tterrag, Alexbegt, Desht, McJty, AlcatrazEscapee, V0idWa1k3r, Muramasa, Kashike, Commoble, TheSilkMiner, and others on MMD, freesound.org",
+		"logoFile": "locks.png"
+	}
 ]

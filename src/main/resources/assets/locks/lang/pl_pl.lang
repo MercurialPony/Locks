@@ -1,0 +1,30 @@
+# Creative tabs
+itemGroup.locks=Zamki
+
+# Items
+item.locks.lock.name=Kłódka
+item.locks.lock_pick.name=Wytrych
+item.locks.key.name=Klucz
+item.locks.master_key.name=Uniwersalny Klucz
+item.locks.key_blank.name=Zwykły Klucz
+item.locks.key_ring.name=Pęk Na Klucze
+
+# GUIs
+locks.gui.lockpicking.title=Otwieranie zamku
+locks.gui.lockpicking.open=Naciśnij `ESC` aby otworzyć
+
+# Subtitles
+locks.subtitle.key_ring=Keys jingle
+locks.subtitle.lock.close=Lock clicks
+locks.subtitle.lock.open=Key turned in lock
+locks.subtitle.lock.rattle=Lock rattles
+locks.subtitle.pin.fail=Pin clicks
+locks.subtitle.pin.match=Pin clicks into place
+
+# Tooltips
+locks.tooltip.id=ID: %s
+locks.tooltip.length=Length: %s
+locks.tooltip.strength:Strength: %s
+
+# Status messages
+locks.status.locked=This block is locked

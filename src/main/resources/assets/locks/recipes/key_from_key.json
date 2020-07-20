@@ -1,6 +1,6 @@
 {
-	"type": "locks:lockable_cloning",
-	"lockable":
+	"type": "locks:locking_item_cloning",
+	"locking":
 	{
 		"item": "locks:key"
 	},
