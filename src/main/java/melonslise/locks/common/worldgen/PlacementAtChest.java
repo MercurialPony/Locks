@@ -1,10 +1,15 @@
 package melonslise.locks.common.worldgen;
 
 import java.util.Random;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
-import melonslise.locks.common.config.LocksConfiguration;
-import net.minecraft.tileentity.TileEntityType;
+import com.mojang.datafixers.Dynamic;
+
+import melonslise.locks.common.config.LocksConfig;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.ChestBlock;
+import net.minecraft.state.properties.ChestType;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.chunk.IChunk;
@@ -15,16 +20,24 @@ import net.minecraft.world.gen.placement.Placement;
 
 public class PlacementAtChest extends Placement<NoPlacementConfig>
 {
-	public PlacementAtChest()
+	public PlacementAtChest(Function<Dynamic<?>, ? extends NoPlacementConfig> factory)
 	{
-		super(NoPlacementConfig::func_214735_a);
+		super(factory);
 	}
 
 	@Override
-	public Stream<BlockPos> getPositions(IWorld region, ChunkGenerator<? extends GenerationSettings> generator, Random random, NoPlacementConfig config, BlockPos regionPosition)
+	public Stream<BlockPos> getPositions(IWorld world, ChunkGenerator<? extends GenerationSettings> gen, Random rand, NoPlacementConfig cfg, BlockPos pos)
 	{
-		if(!LocksConfiguration.MAIN.generateLocks.get()) return Stream.empty();
-		IChunk chunk = region.func_217349_x(regionPosition);
-		return chunk.getTileEntitiesPos().stream().map(tileEntityPosition -> region.getTileEntity(tileEntityPosition)).filter(tileEntity -> tileEntity.getType() == TileEntityType.CHEST).map(tileEntity -> tileEntity.getPos());
+		double ch = LocksConfig.GENERATION_CHANCE.get();
+		if(ch == 0d || rand.nextDouble() > ch)
+			return Stream.empty();
+		IChunk chunk = world.getChunk(pos);
+		return chunk.getTileEntitiesPos().stream()
+			.filter(tePos ->
+			{
+				BlockState teState = world.getBlockState(tePos);
+				// Prevent from adding double chests twice
+				return teState.getProperties().contains(ChestBlock.TYPE) && teState.get(ChestBlock.TYPE) != ChestType.RIGHT;
+			});
 	}
 }

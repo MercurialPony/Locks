@@ -1,9 +1,11 @@
 package melonslise.locks.client.gui.sprite;
 
-import melonslise.locks.utility.LocksUtilities;
-import net.minecraft.client.gui.AbstractGui;
+import melonslise.locks.client.util.LocksClientUtil;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 // TODO Save start pos and gui instead of passing them each time.
+@OnlyIn(Dist.CLIENT)
 public class Texture
 {
 	public int startX, startY, width, height, canvasWidth, canvasHeight;
@@ -18,8 +20,8 @@ public class Texture
 		this.canvasHeight = canvasHeight;
 	}
 
-	public void draw(AbstractGui gui, float positionX, float positionY)
+	public void draw(float x, float y)
 	{
-		LocksUtilities.drawTexturedRectangle(positionX, positionY, this.startX, this.startY, this.width, this.height, canvasWidth, canvasHeight);
+		LocksClientUtil.drawTexturedRectangle(x, y, this.startX, this.startY, this.width, this.height, this.canvasWidth, this.canvasHeight);
 	}
 }

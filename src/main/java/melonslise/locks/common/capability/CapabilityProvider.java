@@ -10,17 +10,15 @@ import net.minecraftforge.common.util.LazyOptional;
 
 public class CapabilityProvider<A> implements ICapabilityProvider
 {
-	protected Capability capability;
+	protected Capability<A> capability;
 	protected A instance;
 	protected LazyOptional<A> optional;
-	protected Direction side;
 
-	public CapabilityProvider(Capability capability, A instance, Direction side)
+	public CapabilityProvider(Capability<A> capability, A instance)
 	{
 		this.capability = capability;
 		this.instance = instance;
-		this.optional = instance == null ? LazyOptional.empty() : LazyOptional.of(() -> instance);
-		this.side = side;
+		this.optional = LazyOptional.of(() -> instance);
 	}
 
 	@Override

@@ -18,19 +18,9 @@
 	"locks.subtitle.pin.fail": "栓点击声",
 	"locks.subtitle.pin.match": "栓合适点击声",
 
-	"_comment": "These are unused as of yet",
-	"locks.general.main.lock_length": "锁长度",
-	"locks.general.main.lock_length.tooltip": "单个新锁的长度",
-	"locks.general.main.lock_pick_strength": "撬锁器强度",
-	"locks.general.main.lock_pick_strength.tooltip": "撬锁器不会损坏的几率",
-	"locks.general.main.lockable_volume": "可锁定量",
-	"locks.general.main.lockable_volume.tooltip": "单个新锁的最大允许量",
-	"locks.general.main.lockable_blocks": "可锁定方块",
-	"locks.general.main.lockable_blocks.tooltip": "可以锁定的块.语法是mod域,后跟块的注册表名称",
-	"locks.general.main.generate_locks": "生成锁",
-	"locks.general.main.generate_locks.tooltip": "生成每个新容器时,使用随机锁",
-	"locks.general.main.remove_locks": "可拆卸锁",
-	"locks.general.main.remove_locks.tooltip": "潜行时空手打开锁可以移除它",
-	"locks.general.main.unbreakable_locks": "坚不可摧的锁",
-	"locks.general.main.unbreakable_locks.tooltip": "在生存模式下不能销毁锁定的方块"
+	"locks.tooltip.id": "ID: %s",
+	"locks.tooltip.length":  "Length: %s",
+	"locks.tooltip.strength": "Strength: %s",
+
+	"locks.status.locked": "This block is locked"
 }

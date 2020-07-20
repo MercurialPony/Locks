@@ -1,0 +1,26 @@
+{
+	"itemGroup.locks": "Zamki",
+
+	"item.locks.lock": "Kłódka",
+	"item.locks.lock_pick": "Wytrych",
+	"item.locks.key": "Klucz",
+	"item.locks.master_key": "Uniwersalny Klucz",
+	"item.locks.key_blank": "Zwykły Klucz",
+	"item.locks.key_ring": "Pęk Na Klucze",
+
+	"locks.gui.lockpicking.title": "Otwieranie zamku",
+	"locks.gui.lockpicking.open": "Naciśnij `ESC` aby otworzyć",
+
+	"locks.subtitle.key_ring": "Keys jingle",
+	"locks.subtitle.lock.close": "Lock clicks",
+	"locks.subtitle.lock.open": "Key used in lock",
+	"locks.subtitle.lock.rattle": "Lock rattles",
+	"locks.subtitle.pin.fail": "Pin clicks",
+	"locks.subtitle.pin.match": "Pin fit click",
+
+	"locks.tooltip.id": "ID: %s",
+	"locks.tooltip.length":  "Length: %s",
+	"locks.tooltip.strength": "Strength: %s",
+
+	"locks.status.locked": "This block is locked"
+}

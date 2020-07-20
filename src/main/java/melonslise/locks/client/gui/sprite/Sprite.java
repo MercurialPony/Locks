@@ -1,21 +1,24 @@
 package melonslise.locks.client.gui.sprite;
 
-import net.minecraft.client.gui.AbstractGui;
+import melonslise.locks.client.util.LocksClientUtil;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
+@OnlyIn(Dist.CLIENT)
 public class Sprite
 {
 	public Texture texture;
 	public float shiftX , shiftY, oldShiftX, oldShiftY, motionX, motionY;
 	public int ticksX, ticksY;
 
-	public Sprite(Texture texture)
+	public Sprite(Texture tex)
 	{
-		this.texture = texture;
+		this.texture = tex;
 	}
 
-	public void draw(AbstractGui gui, float positionX, float positionY, float partialTick)
+	public void draw(float x, float y, float partialTick)
 	{
-		this.texture.draw(gui, positionX + this.oldShiftX + (this.shiftX - this.oldShiftX) * partialTick, positionY + this.oldShiftY + (this.shiftY - this.oldShiftY) * partialTick);
+		this.texture.draw(x + LocksClientUtil.lerp(this.oldShiftX, this.shiftX, partialTick), y + LocksClientUtil.lerp(this.oldShiftY, this.shiftY, partialTick));
 	}
 
 	public void update()
@@ -31,9 +34,11 @@ public class Sprite
 		{
 			this.shiftX += this.motionX;
 			--this.ticksX;
-			if(this.ticksX <= 0) this.motionX = 0F;
+			if(this.ticksX <= 0)
+				this.motionX = 0f;
 		}
-		else this.shiftX += this.motionX;
+		else
+			this.shiftX += this.motionX;
 	}
 
 	protected void moveY()
@@ -43,9 +48,11 @@ public class Sprite
 		{
 			this.shiftY += this.motionY;
 			--this.ticksY;
-			if(this.ticksY <= 0) this.motionY = 0F;
+			if(this.ticksY <= 0)
+				this.motionY = 0f;
 		}
-		else this.shiftY += this.motionY;
+		else
+			this.shiftY += this.motionY;
 	}
 
 	public void moveX(float motion, int ticks)
@@ -62,7 +69,7 @@ public class Sprite
 
 	public void reset()
 	{
-		this.shiftX = this.shiftY = this.oldShiftX = this.oldShiftY = this.motionX = this.motionY = 0F;
+		this.shiftX = this.shiftY = this.oldShiftX = this.oldShiftY = this.motionX = this.motionY = 0f;
 		this.ticksX = this.ticksY = 0;
 	}
 }

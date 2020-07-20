@@ -8,29 +8,19 @@
 	"item.locks.key_blank": "Key Blank",
 	"item.locks.key_ring": "Key Ring",
 
-	"locks.gui.lockpicking.title": "Lock Picking",
+	"locks.gui.lockpicking.title": "Lock picking",
 	"locks.gui.lockpicking.open": "Press `ESC` to open",
 
 	"locks.subtitle.key_ring": "Keys jingle",
 	"locks.subtitle.lock.close": "Lock clicks",
-	"locks.subtitle.lock.open": "Key used in lock",
+	"locks.subtitle.lock.open": "Key turned in lock",
 	"locks.subtitle.lock.rattle": "Lock rattles",
 	"locks.subtitle.pin.fail": "Pin clicks",
-	"locks.subtitle.pin.match": "Pin fit click",
+	"locks.subtitle.pin.match": "Pin clicks into place lightly",
 
-	"_comment": "These are unused as of yet",
-	"locks.general.main.lock_length": "Lock length",
-	"locks.general.main.lock_length.tooltip": "Length of a single new lock",
-	"locks.general.main.lock_pick_strength": "Lock pick strength",
-	"locks.general.main.lock_pick_strength.tooltip": "Chance of a lock pick to not break",
-	"locks.general.main.lockable_volume": "Lockable volume",
-	"locks.general.main.lockable_volume.tooltip": "Maximum allowed volume of a single new lock",
-	"locks.general.main.lockable_blocks": "Lockable blocks",
-	"locks.general.main.lockable_blocks.tooltip": "Blocks that can be locked. Syntax is the mod domain followed by the block's registry name",
-	"locks.general.main.generate_locks": "Generate locks",
-	"locks.general.main.generate_locks.tooltip": "Generate every new chest with a random lock",
-	"locks.general.main.remove_locks": "Removable locks",
-	"locks.general.main.remove_locks.tooltip": "Open locks can be removed with an empty hand while sneaking",
-	"locks.general.main.unbreakable_locks": "Unbreakable locks",
-	"locks.general.main.unbreakable_locks.tooltip": "Locked blocks cannot be destroyed in survival mode"
+	"locks.tooltip.id": "ID: %s",
+	"locks.tooltip.length":  "Length: %s",
+	"locks.tooltip.strength": "Strength: %s",
+
+	"locks.status.locked": "This block is locked"
 }

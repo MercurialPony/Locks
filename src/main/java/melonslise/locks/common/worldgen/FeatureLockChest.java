@@ -1,42 +1,48 @@
 package melonslise.locks.common.worldgen;
 
 import java.util.Random;
+import java.util.function.Function;
 
-import melonslise.locks.common.config.LocksConfiguration;
+import com.mojang.datafixers.Dynamic;
+
+import melonslise.locks.common.config.LocksConfig;
 import melonslise.locks.common.init.LocksCapabilities;
-import melonslise.locks.utility.Box;
-import melonslise.locks.utility.Lock;
-import melonslise.locks.utility.Lockable;
-import melonslise.locks.utility.predicate.PredicateIntersecting;
+import melonslise.locks.common.util.Cuboid6i;
+import melonslise.locks.common.util.Orientation;
+import melonslise.locks.common.util.Lock;
+import melonslise.locks.common.util.Lockable;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.ChestBlock;
 import net.minecraft.state.properties.ChestType;
+import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IWorld;
-import net.minecraft.world.World;
 import net.minecraft.world.gen.ChunkGenerator;
+import net.minecraft.world.gen.GenerationSettings;
 import net.minecraft.world.gen.feature.Feature;
 import net.minecraft.world.gen.feature.NoFeatureConfig;
-import net.minecraftforge.fml.server.ServerLifecycleHooks;
 
 public class FeatureLockChest extends Feature<NoFeatureConfig>
 {
-	public FeatureLockChest()
+	public FeatureLockChest(Function<Dynamic<?>, ? extends NoFeatureConfig> factory)
 	{
-		super(NoFeatureConfig::func_214639_a);
+		super(factory);
 	}
 
 	@Override
-	public boolean place(IWorld region, ChunkGenerator generator, Random random, BlockPos position, NoFeatureConfig config)
+	public boolean place(IWorld world, ChunkGenerator<? extends GenerationSettings> gen, Random rand, BlockPos pos, NoFeatureConfig cfg)
 	{
-		World world = ServerLifecycleHooks.getCurrentServer().getWorld(region.getDimension().getType());
-		return world.getCapability(LocksCapabilities.LOCKABLES).map(lockables ->
-		{
-			if(lockables.getLockables().values().stream().anyMatch(new PredicateIntersecting(position))) return false;
-			BlockState state = region.getBlockState(position);
-			BlockPos adjacentPosition = state.get(ChestBlock.TYPE) == ChestType.SINGLE ? position : position.offset(ChestBlock.getDirectionToAttached(state));
-			lockables.add(new Lockable(new Box(position, adjacentPosition), new Lock(random.nextInt(), LocksConfiguration.MAIN.generateLockLength(random), true), state.get(ChestBlock.FACING)));
-			return true;
-		}).orElse(false);
+		//World world = ServerLifecycleHooks.getCurrentServer().getWorld(region.getDimension().getType());
+		return world.getWorld().getCapability(LocksCapabilities.LOCKABLES)
+			.map(lockables ->
+			{
+				if(lockables.get().values().stream().anyMatch(lockable1 -> lockable1.box.intersects(pos)))
+					return false;
+				BlockState state = world.getBlockState(pos);
+				BlockPos adjPos = state.get(ChestBlock.TYPE) == ChestType.SINGLE ? pos : pos.offset(ChestBlock.getDirectionToAttached(state));
+				lockables.add(new Lockable(new Cuboid6i(pos, adjPos), new Lock(rand.nextInt(), LocksConfig.randLockLen(rand), true), Orientation.fromDirection(state.get(ChestBlock.FACING), Direction.NORTH)));
+				return true;
+			})
+			.orElse(false);
 	}
 }

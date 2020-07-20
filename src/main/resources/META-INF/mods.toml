@@ -3,13 +3,11 @@ loaderVersion="[26,)"
 issueTrackerURL="https://github.com/Melonslise/Locks/issues"
 [[mods]]
 modId="locks"
-version="2.3.1.1"
+version="2.4"
 displayName="Locks"
 #updateJSONURL="http://myurl.me/"
 displayURL="https://minecraft.curseforge.com/projects/locks"
 logoFile="locks.png"
-credits="Diesieben07, Choonster, Gigaherz, Draco18s, JamiesWhiteShirt, Shadows, DShadowWolf, Xalcon, DarkCow, KillJoy, Ben, TheRealFarfetchd, JTK222, Cadiboo, Lykrast, Quadraxis, Tterrag, Alexbegt, Desht, McJty, AlcatrazEscapee, V0idWa1k3r, Muramasa, Kashike, Commoble, freesound.org"
+credits="Diesieben07, Choonster, Gigaherz, Draco18s, JamiesWhiteShirt, Shadows, DShadowWolf, Xalcon, DarkCow, KillJoy, Ben, TheRealFarfetchd, JTK222, Cadiboo, Lykrast, Quadraxis, Tterrag, Alexbegt, Desht, McJty, AlcatrazEscapee, V0idWa1k3r, Muramasa, Kashike, Commoble, TheSilkMiner, and others on MMD, freesound.org"
 authors="Melonslise"
-description='''
-Locks is a small, but unique Minecraft mod that introduces flexible and universal locks which can be dynamically attached to multiple blocks of any kind, including other mods, a fun lock picking mechanic as well as lots of other little, but useful tools and utilities.
-'''
+description='''Locks is a small, but unique Minecraft mod that introduces flexible and universal locks which can be dynamically attached to multiple blocks of any kind, including other mods, a fun lock picking mechanic as well as lots of other little, but useful tools and utilities.'''
