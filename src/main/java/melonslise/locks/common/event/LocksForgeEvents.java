@@ -160,7 +160,7 @@ public final class LocksForgeEvents
 	@SubscribeEvent
 	public static void onBlockBreaking(PlayerEvent.BreakSpeed event)
 	{
-		if(!canBreakLockable(event.getEntityPlayer(), event.getPos()))
+		if(!canBreakLockable(event.getPlayer(), event.getPos()))
 			event.setCanceled(true);
 	}
 

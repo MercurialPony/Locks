@@ -9,6 +9,7 @@ import melonslise.locks.Locks;
 import melonslise.locks.common.container.LockPickingContainer;
 import melonslise.locks.common.init.LocksCapabilities;
 import melonslise.locks.common.util.Lockable;
+import melonslise.locks.common.util.LocksPredicates;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.Item;
@@ -54,7 +55,7 @@ public class LockPickItem extends Item
 		return world.getCapability(LocksCapabilities.LOCKABLES)
 			.map(lockables ->
 			{
-				List<Lockable> matching = lockables.get().values().stream().filter(lockable1 -> lockable1.lock.isLocked() && lockable1.box.intersects(pos)).collect(Collectors.toList());
+				List<Lockable> matching = lockables.get().values().stream().filter(LocksPredicates.LOCKED.and(lockable1 -> lockable1.box.intersects(pos))).collect(Collectors.toList());
 				if(matching.isEmpty())
 					return ActionResultType.PASS;
 				if(world.isRemote)

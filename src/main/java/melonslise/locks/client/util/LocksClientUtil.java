@@ -1,7 +1,10 @@
 package melonslise.locks.client.util;
 
+import com.mojang.blaze3d.systems.RenderSystem;
+
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.WorldVertexBufferUploader;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -17,21 +20,33 @@ public final class LocksClientUtil
 	 * 
 	 */
 
-	public static void drawTexturedRectangle(float x, float y, int u, int v, int width, int height, int textureWidth, int textureHeight)
+	public static void drawTexturedRectangle(float x, float y, int u, int v, int width, int height, int texWidth, int texHeight)
 	{
-		float f = 1f / (float) textureWidth;
-		float f1 = 1f / (float) textureHeight;
-		Tessellator tes = Tessellator.getInstance();
-		BufferBuilder bld = tes.getBuffer();
-		bld.begin(7, DefaultVertexFormats.POSITION_TEX);
-		bld.pos((double) x, (double) (y + (float) height), 0d).tex((double) ((float) u * f), (double) ((float) (v + height) * f1)).endVertex();
-		bld.pos((double) (x + (float) width), (double) (y + (float) height), 0d).tex((double) ((float) (u + width) * f), (double) ((float) (v + height) * f1)).endVertex();
-		bld.pos((double) (x + (float) width), (double) y, 0d).tex((double) ((float) (u + width) * f), (double) ((float) v * f1)).endVertex();
-		bld.pos((double) x, (double) y, 0d).tex((double) ((float) u * f), (double) ((float) v * f1)).endVertex();
-		tes.draw();
+		float f = 1f / (float) texWidth;
+		float f1 = 1f / (float) texHeight;
+		BufferBuilder buf = Tessellator.getInstance().getBuffer();
+		buf.begin(7, DefaultVertexFormats.POSITION_TEX);
+		buf.pos((double) x, (double) (y + (float) height), 0d).tex(((float) u * f), ((float) (v + height) * f1)).endVertex();
+		buf.pos((double) (x + (float) width), (double) (y + (float) height), 0d).tex(((float) (u + width) * f), ((float) (v + height) * f1)).endVertex();
+		buf.pos((double) (x + (float) width), (double) y, 0d).tex(((float) (u + width) * f),  ((float) v * f1)).endVertex();
+		buf.pos((double) x, (double) y, 0d).tex(((float) u * f), ((float) v * f1)).endVertex();
+		buf.finishDrawing();
+		RenderSystem.enableAlphaTest();
+		WorldVertexBufferUploader.draw(buf);
 	}
 
+	/*
+	 * 
+	 * Animation
+	 * 
+	 */
+
 	public static float lerp(float start, float end, float progress)
+	{
+		return start + (end - start) * progress;
+	}
+
+	public static double lerp(double start, double end, double progress)
 	{
 		return start + (end - start) * progress;
 	}

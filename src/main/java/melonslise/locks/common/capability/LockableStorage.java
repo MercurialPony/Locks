@@ -45,7 +45,7 @@ public class LockableStorage implements ILockableStorage
 	@Override
 	public boolean add(Lockable lockable)
 	{
-		if(lockable == null || lockable.box == null || lockable.lock == null || lockable.orient == null || lockable.box.volume() > LocksServerConfig.MAX_LOCKABLE_VOLUME.get() || this.lockables.values().stream().anyMatch(other -> other.box.intersects(lockable.box)))
+		if(lockable == null || lockable.box == null || lockable.lock == null || lockable.orient == null || lockable.box.volume() > LocksServerConfig.MAX_LOCKABLE_VOLUME.get() || this.lockables.values().stream().anyMatch(lockable1 -> lockable1.box.intersects(lockable.box)))
 			return false;
 		this.lockables.put(lockable.networkID, lockable);
 		lockable.addObserver(this);

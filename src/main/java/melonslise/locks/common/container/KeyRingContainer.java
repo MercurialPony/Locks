@@ -37,14 +37,14 @@ public class KeyRingContainer extends Container
 		{
 			super.putStack(stack);
 			if(!this.player.world.isRemote)
-				this.player.world.playSound(null, this.player.posX, this.player.posY, this.player.posZ, LocksSoundEvents.KEY_RING, SoundCategory.PLAYERS, 1f, 1f);
+				this.player.world.playSound(null, this.player.getPosX(), this.player.getPosY(), this.player.getPosZ(), LocksSoundEvents.KEY_RING, SoundCategory.PLAYERS, 1f, 1f);
 		}
 
 		@Override
 		public ItemStack onTake(PlayerEntity player, ItemStack stack)
 		{
 			if(!this.player.world.isRemote)
-				this.player.world.playSound(null, this.player.posX, this.player.posY, this.player.posZ, LocksSoundEvents.KEY_RING, SoundCategory.PLAYERS, 1f, 1f);
+				this.player.world.playSound(null, this.player.getPosX(), this.player.getPosY(), this.player.getPosZ(), LocksSoundEvents.KEY_RING, SoundCategory.PLAYERS, 1f, 1f);
 			return super.onTake(player, stack);
 		}
 	}

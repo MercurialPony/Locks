@@ -32,7 +32,7 @@ public final class LocksFeatures
 	public static void addFeatures()
 	{
 		for(Biome biome : ForgeRegistries.BIOMES.getValues())
-			biome.addFeature(GenerationStage.Decoration.TOP_LAYER_MODIFICATION, Biome.createDecoratedFeature(LOCK_CHEST, IFeatureConfig.NO_FEATURE_CONFIG, LocksPlacements.CHEST, IPlacementConfig.NO_PLACEMENT_CONFIG));
+			biome.addFeature(GenerationStage.Decoration.TOP_LAYER_MODIFICATION, LOCK_CHEST.withConfiguration(IFeatureConfig.NO_FEATURE_CONFIG).withPlacement(LocksPlacements.CHEST.configure(IPlacementConfig.NO_PLACEMENT_CONFIG)));
 	}
 
 	public static Feature add(String name, Feature feature)

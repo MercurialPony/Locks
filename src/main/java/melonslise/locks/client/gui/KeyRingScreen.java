@@ -1,6 +1,6 @@
 package melonslise.locks.client.gui;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 
 import melonslise.locks.common.container.KeyRingContainer;
 import net.minecraft.client.gui.screen.inventory.ContainerScreen;
@@ -42,7 +42,7 @@ public class KeyRingScreen extends ContainerScreen<KeyRingContainer>
 	protected void drawGuiContainerBackgroundLayer(float partialTick, int mouseX, int mouseY)
 	{
 		int rows = this.getContainer().rows;
-		GlStateManager.color4f(1f, 1f, 1f, 1f);
+		RenderSystem.color4f(1f, 1f, 1f, 1f);
 		this.minecraft.getTextureManager().bindTexture(TEXTURE);
 		int i = (this.width - this.xSize) / 2;
 		int j = (this.height - this.ySize) / 2;

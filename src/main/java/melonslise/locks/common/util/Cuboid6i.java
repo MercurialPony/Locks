@@ -2,7 +2,6 @@ package melonslise.locks.common.util;
 
 import java.util.Objects;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.culling.ClippingHelperImpl;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -126,10 +125,9 @@ public class Cuboid6i
 	}
 
 	@OnlyIn(Dist.CLIENT)
-	public boolean inView()
+	public boolean inView(ClippingHelperImpl clippingHelper)
 	{
-		Vec3d view = Minecraft.getInstance().gameRenderer.getActiveRenderInfo().getProjectedView();
-		return ClippingHelperImpl.getInstance().isBoxInFrustum(this.x1 - view.x, this.y1 - view.y, this.z1 - view.z, this.x2 - view.x, this.y2 - view.y, this.z2 - view.z);
+		return clippingHelper.isBoxInFrustum(this.x1, this.y1, this.z1, this.x2, this.y2, this.z2);
 	}
 
 	@Override

@@ -59,8 +59,8 @@ public final class LocksUtil
 		default:
 			break;
 		}
-		int x1 = settings.func_207664_d().getX();
-		int z1 = settings.func_207664_d().getZ();
+		int x1 = settings.getCenterOffset().getX();
+		int z1 = settings.getCenterOffset().getZ();
 		switch(settings.getRotation())
 		{
 		case COUNTERCLOCKWISE_90:

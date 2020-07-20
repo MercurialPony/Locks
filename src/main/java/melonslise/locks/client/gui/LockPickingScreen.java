@@ -1,6 +1,6 @@
 package melonslise.locks.client.gui;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 
 import melonslise.locks.Locks;
 import melonslise.locks.client.gui.sprite.LockPickSprite;
@@ -65,7 +65,7 @@ public class LockPickingScreen extends ContainerScreen<LockPickingContainer>
 	public void drawGuiContainerBackgroundLayer(float partialTick, int mouseX, int mouseY) // TODO Final static constants for texture pos?
 	{
 		float pt = this.minecraft.getRenderPartialTicks();
-		GlStateManager.color4f(1f, 1f, 1f, 1f);
+		RenderSystem.color4f(1f, 1f, 1f, 1f);
 		this.minecraft.getTextureManager().bindTexture(TEXTURE);
 		int cornerX = (this.width - this.xSize) / 2;
 		int cornerY = (this.height - this.ySize) / 2;

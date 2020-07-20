@@ -2,6 +2,7 @@ function initializeCoreMod()
 {
 	// Imports
 	var Opcodes = Java.type("org.objectweb.asm.Opcodes");
+	var ASMAPI = Java.type("net.minecraftforge.coremod.api.ASMAPI");
 	var FieldNode = Java.type("org.objectweb.asm.tree.FieldNode");
 	var IntInsnNode = Java.type("org.objectweb.asm.tree.IntInsnNode");
 	var FieldInsnNode = Java.type("org.objectweb.asm.tree.FieldInsnNode");
@@ -169,6 +170,34 @@ function initializeCoreMod()
 				node.instructions.insert(new IntInsnNode(Opcodes.ALOAD, 1));
 				// Push the class instance to the stack
 				node.instructions.insert(new IntInsnNode(Opcodes.ALOAD, 0));
+				return node;
+			}
+		},
+		"WorldRenderer#updateCameraAndRender":
+		{
+			target:
+			{
+				type: "METHOD",
+				class: "net.minecraft.client.renderer.WorldRenderer",
+				methodName: "func_228426_a_",
+				methodDesc: "(Lcom/mojang/blaze3d/matrix/MatrixStack;FJZLnet/minecraft/client/renderer/ActiveRenderInfo;Lnet/minecraft/client/renderer/GameRenderer;Lnet/minecraft/client/renderer/LightTexture;Lnet/minecraft/client/renderer/Matrix4f;)V"
+			},
+			transformer: function(node)
+			{
+				var updateFogColor = ASMAPI.mapMethod("func_228371_a_");
+				// We want to insert our code right before the FogRenderer.updateFogColor invocation
+				for(var iterator = node.instructions.iterator(); iterator.hasNext();)
+				{
+					var insn = iterator.next();
+					// Look for updateFogColor static invocation
+					if(insn.getOpcode() !== Opcodes.INVOKESTATIC || insn.name !== updateFogColor)
+						continue;
+					// Push the 20th local variable into the stack
+					node.instructions.insertBefore(insn, new IntInsnNode(Opcodes.ALOAD, 20));
+					// Invoke our method with the params loaded into the stack
+					node.instructions.insertBefore(insn, new MethodInsnNode(Opcodes.INVOKESTATIC, "melonslise/locks/coremod/LocksDelegates", "setClippingHelper", "(Lnet/minecraft/client/renderer/culling/ClippingHelperImpl;)V"));
+					break;
+				}
 				return node;
 			}
 		}

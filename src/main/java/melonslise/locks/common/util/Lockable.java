@@ -15,7 +15,6 @@ import com.google.common.collect.Maps;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
@@ -46,6 +45,7 @@ public class Lockable extends Observable implements Observer
 
 	// Client only
 	public Lockable(Cuboid6i box, Lock lock, Orientation orient, int networkID)
+	
 	{
 		this.box = box;
 		this.lock = lock;
@@ -135,7 +135,8 @@ public class Lockable extends Observable implements Observer
 		Pair<Vec3d, Orientation> state = this.getLockState(mc.world);
 		if(state == null)
 			return false;
-		double dist = state.getLeft().squareDistanceTo(TileEntityRendererDispatcher.staticPlayerX, TileEntityRendererDispatcher.staticPlayerY, TileEntityRendererDispatcher.staticPlayerZ);
+		Vec3d origin = mc.gameRenderer.getActiveRenderInfo().getProjectedView();
+		double dist = state.getLeft().squareDistanceTo(origin);
 		double max = mc.gameSettings.renderDistanceChunks * 8;
 		return dist < max * max;
 	}

@@ -1,6 +1,6 @@
 package melonslise.locks.client.gui.sprite;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 
 import melonslise.locks.client.util.LocksClientUtil;
 import net.minecraftforge.api.distmarker.Dist;
@@ -20,12 +20,12 @@ public class RotatableSprite extends Sprite
 	@Override
 	public void draw(float x, float y, float partialTick)
 	{
-		GlStateManager.pushMatrix();
-		GlStateManager.translatef(this.originX + this.shiftX, this.originY + this.shiftY, 0F);
-		GlStateManager.rotatef(LocksClientUtil.lerp(this.oldRotation, this.rotation, partialTick), 0F, 0F, 1F);
-		GlStateManager.translatef(-this.originX - this.shiftX, -this.originY - this.shiftY, 0F);
+		RenderSystem.pushMatrix();
+		RenderSystem.translatef(this.originX + this.shiftX, this.originY + this.shiftY, 0F);
+		RenderSystem.rotatef(LocksClientUtil.lerp(this.oldRotation, this.rotation, partialTick), 0F, 0F, 1F);
+		RenderSystem.translatef(-this.originX - this.shiftX, -this.originY - this.shiftY, 0F);
 		super.draw(x, y, partialTick);
-		GlStateManager.popMatrix();
+		RenderSystem.popMatrix();
 	}
 
 	@Override
