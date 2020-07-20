@@ -1,8 +1,9 @@
 package melonslise.locks.client.gui.sprite;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.matrix.MatrixStack;
 
 import melonslise.locks.client.util.LocksClientUtil;
+import net.minecraft.util.math.vector.Vector3f;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -18,14 +19,14 @@ public class RotatableSprite extends Sprite
 	}
 
 	@Override
-	public void draw(float x, float y, float partialTick)
+	public void draw(MatrixStack mtx, float x, float y, float partialTick)
 	{
-		RenderSystem.pushMatrix();
-		RenderSystem.translatef(this.originX + this.shiftX, this.originY + this.shiftY, 0F);
-		RenderSystem.rotatef(LocksClientUtil.lerp(this.oldRotation, this.rotation, partialTick), 0F, 0F, 1F);
-		RenderSystem.translatef(-this.originX - this.shiftX, -this.originY - this.shiftY, 0F);
-		super.draw(x, y, partialTick);
-		RenderSystem.popMatrix();
+		mtx.push();
+		mtx.translate(this.originX + this.shiftX, this.originY + this.shiftY, 0d);
+		mtx.rotate(Vector3f.ZP.rotationDegrees(LocksClientUtil.lerp(this.oldRotation, this.rotation, partialTick)));
+		mtx.translate(-this.originX - this.shiftX, -this.originY - this.shiftY, 0d);
+		super.draw(mtx, x, y, partialTick);
+		mtx.pop();
 	}
 
 	@Override

@@ -1,11 +1,13 @@
 package melonslise.locks.client.util;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.WorldVertexBufferUploader;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -20,16 +22,17 @@ public final class LocksClientUtil
 	 * 
 	 */
 
-	public static void drawTexturedRectangle(float x, float y, int u, int v, int width, int height, int texWidth, int texHeight)
+	public static void drawTexturedRectangle(MatrixStack mtx, float x, float y, int u, int v, int width, int height, int texWidth, int texHeight)
 	{
+		Matrix4f last = mtx.getLast().getMatrix();
 		float f = 1f / (float) texWidth;
 		float f1 = 1f / (float) texHeight;
 		BufferBuilder buf = Tessellator.getInstance().getBuffer();
 		buf.begin(7, DefaultVertexFormats.POSITION_TEX);
-		buf.pos((double) x, (double) (y + (float) height), 0d).tex(((float) u * f), ((float) (v + height) * f1)).endVertex();
-		buf.pos((double) (x + (float) width), (double) (y + (float) height), 0d).tex(((float) (u + width) * f), ((float) (v + height) * f1)).endVertex();
-		buf.pos((double) (x + (float) width), (double) y, 0d).tex(((float) (u + width) * f),  ((float) v * f1)).endVertex();
-		buf.pos((double) x, (double) y, 0d).tex(((float) u * f), ((float) v * f1)).endVertex();
+		buf.pos(last, x, y + (float) height, 0f).tex(((float) u * f), ((float) (v + height) * f1)).endVertex();
+		buf.pos(last, x + (float) width, y + (float) height, 0f).tex(((float) (u + width) * f), ((float) (v + height) * f1)).endVertex();
+		buf.pos(last, x + (float) width, y, 0f).tex(((float) (u + width) * f),  ((float) v * f1)).endVertex();
+		buf.pos(x, y, 0f).tex(((float) u * f), ((float) v * f1)).endVertex();
 		buf.finishDrawing();
 		RenderSystem.enableAlphaTest();
 		WorldVertexBufferUploader.draw(buf);

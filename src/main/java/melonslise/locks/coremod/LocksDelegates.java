@@ -5,8 +5,8 @@ import java.util.stream.Collectors;
 
 import com.google.common.collect.Lists;
 
+import melonslise.locks.Locks;
 import melonslise.locks.common.config.LocksConfig;
-import melonslise.locks.common.init.LocksCapabilities;
 import melonslise.locks.common.item.LockItem;
 import melonslise.locks.common.util.Cuboid6i;
 import melonslise.locks.common.util.Lock;
@@ -14,7 +14,7 @@ import melonslise.locks.common.util.Lockable;
 import melonslise.locks.common.util.LocksUtil;
 import melonslise.locks.common.util.Orientation;
 import net.minecraft.block.BlockState;
-import net.minecraft.client.renderer.culling.ClippingHelperImpl;
+import net.minecraft.client.renderer.culling.ClippingHelper;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
@@ -38,7 +38,7 @@ public final class LocksDelegates
 	{
 		// World.isRemote check not required because this is fired only on the server anyway
 		if(oldState.getBlock() != newState.getBlock())
-			world.getCapability(LocksCapabilities.LOCKABLES)
+			Locks.PROXY.getLockables(world)
 				.ifPresent(lockables ->
 				{
 					lockables.get().values().stream().filter(lockable1 -> lockable1.box.intersects(pos))
@@ -53,7 +53,7 @@ public final class LocksDelegates
 
 	public static List<LockableInfo> takeLockablesFromWorld(World world, BlockPos start, BlockPos size)
 	{
-		return world.getCapability(LocksCapabilities.LOCKABLES)
+		return Locks.PROXY.getLockables(world)
 			.map(lockables ->
 			{
 				Cuboid6i box = new Cuboid6i(start, start.add(size.getX() - 1, size.getY() - 1, size.getZ() - 1));
@@ -71,7 +71,7 @@ public final class LocksDelegates
 	// FIXME Mutable bb
 	public static void addLockablesToWorld(List<LockableInfo> infos, IWorld world, BlockPos start, PlacementSettings settings) 
 	{
-		world.getWorld().getCapability(LocksCapabilities.LOCKABLES)
+		Locks.PROXY.getLockables(world.getWorld())
 			.ifPresent(lockables ->
 			{
 				for(LockableInfo lockable : infos)
@@ -118,10 +118,10 @@ public final class LocksDelegates
 	}
 
 	@OnlyIn(Dist.CLIENT)
-	public static ClippingHelperImpl clippingHelper;
+	public static ClippingHelper clippingHelper;
 
 	@OnlyIn(Dist.CLIENT)
-	public static void setClippingHelper(ClippingHelperImpl clippingHelper)
+	public static void setClippingHelper(ClippingHelper clippingHelper)
 	{
 		LocksDelegates.clippingHelper = clippingHelper;
 	}

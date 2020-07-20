@@ -7,7 +7,6 @@ import javax.annotation.Nullable;
 
 import melonslise.locks.Locks;
 import melonslise.locks.common.container.LockPickingContainer;
-import melonslise.locks.common.init.LocksCapabilities;
 import melonslise.locks.common.util.Lockable;
 import melonslise.locks.common.util.LocksPredicates;
 import net.minecraft.client.util.ITooltipFlag;
@@ -52,7 +51,7 @@ public class LockPickItem extends Item
 	{
 		World world = ctx.getWorld();
 		BlockPos pos = ctx.getPos();
-		return world.getCapability(LocksCapabilities.LOCKABLES)
+		return Locks.PROXY.getLockables(world)
 			.map(lockables ->
 			{
 				List<Lockable> matching = lockables.get().values().stream().filter(LocksPredicates.LOCKED.and(lockable1 -> lockable1.box.intersects(pos))).collect(Collectors.toList());
@@ -81,6 +80,6 @@ public class LockPickItem extends Item
 	public void addInformation(ItemStack stack, @Nullable World world, List<ITextComponent> lines, ITooltipFlag flag)
 	{
 		if(stack.hasTag() && stack.getTag().contains(KEY_STRENGTH))
-			lines.add(new TranslationTextComponent(Locks.ID + ".tooltip.strength", ItemStack.DECIMALFORMAT.format(getOrSetStrength(stack))).applyTextStyle(TextFormatting.DARK_GREEN));
+			lines.add(new TranslationTextComponent(Locks.ID + ".tooltip.strength", ItemStack.DECIMALFORMAT.format(getOrSetStrength(stack))).func_240699_a_(TextFormatting.DARK_GREEN));
 	}
 }

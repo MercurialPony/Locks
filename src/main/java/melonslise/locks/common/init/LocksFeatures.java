@@ -19,7 +19,7 @@ public final class LocksFeatures
 	public static final List<Feature> FEATURES = new ArrayList<>(1);
 
 	public static final Feature
-		LOCK_CHEST = add("lock_chest", new FeatureLockChest(NoFeatureConfig::deserialize));
+		LOCK_CHEST = add("lock_chest", new FeatureLockChest(NoFeatureConfig.field_236558_a_));
 
 	private LocksFeatures() {}
 

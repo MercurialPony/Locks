@@ -52,7 +52,7 @@ public class LockableStorage implements ILockableStorage
 		if(this.world.isRemote)
 			lockable.shake(10);
 		else
-			LocksNetworks.MAIN.send(PacketDistributor.DIMENSION.with(() -> this.world.dimension.getType()), new AddLockablePacket(lockable));
+			LocksNetworks.MAIN.send(PacketDistributor.DIMENSION.with(() -> this.world.func_234923_W_()), new AddLockablePacket(lockable));
 		return true;
 	}
 
@@ -65,7 +65,7 @@ public class LockableStorage implements ILockableStorage
 		lockable.deleteObserver(this);
 		if(this.world.isRemote)
 			return true;
-		LocksNetworks.MAIN.send(PacketDistributor.DIMENSION.with(() -> this.world.dimension.getType()), new RemoveLockablePacket(networkID));
+		LocksNetworks.MAIN.send(PacketDistributor.DIMENSION.with(() -> this.world.func_234923_W_()), new RemoveLockablePacket(networkID));
 		return true;
 	}
 
@@ -75,7 +75,7 @@ public class LockableStorage implements ILockableStorage
 		if(this.world.isRemote || !(observable instanceof Lockable))
 			return;
 		Lockable lockable = (Lockable) observable;
-		LocksNetworks.MAIN.send(PacketDistributor.DIMENSION.with(() -> this.world.dimension.getType()), new UpdateLockablePacket(lockable.networkID, lockable.lock.isLocked()));
+		LocksNetworks.MAIN.send(PacketDistributor.DIMENSION.with(() -> this.world.func_234923_W_()), new UpdateLockablePacket(lockable.networkID, lockable.lock.isLocked()));
 	}
 
 	@Override

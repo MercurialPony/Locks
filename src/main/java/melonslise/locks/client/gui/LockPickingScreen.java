@@ -1,5 +1,6 @@
 package melonslise.locks.client.gui;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 
 import melonslise.locks.Locks;
@@ -54,42 +55,44 @@ public class LockPickingScreen extends ContainerScreen<LockPickingContainer>
 	}
 
 	@Override
-	public void render(int mouseX, int mouseY, float partialTick)
+	public void render(MatrixStack mtx, int mouseX, int mouseY, float partialTick)
 	{
-		this.renderBackground();
-		super.render(mouseX, mouseY, partialTick);
+		this.renderBackground(mtx);
+		super.render(mtx, mouseX, mouseY, partialTick);
 	}
 
 	// Don't know why, but partialTick param looks laggy af... Use getRenderPartialTicks instead.
 	@Override
-	public void drawGuiContainerBackgroundLayer(float partialTick, int mouseX, int mouseY) // TODO Final static constants for texture pos?
+	public void func_230450_a_(MatrixStack mtx, float partialTick, int mouseX, int mouseY) // TODO Final static constants for texture pos?
 	{
+		//this.renderBackground();
+		//GlStateManager.color4f(1f, 1f, 1f, 1f);
 		float pt = this.minecraft.getRenderPartialTicks();
 		RenderSystem.color4f(1f, 1f, 1f, 1f);
 		this.minecraft.getTextureManager().bindTexture(TEXTURE);
 		int cornerX = (this.width - this.xSize) / 2;
 		int cornerY = (this.height - this.ySize) / 2;
 		for(int a = 0; a < this.length + 1; ++a)
-			this.outerLock.draw(cornerX + a * 24, cornerY);
+			this.outerLock.draw(mtx, cornerX + a * 24, cornerY);
 		for(int a = 0; a < this.length; ++a)
-			this.innerLock.draw(cornerX + a * 24 + 12, cornerY + 48);
-		this.edge.draw(cornerX + this.length * 24 + 12, cornerY + 48);
-		this.lockPick.draw(cornerX - 156, cornerY + 72, pt);
+			this.innerLock.draw(mtx, cornerX + a * 24 + 12, cornerY + 48);
+		this.edge.draw(mtx, cornerX + this.length * 24 + 12, cornerY + 48);
+		this.lockPick.draw(mtx, cornerX - 156, cornerY + 72, pt);
 		for(int a = 0; a < this.pins.length; ++a)
 		{
-			this.spring.draw(cornerX + a * 24 + 18, cornerY);
-			this.pins[a].draw(cornerX + a * 24 + 18, cornerY + 24, pt);
+			this.spring.draw(mtx, cornerX + a * 24 + 18, cornerY);
+			this.pins[a].draw(mtx, cornerX + a * 24 + 18, cornerY + 24, pt);
 		}
-		this.edge.draw(cornerX, cornerY + 48);
+		this.edge.draw(mtx, cornerX, cornerY + 48);
 	}
 
 	@Override
-	protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY)
+	protected void func_230451_b_(MatrixStack mtx, int mouseX, int mouseY)
 	{
 		// Without shadow
-		this.font.drawString(this.title.getFormattedText(), 0f, (float) -this.font.FONT_HEIGHT, 0xffffff);
+		this.font.func_238422_b_(mtx, this.title, 0f, (float) -this.font.FONT_HEIGHT, 0xffffff);
 		if(this.getContainer().isOpen())
-			this.font.drawString(HINT.getFormattedText(), (float) (this.xSize - this.font.getStringWidth(HINT.getFormattedText())) / 2f, (float) (this.ySize + 10), 0xffffff);
+			this.font.func_238422_b_(mtx, HINT, (float) (this.xSize - this.font.func_238414_a_(HINT)) / 2f, (float) (this.ySize + 10), 0xffffff);
 		//this.drawCenteredString(this.font, I18n.format(title), this.width / 2, 10, 0xffffff);
 		//if(this.getContainer().isOpen()) this.drawCenteredString(this.fontRenderer, I18n.format(hint), this.width / 2, cornerY + 96, 0xffffff);
 	}

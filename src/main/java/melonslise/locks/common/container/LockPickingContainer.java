@@ -4,7 +4,6 @@ import java.util.function.Consumer;
 
 import melonslise.locks.Locks;
 import melonslise.locks.client.gui.LockPickingScreen;
-import melonslise.locks.common.init.LocksCapabilities;
 import melonslise.locks.common.init.LocksContainerTypes;
 import melonslise.locks.common.init.LocksItems;
 import melonslise.locks.common.init.LocksNetworks;
@@ -142,7 +141,7 @@ public class LockPickingContainer extends Container
 	public static final IContainerFactory<LockPickingContainer> FACTORY = (id, inv, buffer) ->
 	{
 		BlockPos pos = buffer.readBlockPos();
-		Lockable lockable = inv.player.world.getCapability(LocksCapabilities.LOCKABLES).map(lockables -> lockables.get().get(buffer.readInt())).orElse(null);
+		Lockable lockable = Locks.PROXY.getLockables(inv.player.world).map(lockables -> lockables.get().get(buffer.readInt())).orElse(null);
 		return new LockPickingContainer(id, inv.player, pos, lockable);
 	};
 

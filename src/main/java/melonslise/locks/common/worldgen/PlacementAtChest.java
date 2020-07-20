@@ -1,10 +1,9 @@
 package melonslise.locks.common.worldgen;
 
 import java.util.Random;
-import java.util.function.Function;
 import java.util.stream.Stream;
 
-import com.mojang.datafixers.Dynamic;
+import com.mojang.serialization.Codec;
 
 import melonslise.locks.common.config.LocksConfig;
 import net.minecraft.block.BlockState;
@@ -14,19 +13,18 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.chunk.IChunk;
 import net.minecraft.world.gen.ChunkGenerator;
-import net.minecraft.world.gen.GenerationSettings;
 import net.minecraft.world.gen.placement.NoPlacementConfig;
 import net.minecraft.world.gen.placement.Placement;
 
 public class PlacementAtChest extends Placement<NoPlacementConfig>
 {
-	public PlacementAtChest(Function<Dynamic<?>, ? extends NoPlacementConfig> factory)
+	public PlacementAtChest(Codec<NoPlacementConfig> codec)
 	{
-		super(factory);
+		super(codec);
 	}
 
 	@Override
-	public Stream<BlockPos> getPositions(IWorld world, ChunkGenerator<? extends GenerationSettings> gen, Random rand, NoPlacementConfig cfg, BlockPos pos)
+	public Stream<BlockPos> getPositions(IWorld world, ChunkGenerator gen, Random rand, NoPlacementConfig cfg, BlockPos pos)
 	{
 		double ch = LocksConfig.GENERATION_CHANCE.get();
 		if(ch == 0d || rand.nextDouble() > ch)
@@ -37,7 +35,7 @@ public class PlacementAtChest extends Placement<NoPlacementConfig>
 			{
 				BlockState teState = world.getBlockState(tePos);
 				// Prevent from adding double chests twice
-				return teState.getProperties().contains(ChestBlock.TYPE) && teState.get(ChestBlock.TYPE) != ChestType.RIGHT;
+				return teState.func_235904_r_().contains(ChestBlock.TYPE) && teState.get(ChestBlock.TYPE) != ChestType.RIGHT;
 			});
 	}
 }

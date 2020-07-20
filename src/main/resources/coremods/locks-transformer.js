@@ -96,8 +96,8 @@ function initializeCoreMod()
 			{
 				type: "METHOD",
 				class: "net.minecraft.world.gen.feature.template.Template",
-				methodName: "func_189962_a",
-				methodDesc: "(Lnet/minecraft/world/IWorld;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/world/gen/feature/template/PlacementSettings;I)Z"
+				methodName: "func_237146_a_",
+				methodDesc: "(Lnet/minecraft/world/IWorld;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/world/gen/feature/template/PlacementSettings;Ljava/util/Random;I)Z"
 			},
 			transformer: function(node)
 			{
@@ -117,7 +117,7 @@ function initializeCoreMod()
 					// Push the 2nd local variable to the stack. Should be a BlockPos
 					node.instructions.insertBefore(instruction, new IntInsnNode(Opcodes.ALOAD, 2));
 					// Push the 3rd local variable to the stack. Should be a PlacementSettings
-					node.instructions.insertBefore(instruction, new IntInsnNode(Opcodes.ALOAD, 3));
+					node.instructions.insertBefore(instruction, new IntInsnNode(Opcodes.ALOAD, 4));
 					// Invoke our method with the params loaded into the stack
 					node.instructions.insertBefore(instruction, new MethodInsnNode(Opcodes.INVOKESTATIC, "melonslise/locks/coremod/LocksDelegates", "addLockablesToWorld", "(Ljava/util/List;Lnet/minecraft/world/IWorld;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/world/gen/feature/template/PlacementSettings;)V"));
 					break;
@@ -180,7 +180,7 @@ function initializeCoreMod()
 				type: "METHOD",
 				class: "net.minecraft.client.renderer.WorldRenderer",
 				methodName: "func_228426_a_",
-				methodDesc: "(Lcom/mojang/blaze3d/matrix/MatrixStack;FJZLnet/minecraft/client/renderer/ActiveRenderInfo;Lnet/minecraft/client/renderer/GameRenderer;Lnet/minecraft/client/renderer/LightTexture;Lnet/minecraft/client/renderer/Matrix4f;)V"
+				methodDesc: "(Lcom/mojang/blaze3d/matrix/MatrixStack;FJZLnet/minecraft/client/renderer/ActiveRenderInfo;Lnet/minecraft/client/renderer/GameRenderer;Lnet/minecraft/client/renderer/LightTexture;Lnet/minecraft/util/math/vector/Matrix4f;)V"
 			},
 			transformer: function(node)
 			{
@@ -195,7 +195,7 @@ function initializeCoreMod()
 					// Push the 20th local variable into the stack
 					node.instructions.insertBefore(insn, new IntInsnNode(Opcodes.ALOAD, 20));
 					// Invoke our method with the params loaded into the stack
-					node.instructions.insertBefore(insn, new MethodInsnNode(Opcodes.INVOKESTATIC, "melonslise/locks/coremod/LocksDelegates", "setClippingHelper", "(Lnet/minecraft/client/renderer/culling/ClippingHelperImpl;)V"));
+					node.instructions.insertBefore(insn, new MethodInsnNode(Opcodes.INVOKESTATIC, "melonslise/locks/coremod/LocksDelegates", "setClippingHelper", "(Lnet/minecraft/client/renderer/culling/ClippingHelper;)V"));
 					break;
 				}
 				return node;

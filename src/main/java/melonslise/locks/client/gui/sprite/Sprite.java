@@ -1,5 +1,7 @@
 package melonslise.locks.client.gui.sprite;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
+
 import melonslise.locks.client.util.LocksClientUtil;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -16,9 +18,9 @@ public class Sprite
 		this.texture = tex;
 	}
 
-	public void draw(float x, float y, float partialTick)
+	public void draw(MatrixStack mtx, float x, float y, float partialTick)
 	{
-		this.texture.draw(x + LocksClientUtil.lerp(this.oldShiftX, this.shiftX, partialTick), y + LocksClientUtil.lerp(this.oldShiftY, this.shiftY, partialTick));
+		this.texture.draw(mtx, x + LocksClientUtil.lerp(this.oldShiftX, this.shiftX, partialTick), y + LocksClientUtil.lerp(this.oldShiftY, this.shiftY, partialTick));
 	}
 
 	public void update()

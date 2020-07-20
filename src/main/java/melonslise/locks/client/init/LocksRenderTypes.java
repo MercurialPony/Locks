@@ -18,7 +18,7 @@ public final class LocksRenderTypes extends RenderType
 
 	public static final RenderType OVERLAY_LINES = makeType(Locks.ID + ".overlay_lines", DefaultVertexFormats.POSITION_COLOR, GL11.GL_LINES, 256, State.getBuilder()
 		.line(new LineState(OptionalDouble.empty()))
-		.layer(PROJECTION_LAYERING)
+		.layer(field_239235_M_)
 		.transparency(TRANSLUCENT_TRANSPARENCY)
 		.depthTest(DEPTH_ALWAYS)
 		.writeMask(COLOR_WRITE)

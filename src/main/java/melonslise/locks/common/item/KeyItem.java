@@ -3,7 +3,7 @@ package melonslise.locks.common.item;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import melonslise.locks.common.init.LocksCapabilities;
+import melonslise.locks.Locks;
 import melonslise.locks.common.init.LocksSoundEvents;
 import melonslise.locks.common.util.Lockable;
 import net.minecraft.item.ItemUseContext;
@@ -25,7 +25,7 @@ public class KeyItem extends LockingItem
 	{
 		World world = ctx.getWorld();
 		BlockPos pos = ctx.getPos();
-		return world.getCapability(LocksCapabilities.LOCKABLES)
+		return Locks.PROXY.getLockables(world)
 			.map(lockables ->
 			{
 				int id = getOrSetId(ctx.getItem());

@@ -14,7 +14,7 @@ public final class LocksPlacements
 	public static final List<Placement> PLACEMENTS = new ArrayList<>(1);
 
 	public static final Placement
-		CHEST = add("chest", new PlacementAtChest(NoPlacementConfig::deserialize));
+		CHEST = add("chest", new PlacementAtChest(NoPlacementConfig.field_236555_a_));
 
 	private LocksPlacements() {}
 

@@ -7,7 +7,6 @@ import melonslise.locks.Locks;
 import melonslise.locks.common.capability.CapabilityProvider;
 import melonslise.locks.common.capability.KeyRingInventory;
 import melonslise.locks.common.container.KeyRingContainer;
-import melonslise.locks.common.init.LocksCapabilities;
 import melonslise.locks.common.init.LocksSoundEvents;
 import melonslise.locks.common.util.Lockable;
 import net.minecraft.entity.player.PlayerEntity;
@@ -19,7 +18,6 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Hand;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -36,19 +34,6 @@ public class KeyRingItem extends Item
 	{
 		super(props);
 		this.rows = rows;
-		this.addPropertyOverride(new ResourceLocation(Locks.ID, "keys"), (stack, world, entity) -> 
-		{
-			return stack.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY)
-				.map(inventory ->
-				{
-					int keys = 0;
-					for(int a = 0; a < inventory.getSlots(); ++a)
-						if(!inventory.getStackInSlot(a).isEmpty())
-							++keys;
-					return (float) keys / (float) inventory.getSlots();
-				})
-				.orElse(0f);
-		});
 	}
 
 	@Override
@@ -70,7 +55,7 @@ public class KeyRingItem extends Item
 	{
 		World world = ctx.getWorld();
 		BlockPos pos = ctx.getPos();
-		return world.getCapability(LocksCapabilities.LOCKABLES)
+		return Locks.PROXY.getLockables(world)
 			.map(lockables ->
 			{
 				return ctx.getItem().getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY)

@@ -18,8 +18,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.shapes.VoxelShape;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -33,7 +33,7 @@ public class Lockable extends Observable implements Observer
 	public final Orientation orient;
 	public final int networkID;
 
-	public Map<List<BlockState>, Pair<Vec3d, Orientation>> cache = Maps.newHashMap();
+	public Map<List<BlockState>, Pair<Vector3d, Orientation>> cache = Maps.newHashMap();
 
 	public int prevShakeTicks, shakeTicks, maxShakeTicks;
 
@@ -73,7 +73,7 @@ public class Lockable extends Observable implements Observer
 		this.shakeTicks = this.prevShakeTicks = this.maxShakeTicks = ticks;
 	}
 
-	public Pair<Vec3d, Orientation> getLockState(World world)
+	public Pair<Vector3d, Orientation> getLockState(World world)
 	{
 		List<BlockState> states = new ArrayList<>(this.box.volume());
 		for(BlockPos pos : this.box.getContainedBlockPositions())
@@ -82,7 +82,7 @@ public class Lockable extends Observable implements Observer
 				return null;
 			states.add(world.getBlockState(pos));
 		}
-		Pair<Vec3d, Orientation> pair = this.cache.get(states);
+		Pair<Vector3d, Orientation> pair = this.cache.get(states);
 		if(pair != null)
 			return pair;
 		ArrayList<AxisAlignedBB> boxes = new ArrayList<>(4);
@@ -109,13 +109,13 @@ public class Lockable extends Observable implements Observer
 		if(boxes.isEmpty())
 			return null;
 		Direction side = this.orient.getCuboidFace();
-		Vec3d center = this.box.getSideCenter(side);
-		Vec3d point = center;
+		Vector3d center = this.box.getSideCenter(side);
+		Vector3d point = center;
 		double min = -1d;
 		for(AxisAlignedBB box : boxes)
 			for(Direction side1 : Direction.values())
 			{
-				Vec3d point1 = LocksUtil.getBoxSideCenter(box, side1).add(new Vec3d(side1.getDirectionVec()).scale(0.05d));
+				Vector3d point1 = LocksUtil.getAABBSideCenter(box, side1).add(Vector3d.func_237491_b_(side1.getDirectionVec()).scale(0.05d));
 				double dist = center.squareDistanceTo(point1);
 				if(min != -1d && dist >= min)
 					continue;
@@ -132,10 +132,10 @@ public class Lockable extends Observable implements Observer
 	public boolean inRange()
 	{
 		Minecraft mc = Minecraft.getInstance();
-		Pair<Vec3d, Orientation> state = this.getLockState(mc.world);
+		Pair<Vector3d, Orientation> state = this.getLockState(mc.world);
 		if(state == null)
 			return false;
-		Vec3d origin = mc.gameRenderer.getActiveRenderInfo().getProjectedView();
+		Vector3d origin = mc.gameRenderer.getActiveRenderInfo().getProjectedView();
 		double dist = state.getLeft().squareDistanceTo(origin);
 		double max = mc.gameSettings.renderDistanceChunks * 8;
 		return dist < max * max;

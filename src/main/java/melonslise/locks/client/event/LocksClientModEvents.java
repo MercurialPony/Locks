@@ -1,6 +1,7 @@
 package melonslise.locks.client.event;
 
 import melonslise.locks.Locks;
+import melonslise.locks.client.init.LocksItemModelProperties;
 import melonslise.locks.client.init.LocksScreens;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -16,5 +17,6 @@ public final class LocksClientModEvents
 	public static void onSetup(FMLClientSetupEvent event)
 	{
 		LocksScreens.register();
+		LocksItemModelProperties.register();
 	}
 }

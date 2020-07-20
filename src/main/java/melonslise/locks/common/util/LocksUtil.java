@@ -9,7 +9,7 @@ import net.minecraft.state.properties.AttachFace;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.gen.feature.template.PlacementSettings;
 
 public final class LocksUtil
@@ -243,22 +243,22 @@ public final class LocksUtil
 	/**
 	 * Calculates the center point of the given box's side.
 	 */
-	public static Vec3d getBoxSideCenter(AxisAlignedBB box, Direction side)
+	public static Vector3d getAABBSideCenter(AxisAlignedBB box, Direction side)
 	{
 		switch(side)
 		{
 		case DOWN:
-			return new Vec3d((box.minX + box.maxX) / 2D, box.minY, (box.minZ + box.maxZ) / 2D);
+			return new Vector3d((box.minX + box.maxX) / 2D, box.minY, (box.minZ + box.maxZ) / 2D);
 		case UP:
-			return new Vec3d((box.minX + box.maxX) / 2D, box.maxY, (box.minZ + box.maxZ) / 2D);
+			return new Vector3d((box.minX + box.maxX) / 2D, box.maxY, (box.minZ + box.maxZ) / 2D);
 		case NORTH:
-			return new Vec3d((box.minX + box.maxX) / 2D, (box.minY + box.maxY) / 2D, box.minZ);
+			return new Vector3d((box.minX + box.maxX) / 2D, (box.minY + box.maxY) / 2D, box.minZ);
 		case SOUTH:
-			return new Vec3d((box.minX + box.maxX) / 2D, (box.minY + box.maxY) / 2D, box.maxZ);
+			return new Vector3d((box.minX + box.maxX) / 2D, (box.minY + box.maxY) / 2D, box.maxZ);
 		case WEST:
-			return new Vec3d(box.minX, (box.minY + box.maxY) / 2D, (box.minZ + box.maxZ) / 2D);
+			return new Vector3d(box.minX, (box.minY + box.maxY) / 2D, (box.minZ + box.maxZ) / 2D);
 		case EAST:
-			return new Vec3d(box.maxX, (box.minY + box.maxY) / 2D, (box.minZ + box.maxZ) / 2D);
+			return new Vector3d(box.maxX, (box.minY + box.maxY) / 2D, (box.minZ + box.maxZ) / 2D);
 		default: return null;
 		}
 	}

@@ -53,6 +53,6 @@ public class LockingItem extends Item
 	public void addInformation(ItemStack stack, @Nullable World world, List<ITextComponent> lines, ITooltipFlag flag)
 	{
 		if(stack.hasTag() && stack.getTag().contains(KEY_ID))
-			lines.add(new TranslationTextComponent(Locks.ID + ".tooltip.id", ItemStack.DECIMALFORMAT.format(getOrSetId(stack))).applyTextStyle(TextFormatting.DARK_GREEN));
+			lines.add(new TranslationTextComponent(Locks.ID + ".tooltip.id", ItemStack.DECIMALFORMAT.format(getOrSetId(stack))).func_240699_a_(TextFormatting.DARK_GREEN));
 	}
 }

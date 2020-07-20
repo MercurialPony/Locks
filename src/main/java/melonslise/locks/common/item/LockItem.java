@@ -69,7 +69,7 @@ public class LockItem extends LockingItem
 		PlayerEntity player = ctx.getPlayer();
 		ItemStack stack = ctx.getItem();
 
-		return world.getCapability(LocksCapabilities.LOCKABLES)
+		return Locks.PROXY.getLockables(world)
 			.map(lockables ->
 			{
 				return player.getCapability(LocksCapabilities.LOCK_SELECTION)
@@ -115,6 +115,6 @@ public class LockItem extends LockingItem
 	{
 		super.addInformation(stack, world, lines, flag);
 		if(stack.hasTag() && stack.getTag().contains(KEY_LENGTH))
-			lines.add(new TranslationTextComponent(Locks.ID + ".tooltip.length", ItemStack.DECIMALFORMAT.format(getOrSetLength(stack))).applyTextStyle(TextFormatting.DARK_GREEN));
+			lines.add(new TranslationTextComponent(Locks.ID + ".tooltip.length", ItemStack.DECIMALFORMAT.format(getOrSetLength(stack))).func_240699_a_(TextFormatting.DARK_GREEN));
 	}
 }

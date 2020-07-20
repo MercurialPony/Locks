@@ -2,7 +2,7 @@ package melonslise.locks.common.network.toclient;
 
 import java.util.function.Supplier;
 
-import melonslise.locks.common.init.LocksCapabilities;
+import melonslise.locks.Locks;
 import melonslise.locks.common.util.Lockable;
 import melonslise.locks.common.util.LocksUtil;
 import net.minecraft.client.Minecraft;
@@ -30,7 +30,7 @@ public class AddLockablePacket
 
 	public static void handle(AddLockablePacket pkt, Supplier<NetworkEvent.Context> ctx)
 	{
-		ctx.get().enqueueWork(() -> Minecraft.getInstance().world.getCapability(LocksCapabilities.LOCKABLES).ifPresent(capability -> capability.add(pkt.lockable)));
+		ctx.get().enqueueWork(() -> Locks.PROXY.getLockables(Minecraft.getInstance().world).ifPresent(capability -> capability.add(pkt.lockable)));
 		ctx.get().setPacketHandled(true);
 	}
 }

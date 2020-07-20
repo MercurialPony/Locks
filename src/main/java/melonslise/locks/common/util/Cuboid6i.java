@@ -2,11 +2,11 @@ package melonslise.locks.common.util;
 
 import java.util.Objects;
 
-import net.minecraft.client.renderer.culling.ClippingHelperImpl;
+import net.minecraft.client.renderer.culling.ClippingHelper;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -90,9 +90,9 @@ public class Cuboid6i
 		return (this.x2 - this.x1) * (this.y2 - this.y1) * (this.z2 - this.z1);
 	}
 
-	public Vec3d center()
+	public Vector3d center()
 	{
-		return new Vec3d((double) (this.x2 + this.x1) / 2D, (double) (this.y2 + this.y1) / 2D, (double) (this.z2 + this.z1) / 2D);
+		return new Vector3d((double) (this.x2 + this.x1) / 2D, (double) (this.y2 + this.y1) / 2D, (double) (this.z2 + this.z1) / 2D);
 	}
 
 	public Iterable<BlockPos> getContainedBlockPositions()
@@ -100,16 +100,16 @@ public class Cuboid6i
 		return BlockPos.getAllInBoxMutable(this.x1, this.y1, this.z1, this.x2 - 1, this.y2 - 1, this.z2 - 1);
 	}
 
-	public Vec3d getSideCenter(Direction side)
+	public Vector3d getSideCenter(Direction side)
 	{
 		switch(side)
 		{
-		case DOWN: return new Vec3d((double) (this.x1 + this.x2) / 2D, (double) this.y1, (double) (this.z1 + this.z2) / 2D);
-		case UP: return new Vec3d((double) (this.x1 + this.x2) / 2D, (double) this.y2, (double) (this.z1 + this.z2) / 2D);
-		case NORTH: return new Vec3d((double) (this.x1 + this.x2) / 2D, (double) (this.y1 + this.y2) / 2D, (double) this.z1);
-		case SOUTH: return new Vec3d((double) (this.x1 + this.x2) / 2D, (double) (this.y1 + this.y2) / 2D, (double) this.z2);
-		case WEST: return new Vec3d((double) this.x1, (double) (this.y1 + this.y2) / 2D, (double) (this.z1 + this.z2) / 2D);
-		case EAST: return new Vec3d((double) this.x2, (double) (this.y1 + this.y2) / 2D, (double) (this.z1 + this.z2) / 2D);
+		case DOWN: return new Vector3d((double) (this.x1 + this.x2) / 2D, (double) this.y1, (double) (this.z1 + this.z2) / 2D);
+		case UP: return new Vector3d((double) (this.x1 + this.x2) / 2D, (double) this.y2, (double) (this.z1 + this.z2) / 2D);
+		case NORTH: return new Vector3d((double) (this.x1 + this.x2) / 2D, (double) (this.y1 + this.y2) / 2D, (double) this.z1);
+		case SOUTH: return new Vector3d((double) (this.x1 + this.x2) / 2D, (double) (this.y1 + this.y2) / 2D, (double) this.z2);
+		case WEST: return new Vector3d((double) this.x1, (double) (this.y1 + this.y2) / 2D, (double) (this.z1 + this.z2) / 2D);
+		case EAST: return new Vector3d((double) this.x2, (double) (this.y1 + this.y2) / 2D, (double) (this.z1 + this.z2) / 2D);
 		default: return null;
 		}
 	}
@@ -125,7 +125,7 @@ public class Cuboid6i
 	}
 
 	@OnlyIn(Dist.CLIENT)
-	public boolean inView(ClippingHelperImpl clippingHelper)
+	public boolean inView(ClippingHelper clippingHelper)
 	{
 		return clippingHelper.isBoxInFrustum(this.x1, this.y1, this.z1, this.x2, this.y2, this.z2);
 	}

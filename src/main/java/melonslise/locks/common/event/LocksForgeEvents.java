@@ -18,13 +18,13 @@ import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Hand;
+import net.minecraft.util.RegistryKey;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvents;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
-import net.minecraft.world.dimension.DimensionType;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.TickEvent.Phase;
@@ -53,18 +53,18 @@ public final class LocksForgeEvents
 		LocksCapabilities.attachToEntity(event);
 	}
 
-	public static void syncLockables(World world, DimensionType dimension)
+	public static void syncLockables(World world, RegistryKey<World> dim)
 	{
-		world.getCapability(LocksCapabilities.LOCKABLES).ifPresent(lockables ->
+		Locks.PROXY.getLockables(world).ifPresent(lockables ->
 		{
 			for(Lockable lockable : lockables.get().values())
-				LocksNetworks.MAIN.send(PacketDistributor.DIMENSION.with(() -> dimension), new AddLockablePacket(lockable));
+				LocksNetworks.MAIN.send(PacketDistributor.DIMENSION.with(() -> dim), new AddLockablePacket(lockable));
 		});
 	}
 
 	public static void syncLockables(World world)
 	{
-		syncLockables(world, world.dimension.getType());
+		syncLockables(world, world.func_234923_W_());
 	}
 
 	@SubscribeEvent
@@ -111,7 +111,7 @@ public final class LocksForgeEvents
 		BlockPos pos = event.getPos();
 		World world = event.getWorld();
 		PlayerEntity player = event.getPlayer();
-		world.getCapability(LocksCapabilities.LOCKABLES)
+		Locks.PROXY.getLockables(world)
 			.ifPresent(lockables ->
 			{
 				List<Lockable> intersecting = lockables.get().values().stream().filter(lockable1 -> lockable1.box.intersects(pos)).collect(Collectors.toList());
@@ -152,7 +152,7 @@ public final class LocksForgeEvents
 
 	public static boolean canBreakLockable(PlayerEntity player, BlockPos pos)
 	{
-		return player.world.getCapability(LocksCapabilities.LOCKABLES)
+		return Locks.PROXY.getLockables(player.world)
 			.map(lockables -> !LocksServerConfig.PROTECT_LOCKABLES.get() || player.isCreative() || !lockables.get().values().stream().anyMatch(lockable1 -> lockable1.lock.isLocked() && lockable1.box.intersects(pos)))
 			.orElse(true);
 	}

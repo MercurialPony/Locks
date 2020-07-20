@@ -1,6 +1,6 @@
 package melonslise.locks.client.gui;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.matrix.MatrixStack;
 
 import melonslise.locks.common.container.KeyRingContainer;
 import net.minecraft.client.gui.screen.inventory.ContainerScreen;
@@ -21,32 +21,26 @@ public class KeyRingScreen extends ContainerScreen<KeyRingContainer>
 		//int i = 222;
 		//int j = 114;
 		this.ySize = 114 + container.rows * 18;
+		this.field_238745_s_ = this.ySize - 94;
 	}
 
 	@Override
-	public void render(int mouseX, int mouseY, float partialTick)
+	public void render(MatrixStack mtx, int mouseX, int mouseY, float partialTick)
 	{
-		this.renderBackground();
-		super.render(mouseX, mouseY, partialTick);
-		this.renderHoveredToolTip(mouseX, mouseY);
+		this.renderBackground(mtx);
+		super.render(mtx, mouseX, mouseY, partialTick);
+		this.func_230459_a_(mtx, mouseX, mouseY);
 	}
 
 	@Override
-	protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY)
-	{
-		this.font.drawString(this.title.getFormattedText(), 8f, 6f, 4210752);
-		this.font.drawString(this.playerInventory.getDisplayName().getFormattedText(), 8f, (float)(this.ySize - 96 + 2), 4210752);
-	}
-
-	@Override
-	protected void drawGuiContainerBackgroundLayer(float partialTick, int mouseX, int mouseY)
+	protected void func_230450_a_ (MatrixStack mtx, float partialTick, int mouseX, int mouseY)
 	{
 		int rows = this.getContainer().rows;
-		RenderSystem.color4f(1f, 1f, 1f, 1f);
+		//GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 		this.minecraft.getTextureManager().bindTexture(TEXTURE);
 		int i = (this.width - this.xSize) / 2;
 		int j = (this.height - this.ySize) / 2;
-		this.blit(i, j, 0, 0, this.xSize, rows * 18 + 17);
-		this.blit(i, j + rows * 18 + 17, 0, 126, this.xSize, 96);
+		this.blit(mtx, i, j, 0, 0, this.xSize, rows * 18 + 17);
+		this.blit(mtx, i, j + rows * 18 + 17, 0, 126, this.xSize, 96);
 	}
 }

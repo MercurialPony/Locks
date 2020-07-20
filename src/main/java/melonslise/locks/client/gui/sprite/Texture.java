@@ -1,5 +1,7 @@
 package melonslise.locks.client.gui.sprite;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
+
 import melonslise.locks.client.util.LocksClientUtil;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -20,8 +22,8 @@ public class Texture
 		this.canvasHeight = canvasHeight;
 	}
 
-	public void draw(float x, float y)
+	public void draw(MatrixStack mtx, float x, float y)
 	{
-		LocksClientUtil.drawTexturedRectangle(x, y, this.startX, this.startY, this.width, this.height, this.canvasWidth, this.canvasHeight);
+		LocksClientUtil.drawTexturedRectangle(mtx, x, y, this.startX, this.startY, this.width, this.height, this.canvasWidth, this.canvasHeight);
 	}
 }
