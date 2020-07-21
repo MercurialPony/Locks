@@ -32,11 +32,16 @@ public class CheckPinResultPacket
 
 	public static void handle(CheckPinResultPacket pkt, Supplier<NetworkEvent.Context> ctx)
 	{
-		ctx.get().enqueueWork(() ->
+		// Use runnable, lambda causes issues with classloading
+		ctx.get().enqueueWork(new Runnable()
 		{
-			Container container = Minecraft.getInstance().player.openContainer;
-			if(container.getType() == LocksContainerTypes.LOCK_PICKING)
-				((LockPickingContainer) container).handlePin(pkt.correct, pkt.reset);
+			@Override
+			public void run()
+			{
+				Container container = Minecraft.getInstance().player.openContainer;
+				if(container.getType() == LocksContainerTypes.LOCK_PICKING)
+					((LockPickingContainer) container).handlePin(pkt.correct, pkt.reset);
+			}
 		});
 		ctx.get().setPacketHandled(true);
 	}
