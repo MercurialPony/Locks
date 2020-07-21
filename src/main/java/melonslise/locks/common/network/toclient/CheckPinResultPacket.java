@@ -39,12 +39,17 @@ public class CheckPinResultPacket implements IMessage
 		@Override
 		public IMessage onMessage(CheckPinResultPacket pkt, MessageContext ctx)
 		{
+			// Use runnable, lambda causes classloading issues
 			Minecraft mc = Minecraft.getMinecraft();
-			mc.addScheduledTask(() ->
+			mc.addScheduledTask(new Runnable()
 			{
-				Container container = mc.player.openContainer;
-				if(container instanceof LockPickingContainer)
-					((LockPickingContainer) container).handlePin(pkt.correct, pkt.reset);
+				@Override
+				public void run()
+				{
+					Container container = mc.player.openContainer;
+					if(container instanceof LockPickingContainer)
+						((LockPickingContainer) container).handlePin(pkt.correct, pkt.reset);
+				}
 			});
 			return null;
 		}

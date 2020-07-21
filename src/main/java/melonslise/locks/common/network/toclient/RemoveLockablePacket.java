@@ -35,8 +35,16 @@ public class RemoveLockablePacket implements IMessage
 		@Override
 		public IMessage onMessage(RemoveLockablePacket pkt, MessageContext ctx)
 		{
+			// Use runnable, lambda causes classloading issues
 			Minecraft mc = Minecraft.getMinecraft();
-			mc.addScheduledTask(() -> mc.world.getCapability(LocksCapabilities.LOCKABLES, null).remove(pkt.networkID));
+			mc.addScheduledTask(new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					mc.world.getCapability(LocksCapabilities.LOCKABLES, null).remove(pkt.networkID);
+				}
+			});
 			return null;
 		}
 	}

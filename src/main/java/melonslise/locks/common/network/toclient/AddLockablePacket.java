@@ -37,8 +37,16 @@ public class AddLockablePacket implements IMessage
 		@Override
 		public IMessage onMessage(AddLockablePacket pkt, MessageContext ctx)
 		{
+			// Use runnable, lambda causes classloading issues
 			Minecraft mc = Minecraft.getMinecraft();
-			mc.addScheduledTask(() -> mc.world.getCapability(LocksCapabilities.LOCKABLES, null).add(pkt.lockable));
+			mc.addScheduledTask(new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					mc.world.getCapability(LocksCapabilities.LOCKABLES, null).add(pkt.lockable);
+				}
+			});
 			return null;
 		}
 	}

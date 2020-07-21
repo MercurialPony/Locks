@@ -52,15 +52,20 @@ public class ConfigSyncPacket implements IMessage
 		@Override
 		public IMessage onMessage(ConfigSyncPacket pkt, MessageContext ctx)
 		{
+			// Use runnable, lambda causes classloading issues
 			Minecraft mc = Minecraft.getMinecraft();
-			mc.addScheduledTask(() ->
+			mc.addScheduledTask(new Runnable()
 			{
-				LocksConfig.Server cfg = LocksConfig.getServer(mc.world);
-				cfg.maxLockableVolume = pkt.maxLockableVolume;
-				cfg.lockableBlocks = pkt.lockableBlocks;
-				cfg.allowRemovingLocks = pkt.allowRemovingLocks;
-				cfg.protectLockables = pkt.protectLockables;
-				cfg.init();
+				@Override
+				public void run()
+				{
+					LocksConfig.Server cfg = LocksConfig.getServer(mc.world);
+					cfg.maxLockableVolume = pkt.maxLockableVolume;
+					cfg.lockableBlocks = pkt.lockableBlocks;
+					cfg.allowRemovingLocks = pkt.allowRemovingLocks;
+					cfg.protectLockables = pkt.protectLockables;
+					cfg.init();
+				}
 			});
 			return null;
 		}
