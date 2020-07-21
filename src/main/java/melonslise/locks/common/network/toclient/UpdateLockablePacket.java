@@ -32,7 +32,15 @@ public class UpdateLockablePacket
 
 	public static void handle(UpdateLockablePacket pkt, Supplier<NetworkEvent.Context> ctx)
 	{
-		ctx.get().enqueueWork(() -> Locks.PROXY.getLockables(Minecraft.getInstance().world).ifPresent(lockables -> lockables.get().get(pkt.networkID).lock.setLocked(pkt.locked)));
+		// Use runnable, lambda causes issues with classloading
+		ctx.get().enqueueWork(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				Locks.PROXY.getLockables(Minecraft.getInstance().world).ifPresent(lockables -> lockables.get().get(pkt.networkID).lock.setLocked(pkt.locked));
+			}
+		});
 		ctx.get().setPacketHandled(true);
 	}
 }

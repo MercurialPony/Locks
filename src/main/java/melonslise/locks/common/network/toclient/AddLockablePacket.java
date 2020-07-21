@@ -30,7 +30,15 @@ public class AddLockablePacket
 
 	public static void handle(AddLockablePacket pkt, Supplier<NetworkEvent.Context> ctx)
 	{
-		ctx.get().enqueueWork(() -> Locks.PROXY.getLockables(Minecraft.getInstance().world).ifPresent(capability -> capability.add(pkt.lockable)));
+		// Use runnable, lambda causes issues with classloading
+		ctx.get().enqueueWork(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				Locks.PROXY.getLockables(Minecraft.getInstance().world).ifPresent(lockables -> lockables.add(pkt.lockable));
+			}
+		});
 		ctx.get().setPacketHandled(true);
 	}
 }
