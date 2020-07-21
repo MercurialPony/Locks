@@ -10,6 +10,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockPos.MutableBlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import net.minecraft.world.gen.structure.StructureBoundingBox;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -121,9 +122,14 @@ public class Cuboid6i
 		return new AxisAlignedBB(this.x1, this.y1, this.z1, this.x2, this.y2, this.z2);
 	}
 
+	public StructureBoundingBox temp = null;
+
 	public boolean loaded(World world)
 	{
-		return world.isAreaLoaded(this.x1, this.y1, this.z1, this.x2, this.y2, this.z2, true);
+		if(temp == null)
+			temp = new StructureBoundingBox(this.x1, this.y1, this.z1, this.x2, this.y2, this.z2);
+		// Direct method is private and AT crashes in prod for some odd reason...
+		return world.isAreaLoaded(temp);
 	}
 
 	@SideOnly(Side.CLIENT)
