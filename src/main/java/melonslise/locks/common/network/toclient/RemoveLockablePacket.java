@@ -28,7 +28,15 @@ public class RemoveLockablePacket
 
 	public static void handle(RemoveLockablePacket pkt, Supplier<NetworkEvent.Context> ctx)
 	{
-		ctx.get().enqueueWork(() -> Minecraft.getInstance().world.getCapability(LocksCapabilities.LOCKABLES).ifPresent(capability -> capability.remove(pkt.networkID)));
+		// Use runnable, lambda causes issues with classloading
+		ctx.get().enqueueWork(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				Minecraft.getInstance().world.getCapability(LocksCapabilities.LOCKABLES).ifPresent(lockables -> lockables.remove(pkt.networkID));
+			}
+		});
 		ctx.get().setPacketHandled(true);
 	}
 }
