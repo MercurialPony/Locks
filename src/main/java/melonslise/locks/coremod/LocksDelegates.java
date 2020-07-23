@@ -14,7 +14,6 @@ import melonslise.locks.common.util.Lockable;
 import melonslise.locks.common.util.LocksUtil;
 import melonslise.locks.common.util.Orientation;
 import net.minecraft.block.BlockState;
-import net.minecraft.client.renderer.culling.ClippingHelper;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
@@ -25,8 +24,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.feature.template.PlacementSettings;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.util.Constants;
 
 public final class LocksDelegates
@@ -115,15 +112,6 @@ public final class LocksDelegates
 			list.add(new LockableInfo(box, lock, orient));
 		}
 		return list;
-	}
-
-	@OnlyIn(Dist.CLIENT)
-	public static ClippingHelper clippingHelper;
-
-	@OnlyIn(Dist.CLIENT)
-	public static void setClippingHelper(ClippingHelper clippingHelper)
-	{
-		LocksDelegates.clippingHelper = clippingHelper;
 	}
 
 	/*

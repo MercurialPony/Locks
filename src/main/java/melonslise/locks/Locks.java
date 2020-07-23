@@ -1,6 +1,7 @@
 package melonslise.locks;
 
 import melonslise.locks.client.proxy.ClientProxy;
+import melonslise.locks.common.config.LocksClientConfig;
 import melonslise.locks.common.config.LocksConfig;
 import melonslise.locks.common.config.LocksServerConfig;
 import melonslise.locks.common.proxy.IProxy;
@@ -21,5 +22,6 @@ public final class Locks
 	{
 		ModLoadingContext.get().registerConfig(Type.SERVER, LocksServerConfig.SPEC);
 		ModLoadingContext.get().registerConfig(Type.COMMON, LocksConfig.SPEC);
+		ModLoadingContext.get().registerConfig(Type.CLIENT, LocksClientConfig.SPEC);
 	}
 }
