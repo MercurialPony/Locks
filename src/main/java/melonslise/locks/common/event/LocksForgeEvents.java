@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import melonslise.locks.Locks;
-import melonslise.locks.common.config.LocksConfig;
+import melonslise.locks.common.config.LocksClientConfig;
 import melonslise.locks.common.config.LocksServerConfig;
 import melonslise.locks.common.init.LocksCapabilities;
 import melonslise.locks.common.init.LocksNetworks;
@@ -128,7 +128,7 @@ public final class LocksForgeEvents
 					event.setUseBlock(Result.DENY);
 					world.playSound(player, pos, LocksSoundEvents.LOCK_RATTLE, SoundCategory.BLOCKS, 1f, 1f); // TODO Play sound only if item returns fail/pass
 					player.swingArm(Hand.MAIN_HAND);
-					if(world.isRemote && LocksConfig.DEAF_MODE.get())
+					if(world.isRemote && LocksClientConfig.DEAF_MODE.get())
 						player.sendStatusMessage(LOCKED_MESSAGE, true);
 					return;
 				}

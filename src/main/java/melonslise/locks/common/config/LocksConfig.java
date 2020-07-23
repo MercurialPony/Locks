@@ -12,7 +12,6 @@ public final class LocksConfig
 	public static final ForgeConfigSpec.IntValue MIN_GENERATED_LOCK_LENGTH;
 	public static final ForgeConfigSpec.IntValue MAX_GENERATED_LOCK_LENGTH;
 	public static final ForgeConfigSpec.BooleanValue RANDOMIZE_LOADED_LOCKS;
-	public static final ForgeConfigSpec.BooleanValue DEAF_MODE;
 
 	static
 	{
@@ -22,7 +21,6 @@ public final class LocksConfig
 		MIN_GENERATED_LOCK_LENGTH = cfg.comment("The minimum amount of pins on every generated lock (inclusive)").defineInRange("Min Generated Lock Length", 5, 1, 30);
 		MAX_GENERATED_LOCK_LENGTH = cfg.comment("The maximum amount of pins on every generated lock (exclusive)").defineInRange("Max Generated Lock Length", 9, 1, 30);
 		RANDOMIZE_LOADED_LOCKS = cfg.comment("Randomize lock IDs and combinations when loading them from a structure file. Randomization works just like during world generation").define("Randomize Loaded Locks", false);
-		DEAF_MODE = cfg.comment("Display visual feedback when trying to use a locked block for certain hearing impaired individuals").define("Deaf Mode", false);
 
 		SPEC = cfg.build();
 	}

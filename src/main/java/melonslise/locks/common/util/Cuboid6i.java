@@ -2,15 +2,11 @@ package melonslise.locks.common.util;
 
 import java.util.Objects;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.culling.ClippingHelperImpl;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 
 public class Cuboid6i
 {
@@ -123,13 +119,6 @@ public class Cuboid6i
 	public boolean loaded(World world)
 	{
 		return world.isAreaLoaded(this.x1, this.y1, this.z1, this.x2, this.y2, this.z2);
-	}
-
-	@OnlyIn(Dist.CLIENT)
-	public boolean inView()
-	{
-		Vec3d view = Minecraft.getInstance().gameRenderer.getActiveRenderInfo().getProjectedView();
-		return ClippingHelperImpl.getInstance().isBoxInFrustum(this.x1 - view.x, this.y1 - view.y, this.z1 - view.z, this.x2 - view.x, this.y2 - view.y, this.z2 - view.z);
 	}
 
 	@Override
