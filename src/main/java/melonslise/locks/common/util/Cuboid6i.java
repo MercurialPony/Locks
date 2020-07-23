@@ -2,8 +2,6 @@ package melonslise.locks.common.util;
 
 import java.util.Objects;
 
-import net.minecraft.client.renderer.culling.ClippingHelperImpl;
-import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
@@ -11,8 +9,6 @@ import net.minecraft.util.math.BlockPos.MutableBlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.structure.StructureBoundingBox;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class Cuboid6i
 {
@@ -130,12 +126,6 @@ public class Cuboid6i
 			temp = new StructureBoundingBox(this.x1, this.y1, this.z1, this.x2, this.y2, this.z2);
 		// Direct method is private and AT crashes in prod for some odd reason...
 		return world.isAreaLoaded(temp);
-	}
-
-	@SideOnly(Side.CLIENT)
-	public boolean inView()
-	{
-		return ClippingHelperImpl.getInstance().isBoxInFrustum(this.x1 - TileEntityRendererDispatcher.staticPlayerX, this.y1 - TileEntityRendererDispatcher.staticPlayerY, this.z1 - TileEntityRendererDispatcher.staticPlayerZ, this.x2 - TileEntityRendererDispatcher.staticPlayerX, this.y2 - TileEntityRendererDispatcher.staticPlayerY, this.z2 - TileEntityRendererDispatcher.staticPlayerZ);
 	}
 
 	@Override

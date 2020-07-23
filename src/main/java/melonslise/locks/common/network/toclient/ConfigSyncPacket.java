@@ -14,6 +14,8 @@ public class ConfigSyncPacket implements IMessage
 	private String[] lockableBlocks;
 	private boolean allowRemovingLocks;
 	private boolean protectLockables;
+	private int defaultLockLength;
+	private double defaultLockPickStrength;
 
 	public ConfigSyncPacket() {}
 
@@ -23,6 +25,8 @@ public class ConfigSyncPacket implements IMessage
 		this.lockableBlocks = cfg.lockableBlocks;
 		this.allowRemovingLocks = cfg.allowRemovingLocks;
 		this.protectLockables = cfg.protectLockables;
+		this.defaultLockLength = cfg.defaultLockLength;
+		this.defaultLockPickStrength = cfg.defaultLockPickStrength;
 	}
 
 	@Override
@@ -34,6 +38,8 @@ public class ConfigSyncPacket implements IMessage
 			this.lockableBlocks[a] = ByteBufUtils.readUTF8String(buf);
 		this.allowRemovingLocks = buf.readBoolean();
 		this.protectLockables = buf.readBoolean();
+		this.defaultLockLength = buf.readByte();
+		this.defaultLockPickStrength = buf.readFloat();
 	}
 
 	@Override
@@ -45,6 +51,8 @@ public class ConfigSyncPacket implements IMessage
 			ByteBufUtils.writeUTF8String(buf, str);
 		buf.writeBoolean(this.allowRemovingLocks);
 		buf.writeBoolean(this.protectLockables);
+		buf.writeByte(this.defaultLockLength);
+		buf.writeFloat((float) this.defaultLockPickStrength);
 	}
 
 	public static class Handler implements IMessageHandler<ConfigSyncPacket, IMessage>
@@ -64,6 +72,8 @@ public class ConfigSyncPacket implements IMessage
 					cfg.lockableBlocks = pkt.lockableBlocks;
 					cfg.allowRemovingLocks = pkt.allowRemovingLocks;
 					cfg.protectLockables = pkt.protectLockables;
+					cfg.defaultLockLength = pkt.defaultLockLength;
+					cfg.defaultLockPickStrength = pkt.defaultLockPickStrength;
 					cfg.init();
 				}
 			});

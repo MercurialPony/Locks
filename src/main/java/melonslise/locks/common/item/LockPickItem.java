@@ -7,13 +7,13 @@ import javax.annotation.Nullable;
 
 import melonslise.locks.Locks;
 import melonslise.locks.common.capability.ILockableStorage;
+import melonslise.locks.common.config.LocksConfig;
 import melonslise.locks.common.init.LocksCapabilities;
 import melonslise.locks.common.network.LocksGuiHandler;
 import melonslise.locks.common.util.Lockable;
 import melonslise.locks.common.util.LocksPredicates;
 import melonslise.locks.common.util.LocksUtil;
 import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -21,7 +21,6 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
-import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentTranslation;
@@ -32,15 +31,13 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class LockPickItem extends Item
 {
-	public static final float DEFAULT_STRENGTH = 0.3f;
-
 	public static final String KEY_STRENGTH = "Strength";
 
 	public static float getOrSetStrength(ItemStack stack)
 	{
 		NBTTagCompound nbt = LocksUtil.getTag(stack);
 		if(!nbt.hasKey(KEY_STRENGTH))
-			nbt.setFloat(KEY_STRENGTH, DEFAULT_STRENGTH);
+			nbt.setFloat(KEY_STRENGTH, (float) LocksConfig.SERVER.defaultLockPickStrength);
 		return nbt.getFloat(KEY_STRENGTH);
 	}
 
@@ -57,26 +54,14 @@ public class LockPickItem extends Item
 		return EnumActionResult.SUCCESS;
 	}
 
-	@Override
-	public void getSubItems(CreativeTabs tab, NonNullList<ItemStack> items)
-	{
-		if(!this.isInCreativeTab(tab))
-			return;
-		ItemStack stack = new ItemStack(this);
-		getOrSetStrength(stack);
-		items.add(stack);
-	}
-
 	@SideOnly(Side.CLIENT)
 	@Override
 	public void addInformation(ItemStack stack, @Nullable World world, List<String> lines, ITooltipFlag flag)
 	{
 		super.addInformation(stack, world, lines, flag);
-		if(LocksUtil.hasKey(stack, KEY_STRENGTH))
-		{
-			ITextComponent txt = new TextComponentTranslation(Locks.ID + ".tooltip.strength", ItemStack.DECIMALFORMAT.format(getOrSetStrength(stack)));
-			txt.getStyle().setColor(TextFormatting.DARK_GREEN);
-			lines.add(txt.getFormattedText());
-		}
+		float strength = LocksUtil.hasKey(stack, KEY_STRENGTH) ? stack.getTagCompound().getFloat(KEY_STRENGTH) : (float) LocksConfig.getServerClient().defaultLockPickStrength;
+		ITextComponent txt = new TextComponentTranslation(Locks.ID + ".tooltip.strength", ItemStack.DECIMALFORMAT.format(strength));
+		txt.getStyle().setColor(TextFormatting.DARK_GREEN);
+		lines.add(txt.getFormattedText());
 	}
 }

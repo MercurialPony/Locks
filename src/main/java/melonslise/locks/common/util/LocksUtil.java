@@ -264,7 +264,7 @@ public final class LocksUtil
 	/**
 	 * Calculates the center point of the given box's side.
 	 */
-	public static Vec3d getBoxSideCenter(AxisAlignedBB box, EnumFacing side)
+	public static Vec3d getAABBSideCenter(AxisAlignedBB box, EnumFacing side)
 	{
 		switch(side)
 		{

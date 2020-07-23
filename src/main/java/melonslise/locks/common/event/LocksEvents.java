@@ -197,7 +197,7 @@ public final class LocksEvents
 			event.setUseBlock(Result.DENY);
 			world.playSound(null, pos, LocksSoundEvents.LOCK_RATTLE, SoundCategory.BLOCKS, 1f, 1f); // TODO Play sound only if item returns fail/pass
 			player.swingArm(EnumHand.MAIN_HAND);
-			if(world.isRemote && LocksConfig.COMMON.deafMode)
+			if(world.isRemote && LocksConfig.CLIENT.deafMode)
 				player.sendStatusMessage(LOCKED_MESSAGE, true);
 			return;
 		}

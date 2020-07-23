@@ -11,7 +11,7 @@ public final class Locks
 	public static final String
 		ID = "locks",
 		NAME = "Locks",
-		VERSION = "2.4",
+		VERSION = "2.5",
 		GAMEVERSIONS = "1.12.2";
 
 	@Mod.Instance(ID)

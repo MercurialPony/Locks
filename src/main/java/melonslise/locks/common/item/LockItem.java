@@ -17,14 +17,12 @@ import melonslise.locks.common.util.Lockable;
 import melonslise.locks.common.util.LocksUtil;
 import melonslise.locks.common.util.Orientation;
 import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
-import net.minecraft.util.NonNullList;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
@@ -36,8 +34,6 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class LockItem extends LockingItem
 {
-	public static final byte DEFAULT_LENGTH = 7;
-
 	public static final String KEY_LENGTH = "Length";
 
 	public static ItemStack from(Lock lock)
@@ -45,7 +41,7 @@ public class LockItem extends LockingItem
 		ItemStack stack = new ItemStack(LocksItems.LOCK);
 		NBTTagCompound nbt = LocksUtil.getTag(stack);
 		nbt.setInteger(KEY_ID, lock.id);
-		nbt.setInteger(KEY_LENGTH, lock.getLength());
+		nbt.setByte(KEY_LENGTH, (byte) lock.getLength());
 		return stack;
 	}
 
@@ -53,7 +49,7 @@ public class LockItem extends LockingItem
 	{
 		NBTTagCompound nbt = LocksUtil.getTag(stack);
 		if(!nbt.hasKey(KEY_LENGTH))
-			nbt.setByte(KEY_LENGTH, DEFAULT_LENGTH);
+			nbt.setByte(KEY_LENGTH, (byte) LocksConfig.SERVER.defaultLockLength);
 		return nbt.getByte(KEY_LENGTH);
 	}
 
@@ -86,26 +82,14 @@ public class LockItem extends LockingItem
 		return EnumActionResult.SUCCESS;
 	}
 
-	@Override
-	public void getSubItems(CreativeTabs tab, NonNullList<ItemStack> items)
-	{
-		if(!this.isInCreativeTab(tab))
-			return;
-		ItemStack stack = new ItemStack(this);
-		getOrSetLength(stack);
-		items.add(stack);
-	}
-
 	@SideOnly(Side.CLIENT)
 	@Override
 	public void addInformation(ItemStack stack, @Nullable World world, List<String> lines, ITooltipFlag flag)
 	{
 		super.addInformation(stack, world, lines, flag);
-		if(LocksUtil.hasKey(stack, KEY_LENGTH))
-		{
-			ITextComponent txt = new TextComponentTranslation(Locks.ID + ".tooltip.length", ItemStack.DECIMALFORMAT.format(getOrSetLength(stack)));
-			txt.getStyle().setColor(TextFormatting.DARK_GREEN);
-			lines.add(txt.getFormattedText());
-		}
+		int length = LocksUtil.hasKey(stack, KEY_LENGTH) ? stack.getTagCompound().getByte(KEY_LENGTH) : LocksConfig.getServerClient().defaultLockLength;
+		ITextComponent txt = new TextComponentTranslation(Locks.ID + ".tooltip.length", ItemStack.DECIMALFORMAT.format(length));
+		txt.getStyle().setColor(TextFormatting.DARK_GREEN);
+		lines.add(txt.getFormattedText());
 	}
 }

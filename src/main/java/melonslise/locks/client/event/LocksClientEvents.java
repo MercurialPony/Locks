@@ -1,7 +1,5 @@
 package melonslise.locks.client.event;
 
-import org.apache.commons.lang3.tuple.Pair;
-
 import melonslise.locks.Locks;
 import melonslise.locks.client.util.LocksClientUtil;
 import melonslise.locks.common.capability.ILockableStorage;
@@ -12,13 +10,13 @@ import melonslise.locks.common.init.LocksItems;
 import melonslise.locks.common.util.AttachFace;
 import melonslise.locks.common.util.Cuboid6i;
 import melonslise.locks.common.util.Lockable;
-import melonslise.locks.common.util.Orientation;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.RenderGlobal;
-import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
+import net.minecraft.client.renderer.culling.ClippingHelperImpl;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -66,35 +64,29 @@ public final class LocksClientEvents
 	public static void onRenderWorld(RenderWorldLastEvent event)
 	{
 		Minecraft mc = Minecraft.getMinecraft();
+		Vec3d origin = new Vec3d(TileEntityRendererDispatcher.staticPlayerX, TileEntityRendererDispatcher.staticPlayerY, TileEntityRendererDispatcher.staticPlayerZ);
+		BlockPos.MutableBlockPos mutPos = new BlockPos.MutableBlockPos();
 		ILockableStorage lockables = mc.world.getCapability(LocksCapabilities.LOCKABLES, null);
+		
 		for(Lockable lockable : lockables.get().values())
 		{
-			if(!lockable.box.loaded(mc.world) || !lockable.inRange() || !lockable.box.inView())
-				continue;
-			Pair<Vec3d, Orientation> state = lockable.getLockState(mc.world);
-			if(state == null)
+			Lockable.State state = lockable.getLockState(mc.world);
+			if(state == null || !state.inRange(origin) || !state.inView(ClippingHelperImpl.getInstance(), origin))
 				continue;
 			GlStateManager.pushMatrix();
 			// For some reason translating by negative player position and then the point coords causes jittering in very big z and x coords. Why? Thus we use 1 translation instead
-			GlStateManager.translate(state.getLeft().x - TileEntityRendererDispatcher.staticPlayerX, state.getLeft().y - TileEntityRendererDispatcher.staticPlayerY, state.getLeft().z - TileEntityRendererDispatcher.staticPlayerZ);
-			GlStateManager.rotate(-state.getRight().dir.getHorizontalAngle() - 180f, 0f, 1f, 0f);
-			if(state.getRight().face != AttachFace.WALL)
+			GlStateManager.translate(state.pos.x - origin.x, state.pos.y - origin.y, state.pos.z - origin.z);
+			GlStateManager.rotate(-state.orient.dir.getHorizontalAngle() - 180f, 0f, 1f, 0f);
+			if(state.orient.face != AttachFace.WALL)
 				GlStateManager.rotate(90f, 1f, 0f, 0f);
 			GlStateManager.translate(0d, 0.1d, 0d);
 			GlStateManager.rotate(MathHelper.sin(LocksClientUtil.cubicBezier1d(1f, 1f, LocksClientUtil.lerp(lockable.maxShakeTicks - lockable.prevShakeTicks, lockable.maxShakeTicks - lockable.shakeTicks, event.getPartialTicks()) / (float) lockable.maxShakeTicks) * (float) lockable.maxShakeTicks / 5f * 3.14f) * 10f, 0f, 0f, 1f);
 			GlStateManager.translate(0d, -0.1d, 0d);
 			GlStateManager.scale(0.5f, 0.5f, 0.5f);
-			//int lightValue = mc.world.getCombinedLight(new BlockPos(pair.getLeft()), 0);
-			//GLX.glMultiTexCoord2f(GLX.GL_TEXTURE1, (float) (lightValue % 65536), (float) (lightValue / 65536));
-			//mc.gameRenderer.enableLightmap();
-			GlStateManager.disableLighting();
-			GlStateManager.pushAttrib();
-			RenderHelper.enableStandardItemLighting();
+			int light = mc.world.getCombinedLight(mutPos.setPos(state.pos.x, state.pos.y, state.pos.z), 0);
+			OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, light % 65536, light / 65536);
 			mc.entityRenderer.enableLightmap();
 			mc.getRenderItem().renderItem(LOCK_STACK, ItemCameraTransforms.TransformType.FIXED);
-			mc.entityRenderer.disableLightmap();
-			RenderHelper.disableStandardItemLighting();
-			GlStateManager.popAttrib();
 			GlStateManager.popMatrix();
 		}
 
@@ -117,7 +109,8 @@ public final class LocksClientEvents
 		GlStateManager.depthMask(false);
 		GlStateManager.disableDepth();
 		// Ditto
-		RenderGlobal.drawBoundingBox((double) box.x1 - TileEntityRendererDispatcher.staticPlayerX, (double) box.y1 - TileEntityRendererDispatcher.staticPlayerY, (double) box.z1 - TileEntityRendererDispatcher.staticPlayerZ, (double) box.x2 - TileEntityRendererDispatcher.staticPlayerX, (double) box.y2 - TileEntityRendererDispatcher.staticPlayerY, (double) box.z2 - TileEntityRendererDispatcher.staticPlayerZ, r, g, 0f, 0.5f);
+		mc.entityRenderer.disableLightmap();
+		RenderGlobal.drawBoundingBox((double) box.x1 - origin.x, (double) box.y1 - origin.y, (double) box.z1 - origin.z, (double) box.x2 - origin.x, (double) box.y2 - origin.y, (double) box.z2 - origin.z, r, g, 0f, 0.5f);
 		GlStateManager.enableDepth();
 		GlStateManager.depthMask(true);
 		GlStateManager.enableTexture2D();

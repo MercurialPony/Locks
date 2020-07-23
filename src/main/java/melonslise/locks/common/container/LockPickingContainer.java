@@ -1,7 +1,5 @@
 package melonslise.locks.common.container;
 
-import org.apache.commons.lang3.tuple.Pair;
-
 import melonslise.locks.Locks;
 import melonslise.locks.client.gui.LockPickingGui;
 import melonslise.locks.common.init.LocksItems;
@@ -10,7 +8,6 @@ import melonslise.locks.common.init.LocksSoundEvents;
 import melonslise.locks.common.item.LockPickItem;
 import melonslise.locks.common.network.toclient.CheckPinResultPacket;
 import melonslise.locks.common.util.Lockable;
-import melonslise.locks.common.util.Orientation;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.entity.player.EntityPlayer;
@@ -38,11 +35,11 @@ public class LockPickingContainer extends Container
 	{
 		this.player = player;
 		this.lockable = lockable;
-		Pair<Vec3d, Orientation> state = lockable.getLockState(player.world);
+		Lockable.State state = lockable.getLockState(player.world);
 		if(state == null)
 			this.pos = lockable.box.center();
 		else
-			this.pos = lockable.getLockState(player.world).getLeft();
+			this.pos = state.pos;
 	}
 
 	public int getCurrentIndex()
