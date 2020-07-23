@@ -1,11 +1,18 @@
 package melonslise.locks.client.util;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.ActiveRenderInfo;
 import net.minecraft.client.renderer.BufferBuilder;
+import net.minecraft.client.renderer.Matrix4f;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.WorldVertexBufferUploader;
+import net.minecraft.client.renderer.culling.ClippingHelperImpl;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -13,6 +20,22 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public final class LocksClientUtil
 {
 	private LocksClientUtil() {}
+
+	/*
+	 * 
+	 * Axis Aligned Bounding Boxes
+	 * 
+	 */
+
+	public static AxisAlignedBB rotateY(AxisAlignedBB bb)
+	{
+		return new AxisAlignedBB(bb.minZ, bb.minY, bb.minX, bb.maxZ, bb.maxY, bb.maxX);
+	}
+
+	public static AxisAlignedBB rotateX(AxisAlignedBB bb)
+	{
+		return new AxisAlignedBB(bb.minX, bb.minZ, bb.minY, bb.maxX, bb.maxZ, bb.maxY);
+	}
 
 	/*
 	 * 
@@ -33,6 +56,17 @@ public final class LocksClientUtil
 		buf.finishDrawing();
 		RenderSystem.enableAlphaTest();
 		WorldVertexBufferUploader.draw(buf);
+	}
+
+	public static ClippingHelperImpl getClippingHelper(MatrixStack mtx, Matrix4f proj, ActiveRenderInfo info)
+	{
+		ClippingHelperImpl ch = Minecraft.getInstance().worldRenderer.debugFixedClippingHelper;
+		if(ch != null)
+			return ch;
+		ch = new ClippingHelperImpl(mtx.getLast().getMatrix(), proj);
+		Vec3d pos = info.getProjectedView();
+		ch.setCameraPosition(pos.x, pos.y, pos.z);
+		return ch;
 	}
 
 	/*

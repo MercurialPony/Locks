@@ -15,12 +15,10 @@ import melonslise.locks.common.util.Lockable;
 import melonslise.locks.common.util.Orientation;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUseContext;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ActionResultType;
-import net.minecraft.util.NonNullList;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
@@ -37,8 +35,6 @@ public class LockItem extends LockingItem
 		super(props);
 	}
 
-	public static final byte DEFAULT_LENGTH = 7;
-
 	public static final String KEY_LENGTH = "Length";
 
 	public static ItemStack from(Lock lock)
@@ -46,7 +42,7 @@ public class LockItem extends LockingItem
 		ItemStack stack = new ItemStack(LocksItems.LOCK);
 		CompoundNBT nbt = stack.getOrCreateTag();
 		nbt.putInt(KEY_ID, lock.id);
-		nbt.putInt(KEY_LENGTH, lock.getLength());
+		nbt.putByte(KEY_LENGTH, (byte) lock.getLength());
 		return stack;
 	}
 
@@ -54,7 +50,7 @@ public class LockItem extends LockingItem
 	{
 		CompoundNBT nbt = stack.getOrCreateTag();
 		if(!nbt.contains(KEY_LENGTH))
-			nbt.putByte(KEY_LENGTH, DEFAULT_LENGTH);
+			nbt.putByte(KEY_LENGTH, LocksServerConfig.DEFAULT_LOCK_LENGTH.get().byteValue());
 		return nbt.getByte(KEY_LENGTH);
 	}
 
@@ -99,22 +95,12 @@ public class LockItem extends LockingItem
 			.orElse(ActionResultType.PASS);
 	}
 
-	@Override
-	public void fillItemGroup(ItemGroup group, NonNullList<ItemStack> items)
-	{
-		if(!this.isInGroup(group))
-			return;
-		ItemStack stack = new ItemStack(this);
-		getOrSetLength(stack);
-		items.add(stack);
-	}
-
 	@OnlyIn(Dist.CLIENT)
 	@Override
 	public void addInformation(ItemStack stack, @Nullable World world, List<ITextComponent> lines, ITooltipFlag flag)
 	{
 		super.addInformation(stack, world, lines, flag);
-		if(stack.hasTag() && stack.getTag().contains(KEY_LENGTH))
-			lines.add(new TranslationTextComponent(Locks.ID + ".tooltip.length", ItemStack.DECIMALFORMAT.format(getOrSetLength(stack))).applyTextStyle(TextFormatting.DARK_GREEN));
+		int length = stack.hasTag() && stack.getTag().contains(KEY_LENGTH) ? stack.getTag().getByte(KEY_LENGTH) : LocksServerConfig.DEFAULT_LOCK_LENGTH.get();
+		lines.add(new TranslationTextComponent(Locks.ID + ".tooltip.length", ItemStack.DECIMALFORMAT.format(length)).applyTextStyles(TextFormatting.DARK_GREEN));
 	}
 }
