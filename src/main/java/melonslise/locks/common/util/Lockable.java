@@ -10,7 +10,6 @@ import java.util.Observable;
 import java.util.Observer;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import melonslise.locks.client.util.LocksClientUtil;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
@@ -30,9 +29,9 @@ public class Lockable extends Observable implements Observer
 	{
 		public static final AxisAlignedBB
 			VERT_Z_BB = new AxisAlignedBB(-2d/16d, -3d/16d, 0.5d/16d, 2d/16d, 3d/16d, 0.5d/16d),
-			VERT_X_BB = LocksClientUtil.rotateY(VERT_Z_BB),
-			HOR_Z_BB = LocksClientUtil.rotateX(VERT_Z_BB),
-			HOR_X_BB = LocksClientUtil.rotateY(HOR_Z_BB);
+			VERT_X_BB = LocksUtil.rotateY(VERT_Z_BB),
+			HOR_Z_BB = LocksUtil.rotateX(VERT_Z_BB),
+			HOR_X_BB = LocksUtil.rotateY(HOR_Z_BB);
 
 		public final Vec3d pos;
 		public final Orientation orient;

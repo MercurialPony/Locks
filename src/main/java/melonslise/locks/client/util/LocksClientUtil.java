@@ -3,7 +3,6 @@ package melonslise.locks.client.util;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -11,22 +10,6 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public final class LocksClientUtil
 {
 	private LocksClientUtil() {}
-
-	/*
-	 * 
-	 * Axis Aligned Bounding Boxes
-	 * 
-	 */
-
-	public static AxisAlignedBB rotateY(AxisAlignedBB bb)
-	{
-		return new AxisAlignedBB(bb.minZ, bb.minY, bb.minX, bb.maxZ, bb.maxY, bb.maxX);
-	}
-
-	public static AxisAlignedBB rotateX(AxisAlignedBB bb)
-	{
-		return new AxisAlignedBB(bb.minX, bb.minZ, bb.minY, bb.maxX, bb.maxZ, bb.maxY);
-	}
 
 	/*
 	 * 
