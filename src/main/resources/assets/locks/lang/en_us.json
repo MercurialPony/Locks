@@ -15,11 +15,11 @@
 	"locks.subtitle.lock.close": "Lock clicks",
 	"locks.subtitle.lock.open": "Key turned in lock",
 	"locks.subtitle.lock.rattle": "Lock rattles",
-	"locks.subtitle.pin.fail": "Pin clicks",
-	"locks.subtitle.pin.match": "Pin clicks into place lightly",
+	"locks.subtitle.pin.fail": "Pin clicks lightly",
+	"locks.subtitle.pin.match": "Pin firmly clicks into place",
 
 	"locks.tooltip.id": "ID: %s",
-	"locks.tooltip.length":  "Length: %s",
+	"locks.tooltip.length": "Length: %s",
 	"locks.tooltip.strength": "Strength: %s",
 
 	"locks.status.locked": "This block is locked"

@@ -19,7 +19,7 @@
 	"locks.subtitle.pin.match": "栓合适点击声",
 
 	"locks.tooltip.id": "ID: %s",
-	"locks.tooltip.length":  "Length: %s",
+	"locks.tooltip.length": "Length: %s",
 	"locks.tooltip.strength": "Strength: %s",
 
 	"locks.status.locked": "This block is locked"

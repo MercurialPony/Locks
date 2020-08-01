@@ -1,26 +1,26 @@
 {
-	"itemGroup.locks": "Zamki",
+	"itemGroup.locks": "Locks",
 
-	"item.locks.lock": "Kłódka",
+	"item.locks.lock": "Zamek",
 	"item.locks.lock_pick": "Wytrych",
 	"item.locks.key": "Klucz",
-	"item.locks.master_key": "Uniwersalny Klucz",
-	"item.locks.key_blank": "Zwykły Klucz",
-	"item.locks.key_ring": "Pęk Na Klucze",
+	"item.locks.master_key": "Klucz uniwersalny",
+	"item.locks.key_blank": "Klucz surowy",
+	"item.locks.key_ring": "Kółko na klucze",
 
-	"locks.gui.lockpicking.title": "Otwieranie zamku",
-	"locks.gui.lockpicking.open": "Naciśnij `ESC` aby otworzyć",
+	"locks.gui.lockpicking.title": "Otwieranie zamka",
+	"locks.gui.lockpicking.open": "Naciśnij „ESC”, aby otworzyć",
 
-	"locks.subtitle.key_ring": "Keys jingle",
-	"locks.subtitle.lock.close": "Lock clicks",
-	"locks.subtitle.lock.open": "Key used in lock",
-	"locks.subtitle.lock.rattle": "Lock rattles",
-	"locks.subtitle.pin.fail": "Pin clicks",
-	"locks.subtitle.pin.match": "Pin fit click",
+	"locks.subtitle.key_ring": "Klucze brzęczą",
+	"locks.subtitle.lock.close": "Trzask zamka",
+	"locks.subtitle.lock.open": "Przekręcono klucz w zamku",
+	"locks.subtitle.lock.rattle": "Zamek stuka",
+	"locks.subtitle.pin.fail": "Zastawka wydaje dźwięk",
+	"locks.subtitle.pin.match": "Zastawka wsuwa się na odpowiednie miejsce",
 
 	"locks.tooltip.id": "ID: %s",
-	"locks.tooltip.length":  "Length: %s",
-	"locks.tooltip.strength": "Strength: %s",
+	"locks.tooltip.length": "Długość: %s",
+	"locks.tooltip.strength": "Wytrzymałość: %s",
 
-	"locks.status.locked": "This block is locked"
+	"locks.status.locked": "Ten blok jest zablokowany przy użyciu zamka"
 }
