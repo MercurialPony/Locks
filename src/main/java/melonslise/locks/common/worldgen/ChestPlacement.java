@@ -18,9 +18,9 @@ import net.minecraft.world.gen.GenerationSettings;
 import net.minecraft.world.gen.placement.NoPlacementConfig;
 import net.minecraft.world.gen.placement.Placement;
 
-public class PlacementAtChest extends Placement<NoPlacementConfig>
+public class ChestPlacement extends Placement<NoPlacementConfig>
 {
-	public PlacementAtChest(Function<Dynamic<?>, ? extends NoPlacementConfig> factory)
+	public ChestPlacement(Function<Dynamic<?>, ? extends NoPlacementConfig> factory)
 	{
 		super(factory);
 	}

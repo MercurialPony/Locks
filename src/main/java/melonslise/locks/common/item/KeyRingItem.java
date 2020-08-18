@@ -87,7 +87,7 @@ public class KeyRingItem extends Item
 								continue;
 							for(Lockable lockable : matching)
 								lockable.lock.setLocked(!lockable.lock.isLocked());
-							world.playSound(ctx.getPlayer(), pos, LocksSoundEvents.LOCK_OPEN, SoundCategory.BLOCKS, 1F, 1F);
+							world.playSound(ctx.getPlayer(), pos, LocksSoundEvents.LOCK_OPEN.get(), SoundCategory.BLOCKS, 1F, 1F);
 							return ActionResultType.SUCCESS;
 						}
 						return ActionResultType.PASS;

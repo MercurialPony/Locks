@@ -1,43 +1,40 @@
 package melonslise.locks.common.init;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import melonslise.locks.Locks;
-import melonslise.locks.common.worldgen.FeatureLockChest;
+import melonslise.locks.common.worldgen.ChestLockerFeature;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.gen.GenerationStage;
 import net.minecraft.world.gen.feature.Feature;
 import net.minecraft.world.gen.feature.IFeatureConfig;
 import net.minecraft.world.gen.feature.NoFeatureConfig;
 import net.minecraft.world.gen.placement.IPlacementConfig;
-import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.fml.RegistryObject;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 
 public final class LocksFeatures
 {
-	public static final List<Feature> FEATURES = new ArrayList<>(1);
+	public static final DeferredRegister<Feature<?>> FEATURES = new DeferredRegister(ForgeRegistries.FEATURES, Locks.ID);
 
-	public static final Feature
-		LOCK_CHEST = add("lock_chest", new FeatureLockChest(NoFeatureConfig::deserialize));
+	public static final RegistryObject<Feature<NoFeatureConfig>>
+		CHEST_LOCKER = add("chest_locker", new ChestLockerFeature(NoFeatureConfig::deserialize));
 
 	private LocksFeatures() {}
 
-	public static void register(RegistryEvent.Register<Feature<?>> event)
+	public static void register()
 	{
-		for(Feature feature : FEATURES)
-			event.getRegistry().register(feature);
+		FEATURES.register(FMLJavaModLoadingContext.get().getModEventBus());
 	}
 
 	public static void addFeatures()
 	{
 		for(Biome biome : ForgeRegistries.BIOMES.getValues())
-			biome.addFeature(GenerationStage.Decoration.TOP_LAYER_MODIFICATION, Biome.createDecoratedFeature(LOCK_CHEST, IFeatureConfig.NO_FEATURE_CONFIG, LocksPlacements.CHEST, IPlacementConfig.NO_PLACEMENT_CONFIG));
+			biome.addFeature(GenerationStage.Decoration.TOP_LAYER_MODIFICATION, Biome.createDecoratedFeature(CHEST_LOCKER.get(), IFeatureConfig.NO_FEATURE_CONFIG, LocksPlacements.CHEST.get(), IPlacementConfig.NO_PLACEMENT_CONFIG));
 	}
 
-	public static Feature add(String name, Feature feature)
+	public static <T extends IFeatureConfig> RegistryObject<Feature<T>> add(String name, Feature<T> feature)
 	{
-		FEATURES.add((Feature) feature.setRegistryName(Locks.ID, name));
-		return feature;
+		return FEATURES.register(name, () -> feature);
 	}
 }

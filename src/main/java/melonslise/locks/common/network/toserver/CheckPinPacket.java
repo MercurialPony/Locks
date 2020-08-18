@@ -32,7 +32,7 @@ public class CheckPinPacket
 		ctx.get().enqueueWork(() ->
 		{
 			Container container = ctx.get().getSender().openContainer;
-			if(container.getType() == LocksContainerTypes.LOCK_PICKING)
+			if(container.getType() == LocksContainerTypes.LOCK_PICKING.get())
 				((LockPickingContainer) container).checkPin(pkt.pin);
 		});
 		ctx.get().setPacketHandled(true);

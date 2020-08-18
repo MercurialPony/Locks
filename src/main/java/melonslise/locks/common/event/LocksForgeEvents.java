@@ -126,7 +126,7 @@ public final class LocksForgeEvents
 				{
 					intersecting.stream().filter(LocksPredicates.LOCKED).forEach(lockable -> lockable.shake(20));
 					event.setUseBlock(Result.DENY);
-					world.playSound(player, pos, LocksSoundEvents.LOCK_RATTLE, SoundCategory.BLOCKS, 1f, 1f); // TODO Play sound only if item returns fail/pass
+					world.playSound(player, pos, LocksSoundEvents.LOCK_RATTLE.get(), SoundCategory.BLOCKS, 1f, 1f); // TODO Play sound only if item returns fail/pass
 					player.swingArm(Hand.MAIN_HAND);
 					if(world.isRemote && LocksClientConfig.DEAF_MODE.get())
 						player.sendStatusMessage(LOCKED_MESSAGE, true);

@@ -39,7 +39,7 @@ public class LockItem extends LockingItem
 
 	public static ItemStack from(Lock lock)
 	{
-		ItemStack stack = new ItemStack(LocksItems.LOCK);
+		ItemStack stack = new ItemStack(LocksItems.LOCK.get());
 		CompoundNBT nbt = stack.getOrCreateTag();
 		nbt.putInt(KEY_ID, lock.id);
 		nbt.putByte(KEY_LENGTH, (byte) lock.getLength());
@@ -80,7 +80,7 @@ public class LockItem extends LockingItem
 						{
 							select.set(null);
 							// TODO Go through the add checks here as well
-							world.playSound(player, pos, LocksSoundEvents.LOCK_CLOSE, SoundCategory.BLOCKS, 1F, 1F);
+							world.playSound(player, pos, LocksSoundEvents.LOCK_CLOSE.get(), SoundCategory.BLOCKS, 1F, 1F);
 							if(world.isRemote)
 								return ActionResultType.SUCCESS;
 							if(!lockables.add(new Lockable(new Cuboid6i(pos1, pos), Lock.from(stack), Orientation.fromDirection(ctx.getFace(), ctx.getPlacementHorizontalFacing().getOpposite()))))

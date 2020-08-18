@@ -1,18 +1,18 @@
 package melonslise.locks.common.init;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import melonslise.locks.Locks;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
-import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.fml.RegistryObject;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.registries.DeferredRegister;
+import net.minecraftforge.registries.ForgeRegistries;
 
 public final class LocksSoundEvents
 {
-	private static final List<SoundEvent> SOUNDS = new ArrayList<SoundEvent>(6);
+	public static final DeferredRegister<SoundEvent> SOUND_EVENTS = new DeferredRegister(ForgeRegistries.SOUND_EVENTS, Locks.ID);
 
-	public static final SoundEvent
+	public static final RegistryObject<SoundEvent>
 		KEY_RING = add("key_ring"),
 		LOCK_CLOSE = add("lock.close"),
 		LOCK_OPEN = add("lock.open"),
@@ -22,17 +22,13 @@ public final class LocksSoundEvents
 
 	private LocksSoundEvents() {}
 
-	public static void register(RegistryEvent.Register<SoundEvent> event)
+	public static void register()
 	{
-		for(SoundEvent sound : SOUNDS)
-			event.getRegistry().register(sound);
+		SOUND_EVENTS.register(FMLJavaModLoadingContext.get().getModEventBus());
 	}
 
-	public static SoundEvent add(String name)
+	public static RegistryObject<SoundEvent> add(String name)
 	{
-		ResourceLocation rl = new ResourceLocation(Locks.ID, name);
-		SoundEvent sound = new SoundEvent(rl).setRegistryName(rl);
-		SOUNDS.add(sound);
-		return sound;
+		return SOUND_EVENTS.register(name, () -> new SoundEvent(new ResourceLocation(Locks.ID, name)));
 	}
 }

@@ -7,7 +7,6 @@ import melonslise.locks.Locks;
 import melonslise.locks.client.util.LocksClientUtil;
 import melonslise.locks.common.config.LocksServerConfig;
 import melonslise.locks.common.init.LocksCapabilities;
-import melonslise.locks.common.init.LocksItems;
 import melonslise.locks.common.util.Cuboid6i;
 import melonslise.locks.common.util.Lockable;
 import net.minecraft.client.Minecraft;
@@ -44,7 +43,8 @@ public final class LocksClientForgeEvents
 		}));
 	}
 
-	public static final ItemStack LOCK_STACK = new ItemStack(LocksItems.LOCK);
+	// Initialized in client setup to avoid null crash
+	public static ItemStack LOCK_MODEL_STACK = null;
 
 	// TODO Use voxel shapes instead
 	// TODO Move render to Lockable?
@@ -75,7 +75,7 @@ public final class LocksClientForgeEvents
 					int lightValue = mc.world.getCombinedLight(mutPos.setPos(state.pos.x, state.pos.y, state.pos.z), 0);
 					GLX.glMultiTexCoord2f(GLX.GL_TEXTURE1, (float) (lightValue % 65536), (float) (lightValue / 65536));
 					mc.gameRenderer.enableLightmap();
-					mc.getItemRenderer().renderItem(LOCK_STACK, TransformType.FIXED);
+					mc.getItemRenderer().renderItem(LOCK_MODEL_STACK, TransformType.FIXED);
 					GlStateManager.popMatrix();
 				}
 			});
