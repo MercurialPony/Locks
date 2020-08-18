@@ -3,10 +3,10 @@ package melonslise.locks.common.item;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import melonslise.locks.Locks;
 import melonslise.locks.common.capability.CapabilityProvider;
 import melonslise.locks.common.capability.KeyRingInventory;
 import melonslise.locks.common.container.KeyRingContainer;
+import melonslise.locks.common.init.LocksCapabilities;
 import melonslise.locks.common.init.LocksSoundEvents;
 import melonslise.locks.common.util.Lockable;
 import net.minecraft.entity.player.PlayerEntity;
@@ -55,7 +55,7 @@ public class KeyRingItem extends Item
 	{
 		World world = ctx.getWorld();
 		BlockPos pos = ctx.getPos();
-		return Locks.PROXY.getLockables(world)
+		return world.getCapability(LocksCapabilities.LOCKABLES)
 			.map(lockables ->
 			{
 				return ctx.getItem().getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY)
@@ -72,7 +72,7 @@ public class KeyRingItem extends Item
 								continue;
 							for(Lockable lockable : matching)
 								lockable.lock.setLocked(!lockable.lock.isLocked());
-							world.playSound(ctx.getPlayer(), pos, LocksSoundEvents.LOCK_OPEN, SoundCategory.BLOCKS, 1F, 1F);
+							world.playSound(ctx.getPlayer(), pos, LocksSoundEvents.LOCK_OPEN.get(), SoundCategory.BLOCKS, 1F, 1F);
 							return ActionResultType.SUCCESS;
 						}
 						return ActionResultType.PASS;

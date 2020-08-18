@@ -4,8 +4,8 @@ import java.util.Random;
 
 import com.mojang.serialization.Codec;
 
-import melonslise.locks.Locks;
 import melonslise.locks.common.config.LocksConfig;
+import melonslise.locks.common.init.LocksCapabilities;
 import melonslise.locks.common.util.Cuboid6i;
 import melonslise.locks.common.util.Lock;
 import melonslise.locks.common.util.Lockable;
@@ -19,19 +19,18 @@ import net.minecraft.world.ISeedReader;
 import net.minecraft.world.gen.ChunkGenerator;
 import net.minecraft.world.gen.feature.Feature;
 import net.minecraft.world.gen.feature.NoFeatureConfig;
-import net.minecraft.world.gen.feature.structure.StructureManager;
 
-public class FeatureLockChest extends Feature<NoFeatureConfig>
+public class ChestLockerFeature extends Feature<NoFeatureConfig>
 {
-	public FeatureLockChest(Codec<NoFeatureConfig> codec)
+	public ChestLockerFeature(Codec<NoFeatureConfig> codec)
 	{
 		super(codec);
 	}
 
 	@Override
-	public boolean func_230362_a_(ISeedReader reader, StructureManager structureManager, ChunkGenerator gen, Random rand, BlockPos pos, NoFeatureConfig cfg)
+	public boolean func_241855_a(ISeedReader reader, ChunkGenerator gen, Random rand, BlockPos pos, NoFeatureConfig cfg)
 	{
-		return Locks.PROXY.getLockables(reader.getWorld())
+		return reader.getWorld().getCapability(LocksCapabilities.LOCKABLES)
 			.map(lockables ->
 			{
 				if(lockables.get().values().stream().anyMatch(lockable1 -> lockable1.box.intersects(pos)))

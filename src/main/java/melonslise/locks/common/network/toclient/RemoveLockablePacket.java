@@ -2,7 +2,7 @@ package melonslise.locks.common.network.toclient;
 
 import java.util.function.Supplier;
 
-import melonslise.locks.Locks;
+import melonslise.locks.common.init.LocksCapabilities;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkEvent;
@@ -34,7 +34,7 @@ public class RemoveLockablePacket
 			@Override
 			public void run()
 			{
-				Locks.PROXY.getLockables(Minecraft.getInstance().world).ifPresent(lockables -> lockables.remove(pkt.networkID));
+				Minecraft.getInstance().world.getCapability(LocksCapabilities.LOCKABLES).ifPresent(lockables -> lockables.remove(pkt.networkID));
 			}
 		});
 		ctx.get().setPacketHandled(true);

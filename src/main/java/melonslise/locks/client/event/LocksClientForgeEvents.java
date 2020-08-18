@@ -5,12 +5,9 @@ import com.mojang.blaze3d.systems.RenderSystem;
 
 import melonslise.locks.Locks;
 import melonslise.locks.client.init.LocksRenderTypes;
-import melonslise.locks.client.proxy.ClientProxy;
 import melonslise.locks.client.util.LocksClientUtil;
-import melonslise.locks.common.capability.LockableStorage;
 import melonslise.locks.common.config.LocksServerConfig;
 import melonslise.locks.common.init.LocksCapabilities;
-import melonslise.locks.common.init.LocksItems;
 import melonslise.locks.common.util.Cuboid6i;
 import melonslise.locks.common.util.Lockable;
 import net.minecraft.client.Minecraft;
@@ -29,9 +26,7 @@ import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.math.vector.Vector3f;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
-import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
@@ -41,26 +36,20 @@ public final class LocksClientForgeEvents
 	private LocksClientForgeEvents() {}
 
 	@SubscribeEvent
-	public static void onWorldLoad(WorldEvent.Load event)
-	{
-		if(event.getWorld().isRemote())
-			ClientProxy.CLIENT_LOCKABLES = LazyOptional.of(() -> new LockableStorage(event.getWorld().getWorld()));
-	}
-
-	@SubscribeEvent
 	public static void onClientTick(TickEvent.ClientTickEvent event)
 	{
 		Minecraft mc = Minecraft.getInstance();
 		if(event.phase == TickEvent.Phase.END || mc.world == null || mc.isGamePaused())
 			return;
-		Locks.PROXY.getLockables(mc.world).ifPresent(lockables -> lockables.get().values().forEach(lockable ->
+		mc.world.getCapability(LocksCapabilities.LOCKABLES).ifPresent(lockables -> lockables.get().values().forEach(lockable ->
 		{
 			if(lockable.box.loaded(mc.world))
 				lockable.tick();
 		}));
 	}
 
-	public static final ItemStack LOCK_STACK = new ItemStack(LocksItems.LOCK);
+	// Initialized in client setup to avoid null crash
+	public static ItemStack LOCK_MODEL_STACK = null;
 
 	// TODO Use voxel shapes instead
 	// TODO Move render to Lockable?
@@ -74,7 +63,7 @@ public final class LocksClientForgeEvents
 		IRenderTypeBuffer.Impl buf = mc.getRenderTypeBuffers().getBufferSource();
 		MatrixStack mtx = event.getMatrixStack();
 		BlockPos.Mutable mutPos = new BlockPos.Mutable();
-		Locks.PROXY.getLockables(mc.world)
+		mc.world.getCapability(LocksCapabilities.LOCKABLES)
 			.ifPresent(lockables ->
 			{
 				for(Lockable lockable : lockables.get().values())
@@ -93,7 +82,7 @@ public final class LocksClientForgeEvents
 					mtx.translate(0d, -0.1d, 0d);
 					mtx.scale(0.5f, 0.5f, 0.5f);
 					int packedLight = WorldRenderer.getCombinedLight(mc.world, mutPos.setPos(state.pos.x, state.pos.y, state.pos.z));
-					mc.getItemRenderer().renderItem(LOCK_STACK, ItemCameraTransforms.TransformType.FIXED, packedLight, OverlayTexture.NO_OVERLAY, mtx, buf);
+					mc.getItemRenderer().renderItem(LOCK_MODEL_STACK, ItemCameraTransforms.TransformType.FIXED, packedLight, OverlayTexture.NO_OVERLAY, mtx, buf);
 					RenderSystem.disableDepthTest();
 					buf.finish();
 					mtx.pop();

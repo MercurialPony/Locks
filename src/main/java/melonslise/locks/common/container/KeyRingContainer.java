@@ -37,14 +37,14 @@ public class KeyRingContainer extends Container
 		{
 			super.putStack(stack);
 			if(!this.player.world.isRemote)
-				this.player.world.playSound(null, this.player.getPosX(), this.player.getPosY(), this.player.getPosZ(), LocksSoundEvents.KEY_RING, SoundCategory.PLAYERS, 1f, 1f);
+				this.player.world.playSound(null, this.player.getPosX(), this.player.getPosY(), this.player.getPosZ(), LocksSoundEvents.KEY_RING.get(), SoundCategory.PLAYERS, 1f, 1f);
 		}
 
 		@Override
 		public ItemStack onTake(PlayerEntity player, ItemStack stack)
 		{
 			if(!this.player.world.isRemote)
-				this.player.world.playSound(null, this.player.getPosX(), this.player.getPosY(), this.player.getPosZ(), LocksSoundEvents.KEY_RING, SoundCategory.PLAYERS, 1f, 1f);
+				this.player.world.playSound(null, this.player.getPosX(), this.player.getPosY(), this.player.getPosZ(), LocksSoundEvents.KEY_RING.get(), SoundCategory.PLAYERS, 1f, 1f);
 			return super.onTake(player, stack);
 		}
 	}
@@ -55,7 +55,7 @@ public class KeyRingContainer extends Container
 
 	public KeyRingContainer(int id, PlayerEntity player, ItemStack stack)
 	{
-		super(LocksContainerTypes.KEY_RING, id);
+		super(LocksContainerTypes.KEY_RING.get(), id);
 		this.stack = stack;
 		this.inv = stack.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).orElse(null);
 		this.rows = inv.getSlots() / 9;

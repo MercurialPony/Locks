@@ -1,0 +1,16 @@
+{
+	"required": true,
+	"package": "melonslise.locks.mixin",
+	"compatibilityLevel": "JAVA_8",
+	"refmap": "locks.refmap.json",
+	"mixins":
+	[
+		"ServerWorldMixin",
+		"TemplateMixin"
+	],
+	"injectors":
+	{
+		"defaultRequire": 1
+	},
+	"minVersion": "0.8"
+}

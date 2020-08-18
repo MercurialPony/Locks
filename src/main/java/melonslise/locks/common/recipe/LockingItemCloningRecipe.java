@@ -21,6 +21,7 @@ import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.RecipeMatcher;
+import net.minecraftforge.registries.ForgeRegistryEntry;
 
 // TODO Group
 public class LockingItemCloningRecipe extends SpecialRecipe
@@ -98,10 +99,10 @@ public class LockingItemCloningRecipe extends SpecialRecipe
 	@Override
 	public IRecipeSerializer<?> getSerializer()
 	{
-		return LocksRecipeSerializers.LOCKING_ITEM_CLONING;
+		return LocksRecipeSerializers.LOCKING_ITEM_CLONING.get();
 	}
 
-	public static class Serializer extends RecipeSerializer<LockingItemCloningRecipe>
+	public static class Serializer extends ForgeRegistryEntry<IRecipeSerializer<?>>  implements IRecipeSerializer<LockingItemCloningRecipe>
 	{
 		// TODO Static final keys
 		@Override

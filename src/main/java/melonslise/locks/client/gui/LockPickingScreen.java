@@ -90,9 +90,9 @@ public class LockPickingScreen extends ContainerScreen<LockPickingContainer>
 	protected void func_230451_b_(MatrixStack mtx, int mouseX, int mouseY)
 	{
 		// Without shadow
-		this.font.func_238422_b_(mtx, this.title, 0f, (float) -this.font.FONT_HEIGHT, 0xffffff);
+		this.font.func_243248_b(mtx, this.title, 0f, (float) -this.font.FONT_HEIGHT, 0xffffff);
 		if(this.getContainer().isOpen())
-			this.font.func_238422_b_(mtx, HINT, (float) (this.xSize - this.font.func_238414_a_(HINT)) / 2f, (float) (this.ySize + 10), 0xffffff);
+			this.font.func_243248_b(mtx, HINT, (float) (this.xSize - this.font.func_238414_a_(HINT)) / 2f, (float) (this.ySize + 10), 0xffffff);
 		//this.drawCenteredString(this.font, I18n.format(title), this.width / 2, 10, 0xffffff);
 		//if(this.getContainer().isOpen()) this.drawCenteredString(this.fontRenderer, I18n.format(hint), this.width / 2, cornerY + 96, 0xffffff);
 	}

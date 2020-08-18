@@ -1,8 +1,5 @@
 package melonslise.locks.common.init;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import melonslise.locks.Locks;
 import melonslise.locks.common.item.KeyItem;
 import melonslise.locks.common.item.KeyRingItem;
@@ -10,13 +7,16 @@ import melonslise.locks.common.item.LockItem;
 import melonslise.locks.common.item.LockPickItem;
 import melonslise.locks.common.item.MasterKeyItem;
 import net.minecraft.item.Item;
-import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.fml.RegistryObject;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.registries.DeferredRegister;
+import net.minecraftforge.registries.ForgeRegistries;
 
 public final class LocksItems
 {
-	public static final List<Item> ITEMS = new ArrayList<Item>(6);
+	public static DeferredRegister ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, Locks.ID);
 
-	public static final Item
+	public static final RegistryObject<Item>
 		KEY_BLANK = add("key_blank", new Item(new Item.Properties().group(LocksItemGroups.TAB))),
 		LOCK = add("lock", new LockItem(new Item.Properties().group(LocksItemGroups.TAB))),
 		KEY = add("key", new KeyItem(new Item.Properties().group(LocksItemGroups.TAB))),
@@ -26,15 +26,13 @@ public final class LocksItems
 
 	private LocksItems() {}
 
-	public static void register(RegistryEvent.Register<Item> event)
+	public static void register()
 	{
-		for(Item item : ITEMS)
-			event.getRegistry().register(item);
+		ITEMS.register(FMLJavaModLoadingContext.get().getModEventBus());
 	}
 
-	public static Item add(String name, Item item)
+	public static RegistryObject<Item> add(String name, Item item)
 	{
-		ITEMS.add(item.setRegistryName(Locks.ID, name));
-		return item;
+		return ITEMS.register(name, () -> item);
 	}
 }

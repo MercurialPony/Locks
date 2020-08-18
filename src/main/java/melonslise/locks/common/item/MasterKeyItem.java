@@ -3,7 +3,7 @@ package melonslise.locks.common.item;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import melonslise.locks.Locks;
+import melonslise.locks.common.init.LocksCapabilities;
 import melonslise.locks.common.init.LocksSoundEvents;
 import melonslise.locks.common.util.Lockable;
 import net.minecraft.item.Item;
@@ -26,13 +26,13 @@ public class MasterKeyItem extends Item
 	{
 		World world = ctx.getWorld();
 		BlockPos pos = ctx.getPos();
-		return Locks.PROXY.getLockables(world)
+		return world.getCapability(LocksCapabilities.LOCKABLES)
 			.map(lockables ->
 			{
 				List<Lockable> matching = lockables.get().values().stream().filter(lockable1 -> lockable1.box.intersects(pos)).collect(Collectors.toList());
 				if(matching.isEmpty())
 					return ActionResultType.PASS;
-				world.playSound(ctx.getPlayer(), pos, LocksSoundEvents.LOCK_OPEN, SoundCategory.BLOCKS, 1F, 1F);
+				world.playSound(ctx.getPlayer(), pos, LocksSoundEvents.LOCK_OPEN.get(), SoundCategory.BLOCKS, 1F, 1F);
 				if(world.isRemote)
 					return ActionResultType.SUCCESS;
 				for(Lockable lockable : matching)

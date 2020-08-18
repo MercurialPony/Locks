@@ -139,6 +139,6 @@ public class KeyRingInventory implements IItemHandlerModifiable
 	@Override
 	public boolean isItemValid(int slot, @Nonnull ItemStack stack)
 	{
-		return stack.getItem() == LocksItems.KEY;
+		return stack.getItem() == LocksItems.KEY.get();
 	}
 }

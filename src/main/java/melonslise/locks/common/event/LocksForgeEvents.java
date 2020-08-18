@@ -55,7 +55,7 @@ public final class LocksForgeEvents
 
 	public static void syncLockables(World world, RegistryKey<World> dim)
 	{
-		Locks.PROXY.getLockables(world).ifPresent(lockables ->
+		world.getCapability(LocksCapabilities.LOCKABLES).ifPresent(lockables ->
 		{
 			for(Lockable lockable : lockables.get().values())
 				LocksNetworks.MAIN.send(PacketDistributor.DIMENSION.with(() -> dim), new AddLockablePacket(lockable));
@@ -111,7 +111,7 @@ public final class LocksForgeEvents
 		BlockPos pos = event.getPos();
 		World world = event.getWorld();
 		PlayerEntity player = event.getPlayer();
-		Locks.PROXY.getLockables(world)
+		world.getCapability(LocksCapabilities.LOCKABLES)
 			.ifPresent(lockables ->
 			{
 				List<Lockable> intersecting = lockables.get().values().stream().filter(lockable1 -> lockable1.box.intersects(pos)).collect(Collectors.toList());
@@ -126,7 +126,7 @@ public final class LocksForgeEvents
 				{
 					intersecting.stream().filter(LocksPredicates.LOCKED).forEach(lockable -> lockable.shake(20));
 					event.setUseBlock(Result.DENY);
-					world.playSound(player, pos, LocksSoundEvents.LOCK_RATTLE, SoundCategory.BLOCKS, 1f, 1f); // TODO Play sound only if item returns fail/pass
+					world.playSound(player, pos, LocksSoundEvents.LOCK_RATTLE.get(), SoundCategory.BLOCKS, 1f, 1f); // TODO Play sound only if item returns fail/pass
 					player.swingArm(Hand.MAIN_HAND);
 					if(world.isRemote && LocksClientConfig.DEAF_MODE.get())
 						player.sendStatusMessage(LOCKED_MESSAGE, true);
@@ -152,7 +152,7 @@ public final class LocksForgeEvents
 
 	public static boolean canBreakLockable(PlayerEntity player, BlockPos pos)
 	{
-		return Locks.PROXY.getLockables(player.world)
+		return player.world.getCapability(LocksCapabilities.LOCKABLES)
 			.map(lockables -> !LocksServerConfig.PROTECT_LOCKABLES.get() || player.isCreative() || !lockables.get().values().stream().anyMatch(lockable1 -> lockable1.lock.isLocked() && lockable1.box.intersects(pos)))
 			.orElse(true);
 	}

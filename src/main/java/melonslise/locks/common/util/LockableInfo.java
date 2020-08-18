@@ -1,8 +1,4 @@
-package melonslise.locks.coremod;
-
-import melonslise.locks.common.util.Cuboid6i;
-import melonslise.locks.common.util.Lock;
-import melonslise.locks.common.util.Orientation;
+package melonslise.locks.common.util;
 
 public class LockableInfo
 {

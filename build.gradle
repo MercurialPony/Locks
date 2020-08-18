@@ -4,14 +4,19 @@ buildscript
 	{
 		maven
 		{
-			url = 'https://files.minecraftforge.net/maven'
+			url = "https://files.minecraftforge.net/maven"
 		}
 		jcenter()
 		mavenCentral()
+		maven
+		{
+			url = 'https://dist.creeper.host/Sponge/maven'
+		}
 	}
 	dependencies
 	{
 		classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '3.+', changing: true
+		classpath group: 'org.spongepowered', name: 'mixingradle', version: '0.7-SNAPSHOT'
 	}
 }
 
@@ -19,7 +24,7 @@ apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 
-version = '2.5.1'
+version = '2.5.2'
 group = 'melonslise.locks'
 archivesBaseName = 'locks'
 
@@ -28,7 +33,7 @@ sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = co
 minecraft
 {
 	mappings channel: 'snapshot', version: '20200707-1.16.1'
-    
+
 	accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
 
 	runs
@@ -37,9 +42,11 @@ minecraft
 		{
 			workingDirectory project.file('run')
 
+			arg "-mixin.config=" + archivesBaseName + ".mixins.json"
+
 			property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
 
-			property 'forge.logging.console.level', 'debug'
+			property 'forge.logging.console.level', 'info'
 
 			mods
 			{
@@ -54,9 +61,11 @@ minecraft
 		{
 			workingDirectory project.file('run')
 
+			arg "-mixin.config=" + archivesBaseName + ".mixins.json"
+
 			property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
 
-			property 'forge.logging.console.level', 'debug'
+			property 'forge.logging.console.level', 'info'
 
 			mods
 			{
@@ -73,7 +82,7 @@ minecraft
 
 			property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
 
-			property 'forge.logging.console.level', 'debug'
+			property 'forge.logging.console.level', 'info'
 
 			args '--mod', 'locks', '--all', '--output', file('src/generated/resources/')
 
@@ -90,7 +99,7 @@ minecraft
 
 dependencies
 {
-	minecraft 'net.minecraftforge:forge:1.16.1-32.0.61'
+	minecraft 'net.minecraftforge:forge:1.16.2-33.0.5'
 }
 
 jar
@@ -106,8 +115,16 @@ jar
 				"Implementation-Title": archivesBaseName,
 				"Implementation-Version": version,
 				"Implementation-Vendor" :"melonslise",
-				"Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+				"Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
+				"MixinConfigs": archivesBaseName + ".mixins.json"
 			]
 		)
 	}
+}
+
+apply plugin: 'org.spongepowered.mixin'
+
+mixin
+{
+	add sourceSets.main, archivesBaseName + ".refmap.json"
 }

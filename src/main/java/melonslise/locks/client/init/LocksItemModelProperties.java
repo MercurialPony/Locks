@@ -20,7 +20,7 @@ public final class LocksItemModelProperties
 
 	public static void register()
 	{
-		ItemModelsProperties.func_239418_a_(LocksItems.KEY_RING, new ResourceLocation(Locks.ID, "keys"), (ItemStack stack, @Nullable ClientWorld world, @Nullable LivingEntity entity) ->
+		ItemModelsProperties.func_239418_a_(LocksItems.KEY_RING.get(), new ResourceLocation(Locks.ID, "keys"), (ItemStack stack, @Nullable ClientWorld world, @Nullable LivingEntity entity) ->
 		{
 			return stack.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY)
 				.map(inventory ->

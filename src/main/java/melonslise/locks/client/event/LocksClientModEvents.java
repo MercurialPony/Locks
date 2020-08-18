@@ -3,6 +3,8 @@ package melonslise.locks.client.event;
 import melonslise.locks.Locks;
 import melonslise.locks.client.init.LocksItemModelProperties;
 import melonslise.locks.client.init.LocksScreens;
+import melonslise.locks.common.init.LocksItems;
+import net.minecraft.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -18,5 +20,6 @@ public final class LocksClientModEvents
 	{
 		LocksScreens.register();
 		LocksItemModelProperties.register();
+		LocksClientForgeEvents.LOCK_MODEL_STACK = new ItemStack(LocksItems.LOCK.get());
 	}
 }

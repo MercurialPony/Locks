@@ -1,33 +1,34 @@
 package melonslise.locks.common.init;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import melonslise.locks.Locks;
 import melonslise.locks.common.container.KeyRingContainer;
 import melonslise.locks.common.container.LockPickingContainer;
+import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.ContainerType;
-import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.fml.RegistryObject;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.registries.DeferredRegister;
+import net.minecraftforge.registries.ForgeRegistries;
 
 public final class LocksContainerTypes
 {
-	private static final List<ContainerType> CONTAINER_TYPES = new ArrayList<ContainerType>(2);
+	public static final DeferredRegister<ContainerType<?>> CONTAINER_TYPES = DeferredRegister.create(ForgeRegistries.CONTAINERS, Locks.ID);
 
-	public static final ContainerType
-		LOCK_PICKING = add("lock_picking", new ContainerType(LockPickingContainer.FACTORY)),
+	public static final RegistryObject<ContainerType<LockPickingContainer>>
+		LOCK_PICKING = add("lock_picking", new ContainerType(LockPickingContainer.FACTORY));
+
+	public static final RegistryObject<ContainerType<KeyRingContainer>>
 		KEY_RING = add("key_ring", new ContainerType(KeyRingContainer.FACTORY));
 
 	private LocksContainerTypes() {}
 
-	public static void register(RegistryEvent.Register<ContainerType<?>> event)
+	public static void register()
 	{
-		for(ContainerType type : CONTAINER_TYPES)
-			event.getRegistry().register(type);
+		CONTAINER_TYPES.register(FMLJavaModLoadingContext.get().getModEventBus());
 	}
 
-	public static ContainerType add(String name, ContainerType type)
+	public static <T extends Container> RegistryObject<ContainerType<T>> add(String name, ContainerType<T> type)
 	{
-		CONTAINER_TYPES.add((ContainerType) type.setRegistryName(Locks.ID, name));
-		return type;
+		return CONTAINER_TYPES.register(name, () -> type);
 	}
 }
