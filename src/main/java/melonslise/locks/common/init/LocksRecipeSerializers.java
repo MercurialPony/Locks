@@ -23,7 +23,7 @@ public final class LocksRecipeSerializers
 		RECIPE_SERIALIZERS.register(FMLJavaModLoadingContext.get().getModEventBus());
 	}
 
-	public static <T extends IRecipe> RegistryObject<IRecipeSerializer<T>> add(String name, IRecipeSerializer<T> serializer)
+	public static <T extends IRecipe<?>> RegistryObject<IRecipeSerializer<T>> add(String name, IRecipeSerializer<T> serializer)
 	{
 		return RECIPE_SERIALIZERS.register(name, () -> serializer);
 	}
