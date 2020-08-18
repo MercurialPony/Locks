@@ -42,7 +42,7 @@ public class LockPickingContainer extends Container
 
 	public LockPickingContainer(int id, PlayerEntity player, BlockPos pos, Lockable lockable)
 	{
-		super(LocksContainerTypes.LOCK_PICKING, id);
+		super(LocksContainerTypes.LOCK_PICKING.get(), id);
 		this.player = player;
 		this.pos = pos;
 		this.lockable = lockable;
@@ -58,7 +58,7 @@ public class LockPickingContainer extends Container
 	public boolean canInteractWith(PlayerEntity player)
 	{
 		for(ItemStack stack : player.getHeldEquipment())
-			if(stack.getItem() == LocksItems.LOCK_PICK)
+			if(stack.getItem() == LocksItems.LOCK_PICK.get())
 				return true;
 		return false;
 	}
@@ -73,12 +73,12 @@ public class LockPickingContainer extends Container
 		{
 			++this.currentIndex;
 			correct = true;
-			this.player.world.playSound(null, this.pos, LocksSoundEvents.PIN_MATCH, SoundCategory.BLOCKS, 1F, 1F);
+			this.player.world.playSound(null, this.pos, LocksSoundEvents.PIN_MATCH.get(), SoundCategory.BLOCKS, 1F, 1F);
 		}
 		else
 		{
 			if(!this.breakPick(player))
-				this.player.world.playSound(null, this.pos, LocksSoundEvents.PIN_FAIL, SoundCategory.BLOCKS, 1F, 1F);
+				this.player.world.playSound(null, this.pos, LocksSoundEvents.PIN_FAIL.get(), SoundCategory.BLOCKS, 1F, 1F);
 			else
 			{
 				reset = true;
@@ -116,7 +116,7 @@ public class LockPickingContainer extends Container
 		for(EquipmentSlotType slot : EquipmentSlotType.values())
 		{
 			ItemStack stack = player.getItemStackFromSlot(slot);
-			if(slot.getSlotType() != EquipmentSlotType.Group.HAND || stack.getItem() != LocksItems.LOCK_PICK)
+			if(slot.getSlotType() != EquipmentSlotType.Group.HAND || stack.getItem() != LocksItems.LOCK_PICK.get())
 				continue;
 			if(player.world.rand.nextFloat() < LockPickItem.getOrSetStrength(stack))
 				return false;
@@ -134,7 +134,7 @@ public class LockPickingContainer extends Container
 		if(!this.isOpen() || !this.lockable.lock.isLocked())
 			return;
 		this.lockable.lock.setLocked(!this.lockable.lock.isLocked());
-		this.player.world.playSound(player, this.pos, LocksSoundEvents.LOCK_OPEN, SoundCategory.BLOCKS, 1F, 1F);
+		this.player.world.playSound(player, this.pos, LocksSoundEvents.LOCK_OPEN.get(), SoundCategory.BLOCKS, 1F, 1F);
 	}
 
 

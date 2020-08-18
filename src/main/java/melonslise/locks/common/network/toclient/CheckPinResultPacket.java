@@ -39,7 +39,7 @@ public class CheckPinResultPacket
 			public void run()
 			{
 				Container container = Minecraft.getInstance().player.openContainer;
-				if(container.getType() == LocksContainerTypes.LOCK_PICKING)
+				if(container.getType() == LocksContainerTypes.LOCK_PICKING.get())
 					((LockPickingContainer) container).handlePin(pkt.correct, pkt.reset);
 			}
 		});

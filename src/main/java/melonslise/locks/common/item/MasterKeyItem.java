@@ -32,7 +32,7 @@ public class MasterKeyItem extends Item
 				List<Lockable> matching = lockables.get().values().stream().filter(lockable1 -> lockable1.box.intersects(pos)).collect(Collectors.toList());
 				if(matching.isEmpty())
 					return ActionResultType.PASS;
-				world.playSound(ctx.getPlayer(), pos, LocksSoundEvents.LOCK_OPEN, SoundCategory.BLOCKS, 1F, 1F);
+				world.playSound(ctx.getPlayer(), pos, LocksSoundEvents.LOCK_OPEN.get(), SoundCategory.BLOCKS, 1F, 1F);
 				if(world.isRemote)
 					return ActionResultType.SUCCESS;
 				for(Lockable lockable : matching)

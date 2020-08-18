@@ -24,6 +24,6 @@ public class CapabilityProvider<A> implements ICapabilityProvider
 	@Override
 	public <B> LazyOptional<B> getCapability(@Nonnull final Capability<B> capability, final @Nullable Direction side)
 	{
-		return this.capability.orEmpty(capability, this.optional);
+		return this.capability == null ? LazyOptional.empty() : this.capability.orEmpty(capability, this.optional);
 	}
 }

@@ -13,7 +13,7 @@ public final class LocksItemGroups
 		@Override
 		public ItemStack createIcon()
 		{
-			return new ItemStack(LocksItems.LOCK_PICK);
+			return new ItemStack(LocksItems.LOCK_PICK.get());
 		}
 	};
 }

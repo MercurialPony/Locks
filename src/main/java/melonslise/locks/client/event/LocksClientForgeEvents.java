@@ -49,7 +49,8 @@ public final class LocksClientForgeEvents
 		}));
 	}
 
-	public static final ItemStack LOCK_STACK = new ItemStack(LocksItems.LOCK);
+	// Initialized in client setup to avoid null crash
+	public static ItemStack LOCK_MODEL_STACK = null;
 
 	// TODO Use voxel shapes instead
 	// TODO Move render to Lockable?
@@ -82,7 +83,7 @@ public final class LocksClientForgeEvents
 					mtx.translate(0d, -0.1d, 0d);
 					mtx.scale(0.5f, 0.5f, 0.5f);
 					int packedLight = WorldRenderer.getCombinedLight(mc.world, mutPos.setPos(state.pos.x, state.pos.y, state.pos.z));
-					mc.getItemRenderer().renderItem(LOCK_STACK, ItemCameraTransforms.TransformType.FIXED, packedLight, OverlayTexture.NO_OVERLAY, mtx, buf);
+					mc.getItemRenderer().renderItem(LOCK_MODEL_STACK, ItemCameraTransforms.TransformType.FIXED, packedLight, OverlayTexture.NO_OVERLAY, mtx, buf);
 					RenderSystem.disableDepthTest();
 					buf.finish();
 					mtx.pop();

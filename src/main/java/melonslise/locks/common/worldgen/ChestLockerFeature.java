@@ -22,9 +22,9 @@ import net.minecraft.world.gen.GenerationSettings;
 import net.minecraft.world.gen.feature.Feature;
 import net.minecraft.world.gen.feature.NoFeatureConfig;
 
-public class FeatureLockChest extends Feature<NoFeatureConfig>
+public class ChestLockerFeature extends Feature<NoFeatureConfig>
 {
-	public FeatureLockChest(Function<Dynamic<?>, ? extends NoFeatureConfig> factory)
+	public ChestLockerFeature(Function<Dynamic<?>, ? extends NoFeatureConfig> factory)
 	{
 		super(factory);
 	}
