@@ -1,5 +1,6 @@
 package melonslise.locks.common.event;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Random;
@@ -63,6 +64,8 @@ import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
 @Mod.EventBusSubscriber(modid = Locks.ID)
 public final class LocksEvents
 {
+	protected static final HashSet<PopulateChunkEvent.Post> DELAYED_POPULATION_EVENTS = new HashSet<>();
+
 	private LocksEvents() {}
 
 	@SubscribeEvent
@@ -114,20 +117,31 @@ public final class LocksEvents
 	@SubscribeEvent
 	public static void onChunkPopulate(PopulateChunkEvent.Post event)
 	{
-		World world = event.getWorld();
-		Random rand = event.getRand();
-		double ch = LocksConfig.COMMON.generationChance;
-		if(ch == 0d || rand.nextDouble() > ch)
-			return;
-		ILockableStorage lockables = world.getCapability(LocksCapabilities.LOCKABLES, null);
-		for(Entry<BlockPos, TileEntity> entry : world.getChunkFromChunkCoords(event.getChunkX(), event.getChunkZ()).getTileEntityMap().entrySet())
+		DELAYED_POPULATION_EVENTS.add(event);
+	}
+
+	@SubscribeEvent
+	protected static void delayedPopulation(TickEvent.ServerTickEvent tickEvent)
+	{
+		if (tickEvent.phase != Phase.START) return;
+		DELAYED_POPULATION_EVENTS.removeIf(event ->
 		{
-			BlockPos pos = entry.getKey();
-			if(!(entry.getValue() instanceof TileEntityChest) || lockables.get().values().stream().anyMatch(lockable1 -> lockable1.box.intersects(pos)))
-				continue;
-			BlockPos adjPos = LocksUtil.getAdjacentChest((TileEntityChest) entry.getValue());
-			lockables.add(new Lockable(new Cuboid6i(pos, adjPos == null ? pos : adjPos), new Lock(rand.nextInt(), LocksConfig.COMMON.randLockLen(rand), true), Orientation.fromDirection(world.getBlockState(pos).getValue(BlockChest.FACING), EnumFacing.NORTH)));
-		}
+			World world = event.getWorld();
+			Random rand = event.getRand();
+			double ch = LocksConfig.COMMON.generationChance;
+			ILockableStorage lockables = world.getCapability(LocksCapabilities.LOCKABLES, null);
+			for(Entry<BlockPos, TileEntity> entry : world.getChunkFromChunkCoords(event.getChunkX(), event.getChunkZ()).getTileEntityMap().entrySet())
+			{
+				BlockPos pos = entry.getKey();
+				if(ch == 0d || rand.nextDouble() > ch)
+					continue;
+				if (!(entry.getValue() instanceof TileEntityChest) || lockables.get().values().stream().anyMatch(lockable1 -> lockable1.box.intersects(pos)))
+					continue;
+				BlockPos adjPos = LocksUtil.getAdjacentChest((TileEntityChest) entry.getValue());
+				lockables.add(new Lockable(new Cuboid6i(pos, adjPos == null ? pos : adjPos), new Lock(rand.nextInt(), LocksConfig.COMMON.randLockLen(rand), true), Orientation.fromDirection(world.getBlockState(pos).getValue(BlockChest.FACING), EnumFacing.NORTH)));
+			}
+			return true;
+		});
 	}
 
 	public static void syncLockables(World world, int dimId)
