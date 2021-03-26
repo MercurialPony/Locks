@@ -23,7 +23,7 @@ public final class LocksItemModelProperties
 		ItemModelsProperties.func_239418_a_(LocksItems.KEY_RING.get(), new ResourceLocation(Locks.ID, "keys"), (ItemStack stack, @Nullable ClientWorld world, @Nullable LivingEntity entity) ->
 		{
 			return stack.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY)
-				.map(inventory ->
+				.lazyMap(inventory ->
 				{
 					int keys = 0;
 					for(int a = 0; a < inventory.getSlots(); ++a)

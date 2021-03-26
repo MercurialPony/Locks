@@ -24,7 +24,7 @@ apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 
-version = '2.5.2'
+version = '2.5.3'
 group = 'melonslise.locks'
 archivesBaseName = 'locks'
 
@@ -99,7 +99,7 @@ minecraft
 
 dependencies
 {
-	minecraft 'net.minecraftforge:forge:1.16.2-33.0.5'
+	minecraft 'net.minecraftforge:forge:1.16.2-33.0.21'
 }
 
 jar
