@@ -4,7 +4,6 @@ import java.util.function.Supplier;
 
 import melonslise.locks.common.init.LocksCapabilities;
 import melonslise.locks.common.util.Lockable;
-import melonslise.locks.common.util.LocksUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkEvent;
@@ -13,30 +12,30 @@ public class AddLockablePacket
 {
 	private final Lockable lockable;
 
-	public AddLockablePacket(Lockable lockable)
+	public AddLockablePacket(Lockable lkb)
 	{
-		this.lockable = lockable;
+		this.lockable = lkb;
 	}
 
 	public static AddLockablePacket decode(PacketBuffer buf)
 	{
-		return new AddLockablePacket(LocksUtil.readLockableFromBuffer(buf));
+		return new AddLockablePacket(Lockable.fromBuf(buf));
 	}
 
 	public static void encode(AddLockablePacket pkt, PacketBuffer buf)
 	{
-		LocksUtil.writeLockableToBuffer(buf, pkt.lockable);
+		Lockable.toBuf(buf, pkt.lockable);
 	}
 
 	public static void handle(AddLockablePacket pkt, Supplier<NetworkEvent.Context> ctx)
 	{
-		// Use runnable, lambda causes issues with classloading
+		// Use runnable, lambda causes issues with class loading
 		ctx.get().enqueueWork(new Runnable()
 		{
 			@Override
 			public void run()
 			{
-				Minecraft.getInstance().world.getCapability(LocksCapabilities.LOCKABLES).ifPresent(lockables -> lockables.add(pkt.lockable));
+				Minecraft.getInstance().level.getCapability(LocksCapabilities.LOCKABLE_HANDLER).ifPresent(handler -> handler.add(pkt.lockable));
 			}
 		});
 		ctx.get().setPacketHandled(true);

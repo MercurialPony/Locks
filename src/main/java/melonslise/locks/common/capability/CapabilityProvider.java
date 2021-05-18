@@ -1,8 +1,5 @@
 package melonslise.locks.common.capability;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import net.minecraft.util.Direction;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
@@ -10,20 +7,20 @@ import net.minecraftforge.common.util.LazyOptional;
 
 public class CapabilityProvider<A> implements ICapabilityProvider
 {
-	protected Capability<A> capability;
-	protected A instance;
-	protected LazyOptional<A> optional;
+	public final Capability<A> cap;
+	public final A inst;
+	public final LazyOptional<A> opt;
 
-	public CapabilityProvider(Capability<A> capability, A instance)
+	public CapabilityProvider(Capability<A> cap, A inst)
 	{
-		this.capability = capability;
-		this.instance = instance;
-		this.optional = LazyOptional.of(() -> instance);
+		this.cap = cap;
+		this.inst = inst;
+		this.opt = LazyOptional.of(() -> inst);
 	}
 
 	@Override
-	public <B> LazyOptional<B> getCapability(@Nonnull final Capability<B> capability, final @Nullable Direction side)
+	public <B> LazyOptional<B> getCapability(Capability<B> cap, Direction side)
 	{
-		return this.capability == null ? LazyOptional.empty() : this.capability.orEmpty(capability, this.optional);
+		return cap == this.cap ? this.opt.cast() : LazyOptional.empty();
 	}
 }

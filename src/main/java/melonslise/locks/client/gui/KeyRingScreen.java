@@ -15,13 +15,11 @@ public class KeyRingScreen extends ContainerScreen<KeyRingContainer>
 {
 	public static final ResourceLocation TEXTURE = new ResourceLocation("textures/gui/container/generic_54.png");
 
-	public KeyRingScreen(KeyRingContainer container, PlayerInventory inv, ITextComponent title)
+	public KeyRingScreen(KeyRingContainer cont, PlayerInventory inv, ITextComponent title)
 	{
-		super(container, inv, title);
-		//int i = 222;
-		//int j = 114;
-		this.ySize = 114 + container.rows * 18;
-		this.field_238745_s_ = this.ySize - 94;
+		super(cont, inv, title);
+		this.imageHeight = 114 + cont.rows * 18;
+		this.inventoryLabelY = this.imageHeight - 94;
 	}
 
 	@Override
@@ -29,18 +27,17 @@ public class KeyRingScreen extends ContainerScreen<KeyRingContainer>
 	{
 		this.renderBackground(mtx);
 		super.render(mtx, mouseX, mouseY, partialTick);
-		this.func_230459_a_(mtx, mouseX, mouseY);
+		this.renderTooltip(mtx, mouseX, mouseY);
 	}
 
 	@Override
-	protected void func_230450_a_ (MatrixStack mtx, float partialTick, int mouseX, int mouseY)
+	protected void renderBg(MatrixStack mtx, float partialTick, int mouseX, int mouseY)
 	{
-		int rows = this.getContainer().rows;
-		//GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-		this.minecraft.getTextureManager().bindTexture(TEXTURE);
-		int i = (this.width - this.xSize) / 2;
-		int j = (this.height - this.ySize) / 2;
-		this.blit(mtx, i, j, 0, 0, this.xSize, rows * 18 + 17);
-		this.blit(mtx, i, j + rows * 18 + 17, 0, 126, this.xSize, 96);
+		int rows = this.getMenu().rows;
+		this.minecraft.getTextureManager().bind(TEXTURE);
+		int cornerX = (this.width - this.imageWidth) / 2;
+		int cornerY = (this.height - this.imageHeight) / 2;
+		this.blit(mtx, cornerX, cornerY, 0, 0, this.imageWidth, rows * 18 + 17);
+		this.blit(mtx, cornerX, cornerY + rows * 18 + 17, 0, 126, this.imageWidth, 96);
 	}
 }

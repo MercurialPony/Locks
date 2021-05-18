@@ -6,21 +6,20 @@ import net.minecraftforge.common.util.INBTSerializable;
 
 public class SerializableCapabilityProvider<A> extends CapabilityProvider<A> implements INBTSerializable
 {
-	public SerializableCapabilityProvider(Capability capability, A instance)
+	public SerializableCapabilityProvider(Capability<A> cap, A inst)
 	{
-		super(capability, instance);
+		super(cap, inst);
 	}
 
 	@Override
 	public INBT serializeNBT()
 	{
-		return this.instance == null ? null : this.capability.writeNBT(this.instance, null);
+		return this.cap.writeNBT(this.inst, null);
 	}
 
 	@Override
 	public void deserializeNBT(INBT nbt)
 	{
-		if(this.instance != null)
-			this.capability.readNBT(this.instance, null, nbt);
+		this.cap.readNBT(this.inst, null, nbt);
 	}
 }

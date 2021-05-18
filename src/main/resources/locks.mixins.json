@@ -5,8 +5,28 @@
 	"refmap": "locks.refmap.json",
 	"mixins":
 	[
+		"AbstractFurnaceTileEntityMixin",
+		"ChestBlockMixin",
+		"ChestTileEntityMixin",
+		"ChunkManagerMixin",
+		"ChunkMixin",
+		"ChunkPrimerMixin",
+		"ExplosionContextMixin",
+		"ForgeHooksAccessor",
+		"HopperTileEntityMixin",
+		"LockableTileEntityMixin",
+		"LootPoolAccessor",
+		"LootTableAccessor",
+		"LootTableManagerMixin",
+		"PistonBlockMixin",
+		"PistonBlockStructureHelperMixin",
 		"ServerWorldMixin",
-		"TemplateMixin"
+		"TemplateMixin",
+		"WorldMixin"
+	],
+	"client":
+	[
+		"client.WorldRendererMixin"
 	],
 	"injectors":
 	{

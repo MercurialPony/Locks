@@ -33,18 +33,18 @@ public class KeyRingContainer extends Container
 
 		// TODO PITCH
 		@Override
-		public void putStack(ItemStack stack)
+		public void set(ItemStack stack)
 		{
-			super.putStack(stack);
-			if(!this.player.world.isRemote)
-				this.player.world.playSound(null, this.player.getPosX(), this.player.getPosY(), this.player.getPosZ(), LocksSoundEvents.KEY_RING.get(), SoundCategory.PLAYERS, 1f, 1f);
+			super.set(stack);
+			if(!this.player.level.isClientSide)
+				this.player.level.playSound(null, this.player.getX(), this.player.getY(), this.player.getZ(), LocksSoundEvents.KEY_RING.get(), SoundCategory.PLAYERS, 1f, 1f);
 		}
 
 		@Override
 		public ItemStack onTake(PlayerEntity player, ItemStack stack)
 		{
-			if(!this.player.world.isRemote)
-				this.player.world.playSound(null, this.player.getPosX(), this.player.getPosY(), this.player.getPosZ(), LocksSoundEvents.KEY_RING.get(), SoundCategory.PLAYERS, 1f, 1f);
+			if(!this.player.level.isClientSide)
+				this.player.level.playSound(null, this.player.getX(), this.player.getY(), this.player.getZ(), LocksSoundEvents.KEY_RING.get(), SoundCategory.PLAYERS, 1f, 1f);
 			return super.onTake(player, stack);
 		}
 	}
@@ -58,50 +58,53 @@ public class KeyRingContainer extends Container
 		super(LocksContainerTypes.KEY_RING.get(), id);
 		this.stack = stack;
 		this.inv = stack.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).orElse(null);
+
 		this.rows = inv.getSlots() / 9;
 		for(int row = 0; row < rows; ++row)
-			for(int column = 0; column < 9; ++column)
-				this.addSlot(new KeyRingSlot(player, inv, column + row * 9, 8 + column * 18, 18 + row * 18));
+			for(int col = 0; col < 9; ++col)
+				this.addSlot(new KeyRingSlot(player, inv, col + row * 9, 8 + col * 18, 18 + row * 18));
+
 		int offset = (rows - 4) * 18;
 		for(int row = 0; row < 3; ++row)
-			for (int column = 0; column < 9; ++column)
-				this.addSlot(new Slot(player.inventory, column + row * 9 + 9, 8 + column * 18, 103 + row * 18 + offset));
-		for(int column = 0; column < 9; ++column)
-			this.addSlot(new Slot(player.inventory, column, 8 + column * 18, 161 + offset));
+			for (int col = 0; col < 9; ++col)
+				this.addSlot(new Slot(player.inventory, col + row * 9 + 9, 8 + col * 18, 103 + row * 18 + offset));
+
+		for(int coll = 0; coll < 9; ++coll)
+			this.addSlot(new Slot(player.inventory, coll, 8 + coll * 18, 161 + offset));
 	}
 
 	@Override
-	public boolean canInteractWith(PlayerEntity player)
+	public boolean stillValid(PlayerEntity player)
 	{
 		return !this.stack.isEmpty();
 	}
 
 	@Override
-	public ItemStack transferStackInSlot(PlayerEntity player, int index)
+	public ItemStack quickMoveStack(PlayerEntity player, int index)
 	{
 		ItemStack stack = ItemStack.EMPTY;
-		Slot slot = this.inventorySlots.get(index);
-		if(slot == null || !slot.getHasStack())
+		Slot slot = this.slots.get(index);
+		if(slot == null || !slot.hasItem())
 			return stack;
-		ItemStack stack1 = slot.getStack();
+		ItemStack stack1 = slot.getItem();
 		stack = stack1.copy();
 		if(index < this.inv.getSlots())
 		{
-			if(!this.mergeItemStack(stack1, this.inv.getSlots(), this.inventorySlots.size(), true))
+			if(!this.moveItemStackTo(stack1, this.inv.getSlots(), this.slots.size(), true))
 				return ItemStack.EMPTY;
 		}
-		else if(!this.mergeItemStack(stack1, 0, this.inv.getSlots(), false))
+		else if(!this.moveItemStackTo(stack1, 0, this.inv.getSlots(), false))
 			return ItemStack.EMPTY;
 		if(stack1.isEmpty())
-			slot.putStack(ItemStack.EMPTY);
+			slot.set(ItemStack.EMPTY);
 		else
-			slot.onSlotChanged();
+			slot.setChanged();
 		return stack;
 	}
 
 	public static final IContainerFactory<KeyRingContainer> FACTORY = (id, inv, buffer) ->
 	{
-		return new KeyRingContainer(id, inv.player, inv.player.getHeldItem(buffer.readEnumValue(Hand.class)));
+		return new KeyRingContainer(id, inv.player, inv.player.getItemInHand(buffer.readEnum(Hand.class)));
 	};
 
 	public static class Provider implements INamedContainerProvider
@@ -122,7 +125,7 @@ public class KeyRingContainer extends Container
 		@Override
 		public ITextComponent getDisplayName()
 		{
-			return this.stack.getDisplayName();
+			return this.stack.getHoverName();
 		}
 	}
 
@@ -138,7 +141,7 @@ public class KeyRingContainer extends Container
 		@Override
 		public void accept(PacketBuffer buffer)
 		{
-			buffer.writeEnumValue(this.hand);
+			buffer.writeEnum(this.hand);
 		}
 	}
 }

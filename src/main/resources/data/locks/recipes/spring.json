@@ -1,0 +1,20 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"pattern":
+	[
+		"N",
+		"N",
+		"N"
+	],
+	"key":
+	{
+		"N":
+		{
+			"tag": "forge:nuggets/iron"
+		}
+	},
+	"result":
+	{
+		"item": "locks:spring"
+	}
+}

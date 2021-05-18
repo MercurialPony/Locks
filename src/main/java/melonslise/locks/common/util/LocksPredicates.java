@@ -4,9 +4,9 @@ import java.util.function.Predicate;
 
 public final class LocksPredicates
 {
-	public static final Predicate<Lockable> LOCKED = lockable -> lockable.lock.isLocked();
+	public static final Predicate<Lockable> LOCKED = lkb -> lkb.lock.isLocked();
 
-	public static final Predicate<Lockable> NOT_LOCKED = LOCKED.negate();
+	public static final Predicate<Lockable> NOT_LOCKED = lkb -> !lkb.lock.isLocked();
 
 	private LocksPredicates() {}
 }

@@ -1,9 +1,10 @@
 package melonslise.locks.common.init;
 
 import melonslise.locks.Locks;
-import melonslise.locks.common.recipe.LockingItemCloningRecipe;
+import melonslise.locks.common.recipe.KeyRecipe;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.item.crafting.IRecipeSerializer;
+import net.minecraft.item.crafting.SpecialRecipeSerializer;
 import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.DeferredRegister;
@@ -13,8 +14,7 @@ public final class LocksRecipeSerializers
 {
 	public static final DeferredRegister<IRecipeSerializer<?>> RECIPE_SERIALIZERS = DeferredRegister.create(ForgeRegistries.RECIPE_SERIALIZERS, Locks.ID);
 
-	public static final RegistryObject<IRecipeSerializer<LockingItemCloningRecipe>>
-		LOCKING_ITEM_CLONING = add("locking_item_cloning", new LockingItemCloningRecipe.Serializer());
+	public static final RegistryObject<IRecipeSerializer<KeyRecipe>> KEY = add("crafting_key", new SpecialRecipeSerializer<>(KeyRecipe::new));
 
 	private LocksRecipeSerializers() {}
 

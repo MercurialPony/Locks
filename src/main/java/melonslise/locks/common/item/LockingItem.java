@@ -22,10 +22,10 @@ public class LockingItem extends Item
 {
 	public LockingItem(Properties props)
 	{
-		super(props.maxStackSize(1));
+		super(props.stacksTo(1));
 	}
 
-	public static final String KEY_ID = "id";
+	public static final String KEY_ID = "Id";
 
 	public static ItemStack copyId(ItemStack from, ItemStack to)
 	{
@@ -44,15 +44,15 @@ public class LockingItem extends Item
 	@Override
 	public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected)
 	{
-		if(!world.isRemote)
+		if(!world.isClientSide)
 			getOrSetId(stack);
 	}
 
 	@OnlyIn(Dist.CLIENT)
 	@Override
-	public void addInformation(ItemStack stack, @Nullable World world, List<ITextComponent> lines, ITooltipFlag flag)
+	public void appendHoverText(ItemStack stack, @Nullable World world, List<ITextComponent> lines, ITooltipFlag flag)
 	{
 		if(stack.hasTag() && stack.getTag().contains(KEY_ID))
-			lines.add(new TranslationTextComponent(Locks.ID + ".tooltip.id", ItemStack.DECIMALFORMAT.format(getOrSetId(stack))).func_240699_a_(TextFormatting.DARK_GREEN));
+			lines.add(new TranslationTextComponent(Locks.ID + ".tooltip.id", ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(getOrSetId(stack))).withStyle(TextFormatting.DARK_GREEN));
 	}
 }

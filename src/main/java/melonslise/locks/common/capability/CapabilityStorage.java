@@ -9,14 +9,14 @@ import net.minecraftforge.common.util.INBTSerializable;
 public class CapabilityStorage<A extends INBTSerializable> implements IStorage<A>
 {
 	@Override
-	public INBT writeNBT(Capability<A> capability, A instance, Direction side)
+	public INBT writeNBT(Capability<A> cap, A inst, Direction side)
 	{
-		return instance.serializeNBT();
+		return inst.serializeNBT();
 	}
 
 	@Override
-	public void readNBT(Capability<A> capability, A instance, Direction side, INBT nbt)
+	public void readNBT(Capability<A> cap, A inst, Direction side, INBT nbt)
 	{
-		instance.deserializeNBT(nbt);
+		inst.deserializeNBT(nbt);
 	}
 }

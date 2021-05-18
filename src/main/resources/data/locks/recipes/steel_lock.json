@@ -1,0 +1,24 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"pattern":
+	[
+		" S ",
+		"SLS",
+		"SSS"
+	],
+	"key":
+	{
+		"S":
+		{
+			"tag": "forge:ingots/steel"
+		},
+		"L":
+		{
+			"item": "locks:steel_lock_mechanism"
+		}
+	},
+	"result":
+	{
+		"item": "locks:steel_lock"
+	}
+}

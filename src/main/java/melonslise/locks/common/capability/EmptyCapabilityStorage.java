@@ -8,11 +8,13 @@ import net.minecraftforge.common.capabilities.Capability.IStorage;
 public class EmptyCapabilityStorage<A> implements IStorage<A>
 {
 	@Override
-	public INBT writeNBT(Capability<A> capability, A instance, Direction side)
+	public INBT writeNBT(Capability<A> cap, A inst, Direction side)
 	{
 		return null;
 	}
 
 	@Override
-	public void readNBT(Capability<A> capability, A instance, Direction side, INBT nbt) {}
+	public void readNBT(Capability<A> cap, A inst, Direction side, INBT nbt)
+	{
+	}
 }

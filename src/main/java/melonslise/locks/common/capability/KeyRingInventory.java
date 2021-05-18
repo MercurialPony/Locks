@@ -2,7 +2,7 @@ package melonslise.locks.common.capability;
 
 import javax.annotation.Nonnull;
 
-import melonslise.locks.common.init.LocksItems;
+import melonslise.locks.common.init.LocksItemTags;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
@@ -38,7 +38,7 @@ public class KeyRingInventory implements IItemHandlerModifiable
 			CompoundNBT nbt = list.getCompound(a);
 			if(nbt.getInt("Slot") != slot)
 				continue;
-			return ItemStack.read(nbt);
+			return ItemStack.of(nbt);
 		}
 		return ItemStack.EMPTY;
 	}
@@ -52,7 +52,7 @@ public class KeyRingInventory implements IItemHandlerModifiable
 		{
 			nbt = new CompoundNBT();
 			nbt.putInt("Slot", slot);
-			stack.write(nbt);
+			stack.save(nbt);
 		}
 		ListNBT list = this.stack.getOrCreateTag().getList("Items", Constants.NBT.TAG_COMPOUND);
 		for(int a = 0; a < list.size(); a++)
@@ -135,10 +135,9 @@ public class KeyRingInventory implements IItemHandlerModifiable
 			throw new RuntimeException("Slot " + slot + " not in valid range - [0," + getSlots() + ")");
 	}
 
-	// TODO Don't hard code item
 	@Override
 	public boolean isItemValid(int slot, @Nonnull ItemStack stack)
 	{
-		return stack.getItem() == LocksItems.KEY.get();
+		return stack.getItem().is(LocksItemTags.KEYS);
 	}
 }

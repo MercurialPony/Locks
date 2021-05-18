@@ -9,11 +9,11 @@ import net.minecraftforge.fml.network.NetworkEvent;
 
 public class RemoveLockablePacket
 {
-	private final int networkID;
+	private final int id;
 
-	public RemoveLockablePacket(int networkID)
+	public RemoveLockablePacket(int id)
 	{
-		this.networkID = networkID;
+		this.id = id;
 	}
 
 	public static RemoveLockablePacket decode(PacketBuffer buf)
@@ -23,18 +23,18 @@ public class RemoveLockablePacket
 
 	public static void encode(RemoveLockablePacket pkt, PacketBuffer buf)
 	{
-		buf.writeInt(pkt.networkID);
+		buf.writeInt(pkt.id);
 	}
 
 	public static void handle(RemoveLockablePacket pkt, Supplier<NetworkEvent.Context> ctx)
 	{
-		// Use runnable, lambda causes issues with classloading
+		// Use runnable, lambda causes issues with class loading
 		ctx.get().enqueueWork(new Runnable()
 		{
 			@Override
 			public void run()
 			{
-				Minecraft.getInstance().world.getCapability(LocksCapabilities.LOCKABLES).ifPresent(lockables -> lockables.remove(pkt.networkID));
+				Minecraft.getInstance().level.getCapability(LocksCapabilities.LOCKABLE_HANDLER).ifPresent(handler -> handler.remove(pkt.id));
 			}
 		});
 		ctx.get().setPacketHandled(true);

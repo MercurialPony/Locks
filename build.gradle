@@ -1,95 +1,68 @@
-buildscript
-{
-	repositories
-	{
-		maven
-		{
-			url = "https://files.minecraftforge.net/maven"
-		}
-		jcenter()
-		mavenCentral()
-		maven
-		{
-			url = 'https://dist.creeper.host/Sponge/maven'
-		}
-	}
-	dependencies
-	{
-		classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '3.+', changing: true
+buildscript {
+    repositories {
+        maven { url = 'https://maven.minecraftforge.net' }
+		maven { url = 'https://repo.spongepowered.org/repository/maven-public/' }
+        mavenCentral()
+    }
+    dependencies {
+        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '4.1.+', changing: true
 		classpath group: 'org.spongepowered', name: 'mixingradle', version: '0.7-SNAPSHOT'
-	}
+    }
 }
 
 apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 
-version = '2.5.2'
+version = '3.0'
 group = 'melonslise.locks'
 archivesBaseName = 'locks'
 
-sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8'
+java.toolchain.languageVersion = JavaLanguageVersion.of(8)
 
-minecraft
-{
-	mappings channel: 'snapshot', version: '20200707-1.16.1'
-
+minecraft {
+	mappings channel: 'official', version: '1.16.5'
+    
 	accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
 
-	runs
-	{
-		client
-		{
+	runs {
+		client {
 			workingDirectory project.file('run')
 
 			arg "-mixin.config=" + archivesBaseName + ".mixins.json"
 
-			property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
-
 			property 'forge.logging.console.level', 'info'
 
-			mods
-			{
-				locks
-				{
+			mods {
+				locks {
 					source sourceSets.main
 				}
 			}
 		}
 
-		server
-		{
+		server {
 			workingDirectory project.file('run')
 
 			arg "-mixin.config=" + archivesBaseName + ".mixins.json"
 
-			property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
-
 			property 'forge.logging.console.level', 'info'
 
-			mods
-			{
-				locks
-				{
+			mods {
+				locks {
 					source sourceSets.main
 				}
 			}
 		}
 
-		data
-		{
+		data {
 			workingDirectory project.file('run')
-
-			property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
 
 			property 'forge.logging.console.level', 'info'
 
-			args '--mod', 'locks', '--all', '--output', file('src/generated/resources/')
+			args '--mod', 'locks', '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
 
-			mods
-			{
-				locks
-				{
+			mods {
+				locks {
 					source sourceSets.main
 				}
 			}
@@ -97,15 +70,15 @@ minecraft
 	}
 }
 
-dependencies
-{
-	minecraft 'net.minecraftforge:forge:1.16.2-33.0.5'
+sourceSets.main.resources { srcDir 'src/generated/resources' }
+
+dependencies {
+	minecraft 'net.minecraftforge:forge:1.16.5-36.1.4'
+	annotationProcessor 'org.spongepowered:mixin:0.8:processor'
 }
 
-jar
-{
-	manifest
-	{
+jar {
+	manifest {
 		attributes([
 			"Specification-Title": archivesBaseName,
 			"Specification-Vendor": "melonslise",
@@ -121,7 +94,6 @@ jar
 
 apply plugin: 'org.spongepowered.mixin'
 
-mixin
-{
-	add sourceSets.main, archivesBaseName + ".refmap.json"
+mixin {
+    add sourceSets.main, archivesBaseName + ".refmap.json"
 }

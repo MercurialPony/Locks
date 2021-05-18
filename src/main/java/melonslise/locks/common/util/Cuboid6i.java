@@ -1,11 +1,15 @@
 package melonslise.locks.common.util;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.Direction;
-import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.util.math.vector.Vector3i;
 import net.minecraft.world.World;
 
 public class Cuboid6i
@@ -32,9 +36,38 @@ public class Cuboid6i
 		this.z2 = Math.max(pos1.getZ(), pos2.getZ()) + 1;
 	}
 
-	public Cuboid6i(BlockPos pos)
+	public static final String KEY_X1 = "X1", KEY_Y1 = "Y1", KEY_Z1 = "Z1", KEY_X2 = "X2", KEY_Y2 = "Y2", KEY_Z2 = "Z2";
+
+	public static Cuboid6i fromNbt(CompoundNBT nbt)
 	{
-		this(pos.getX(), pos.getY(), pos.getZ(), pos.getX() + 1, pos.getY() + 1, pos.getZ() + 1);
+		return new Cuboid6i(nbt.getInt(KEY_X1), nbt.getInt(KEY_Y1), nbt.getInt(KEY_Z1), nbt.getInt(KEY_X2), nbt.getInt(KEY_Y2), nbt.getInt(KEY_Z2));
+	}
+
+	public static CompoundNBT toNbt(Cuboid6i bb)
+	{
+		CompoundNBT nbt = new CompoundNBT();
+		nbt.putInt(KEY_X1, bb.x1);
+		nbt.putInt(KEY_Y1, bb.y1);
+		nbt.putInt(KEY_Z1, bb.z1);
+		nbt.putInt(KEY_X2, bb.x2);
+		nbt.putInt(KEY_Y2, bb.y2);
+		nbt.putInt(KEY_Z2, bb.z2);
+		return nbt;
+	}
+
+	public static Cuboid6i fromBuf(PacketBuffer buf)
+	{
+		return new Cuboid6i(buf.readInt(), buf.readInt(), buf.readInt(), buf.readInt(), buf.readInt(), buf.readInt());
+	}
+
+	public static void toBuf(PacketBuffer buf, Cuboid6i bb)
+	{
+		buf.writeInt(bb.x1);
+		buf.writeInt(bb.y1);
+		buf.writeInt(bb.z1);
+		buf.writeInt(bb.x2);
+		buf.writeInt(bb.y2);
+		buf.writeInt(bb.z2);
 	}
 
 	public Cuboid6i offset(int x, int y, int z)
@@ -42,9 +75,39 @@ public class Cuboid6i
 		return new Cuboid6i(this.x1 + x, this.y1 + y, this.z1 + z, this.x2 + x, this.y2 + y, this.z2 + z);
 	}
 
-	public Cuboid6i offset(BlockPos pos)
+	public Cuboid6i intersection(Cuboid6i other)
 	{
-		return this.offset(pos.getX(), pos.getY(), pos.getZ());
+		return new Cuboid6i(Math.max(this.x1, other.x1), Math.max(this.y1, other.y1), Math.max(this.z1, other.z1), Math.min(this.x2, other.x2), Math.min(this.y2, other.y2), Math.min(this.z2, other.z2));
+	}
+
+	public int length()
+	{
+		return this.x2 - this.x1;
+	}
+
+	public int height()
+	{
+		return this.y2 - this.y1;
+	}
+
+	public int width()
+	{
+		return this.z2 - this.z1;
+	}
+
+	public int volume()
+	{
+		return this.length() * this.height() * this.width();
+	}
+
+	public Vector3d center()
+	{
+		return new Vector3d((this.x1 + this.x2) * 0.5d, (this.y1 + this.y2) * 0.5d, (this.z1 + this.z2) * 0.5d);
+	}
+
+	public boolean intersects(int x1, int y1, int z1, int x2, int y2, int z2)
+	{
+		return this.x1 < x2 && this.x2 >x1 && this.y1 < y2 && this.y2 > y1 && this.z1 < z2 && this.z2 > z1;
 	}
 
 	public boolean intersects(Cuboid6i other)
@@ -57,68 +120,138 @@ public class Cuboid6i
 		return this.intersects(pos.getX(), pos.getY(), pos.getZ(), pos.getX() + 1, pos.getY() + 1, pos.getZ() + 1);
 	}
 
-	public boolean intersects(int x1, int y1, int z1, int x2, int y2, int z2)
+	public Iterable<BlockPos> getContainedPos()
 	{
-		return this.x1 < x2 && this.x2 >x1 && this.y1 < y2 && this.y2 > y1 && this.z1 < z2 && this.z2 > z1;
+		return BlockPos.betweenClosed(this.x1, this.y1, this.z1, this.x2 - 1, this.y2 - 1, this.z2 - 1);
 	}
 
-	public boolean contains(Cuboid6i other)
+	public boolean getContainedChunks(BiIntPredicate p)
 	{
-		return this.contains(other.x1, other.y1, other.z1) && this.contains(other.x2, other.y2, other.z2);
+		// Get the intersecting chunks and go through the checks
+		// Use bitshift because apparently / 16 behaves differently with certain negative numbers
+		int x1 = this.x1 >> 4;
+		int x2 = this.x2 >> 4;
+		int z1 = this.z1 >> 4;
+		int z2 = this.z2 >> 4;
+		// Prevents funky behavior at positive x/z chunk edges
+		if(this.x2 % 16 == 0)
+			x2 -= 1;
+		if(this.z2 % 16 == 0)
+			z2 -= 1;
+
+		int sizeX = x2 - x1 + 1;
+		int length = sizeX * (z2 - z1 + 1);
+		for(int a = 0; a < length; ++a)
+			if(p.test(x1 + a / sizeX, z1 + a % sizeX))
+				return false;
+		return true;
 	}
 
-	public boolean contains(int x, int y, int z)
+	public <T> List<T> containedChunksTo(BiIntFunction<T> f, boolean endEarly)
 	{
-		return x >= this.x1 && x < this.x2 && y >= this.y1 && y < this.y2 && z >= this.z1 && z < this.z2;
-	}
+		// Get the intersecting chunks and go through the checks
+		// Use bitshift because apparently / 16 behaves differently with certain negative numbers
+		int x1 = this.x1 >> 4;
+		int x2 = this.x2 >> 4;
+		int z1 = this.z1 >> 4;
+		int z2 = this.z2 >> 4;
+		// Prevents funky behavior at positive x/z chunk edges
+		if(this.x2 % 16 == 0)
+			x2 -= 1;
+		if(this.z2 % 16 == 0)
+			z2 -= 1;
 
-	public Cuboid6i intersection(Cuboid6i other)
-	{
-		return new Cuboid6i(Math.max(this.x1, other.x1), Math.max(this.y1, other.y1), Math.max(this.z1, other.z1), Math.min(this.x2, other.x2), Math.min(this.y2, other.y2), Math.min(this.z2, other.z2));
-	}
-
-	public Cuboid6i union(Cuboid6i other)
-	{
-		return new Cuboid6i(Math.min(this.x1, other.x1), Math.min(this.y1, other.y1), Math.min(this.z1, other.z1), Math.max(this.x2, other.x2), Math.max(this.y2, other.y2), Math.max(this.z2, other.z2));
-	}
-
-	public int volume()
-	{
-		return (this.x2 - this.x1) * (this.y2 - this.y1) * (this.z2 - this.z1);
-	}
-
-	public Vector3d center()
-	{
-		return new Vector3d((double) (this.x2 + this.x1) / 2D, (double) (this.y2 + this.y1) / 2D, (double) (this.z2 + this.z1) / 2D);
-	}
-
-	public Iterable<BlockPos> getContainedBlockPositions()
-	{
-		return BlockPos.getAllInBoxMutable(this.x1, this.y1, this.z1, this.x2 - 1, this.y2 - 1, this.z2 - 1);
-	}
-
-	public Vector3d getSideCenter(Direction side)
-	{
-		switch(side)
+		int sizeX = x2 - x1 + 1;
+		int length = sizeX * (z2 - z1 + 1);
+		List<T> list = new ArrayList<>(length);
+		for(int a = 0; a < length; ++a)
 		{
-		case DOWN: return new Vector3d((double) (this.x1 + this.x2) / 2D, (double) this.y1, (double) (this.z1 + this.z2) / 2D);
-		case UP: return new Vector3d((double) (this.x1 + this.x2) / 2D, (double) this.y2, (double) (this.z1 + this.z2) / 2D);
-		case NORTH: return new Vector3d((double) (this.x1 + this.x2) / 2D, (double) (this.y1 + this.y2) / 2D, (double) this.z1);
-		case SOUTH: return new Vector3d((double) (this.x1 + this.x2) / 2D, (double) (this.y1 + this.y2) / 2D, (double) this.z2);
-		case WEST: return new Vector3d((double) this.x1, (double) (this.y1 + this.y2) / 2D, (double) (this.z1 + this.z2) / 2D);
-		case EAST: return new Vector3d((double) this.x2, (double) (this.y1 + this.y2) / 2D, (double) (this.z1 + this.z2) / 2D);
-		default: return null;
+			T t = f.apply(x1 + a % sizeX, z1 + a / sizeX);
+			if(endEarly && t == null)
+				return null;
+			list.add(a, t);
 		}
+		return list;
 	}
 
-	public AxisAlignedBB toAABB()
+	/*
+	public Iterable<BlockPos> getContainedChunkPos()
 	{
-		return new AxisAlignedBB(this.x1, this.y1, this.z1, this.x2, this.y2, this.z2);
+		// Get the intersecting chunks and go through the checks
+		// Use bitshift because apparently / 16 behaves differently with negative numbers
+		final int x1 = this.x1 >> 4;
+		final int x2 = this.x2 >> 4 + (this.x2 >> 4) % 16 == 0 ? -1 : 0;
+		final int z1 = this.z1 >> 4;
+		final int z2 = this.z2 >> 4 + (this.z2 >> 4) % 16 == 0 ? -1 : 0;
+		// Prevents funky behavior at positive x/z chunk edges
+		if(this.x2 % 16 == 0)
+			x2 -= 1;
+		if(this.z2 % 16 == 0)
+			z2 -= 1;
+		final int sizeX = x2 - x1 + 1;
+		return new Iterable<BlockPos>()
+		{
+			@Override
+			public Iterator<BlockPos> iterator()
+			{
+				return new Iterator<BlockPos>()
+				{
+					public BlockPos.Mutable mut = new BlockPos.Mutable(x2 - 1, 0 , z1);
+
+					@Override
+					public boolean hasNext()
+					{
+						return this.mut != null;
+					}
+
+					@Override
+					public BlockPos next()
+					{
+						if(this.mut.getX() != x2)
+							return this.mut.move(1, 0, 0);
+						if(this.mut.getZ() == z2)
+							return null;
+						return this.mut.set(x1, 0, this.mut.getZ() + 1);
+					}
+				};
+			}
+
+			@Override
+			public Spliterator<BlockPos> spliterator()
+			{
+				return new AbstractSpliterator<BlockPos>(sizeX * (z2 - z1 + 1), 64)
+				{
+					public BlockPos.Mutable mut = new BlockPos.Mutable(x1 - 1, 0, z1);
+
+					@Override
+					public boolean tryAdvance(Consumer<? super BlockPos> c)
+					{
+						if(this.mut.getX() == x2)
+						{
+							if(this.mut.getZ() == z2)
+								return false;
+							this.mut.set(x1, 0, this.mut.getZ() + 1);
+						}
+						else
+							this.mut.move(1, 0, 0);
+						c.accept(this.mut);
+						return true;
+					}
+				};
+			}
+		};
+	}
+	*/
+
+	public Vector3d sideCenter(Direction side)
+	{
+		Vector3i dir = side.getNormal();
+		return new Vector3d((this.x1 + this.x2 + this.length() * dir.getX()) * 0.5d, (this.y1 + this.y2 + this.height() * dir.getY()) * 0.5d, (this.z1 + this.z2 + this.width() * dir.getZ()) * 0.5d);
 	}
 
-	public boolean loaded(World world)
+	public boolean isLoaded(World world)
 	{
-		return world.isAreaLoaded(this.x1, this.y1, this.z1, this.x2, this.y2, this.z2);
+		return world.hasChunksAt(this.x1, this.y1, this.z1, this.x2, this.y2, this.z2);
 	}
 
 	@Override

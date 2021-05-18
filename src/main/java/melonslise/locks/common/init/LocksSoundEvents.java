@@ -18,7 +18,8 @@ public final class LocksSoundEvents
 		LOCK_OPEN = add("lock.open"),
 		LOCK_RATTLE = add("lock.rattle"),
 		PIN_FAIL = add("pin.fail"),
-		PIN_MATCH = add("pin.match");
+		PIN_MATCH = add("pin.match"),
+		SHOCK = add("shock");
 
 	private LocksSoundEvents() {}
 

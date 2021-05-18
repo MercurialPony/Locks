@@ -1,0 +1,28 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"pattern":
+	[
+		"SSS",
+		"NNN",
+		"III"
+	],
+	"key":
+	{
+		"S":
+		{
+			"item": "locks:spring"
+		},
+		"N":
+		{
+			"tag": "forge:nuggets/steel"
+		},
+		"I":
+		{
+			"tag": "forge:ingots/steel"
+		}
+	},
+	"result":
+	{
+		"item": "locks:steel_lock_mechanism"
+	}
+}

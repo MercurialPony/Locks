@@ -6,9 +6,9 @@ import java.util.stream.Collectors;
 import melonslise.locks.common.capability.CapabilityProvider;
 import melonslise.locks.common.capability.KeyRingInventory;
 import melonslise.locks.common.container.KeyRingContainer;
-import melonslise.locks.common.init.LocksCapabilities;
 import melonslise.locks.common.init.LocksSoundEvents;
 import melonslise.locks.common.util.Lockable;
+import melonslise.locks.common.util.LocksUtil;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.Item;
@@ -24,15 +24,15 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.fml.network.NetworkHooks;
 import net.minecraftforge.items.CapabilityItemHandler;
+import net.minecraftforge.items.IItemHandler;
 
-// TODO Add amount of keys to tooltip
 public class KeyRingItem extends Item
 {
 	public final int rows;
 
-	public KeyRingItem(Properties props, int rows)
+	public KeyRingItem(int rows, Properties props)
 	{
-		super(props);
+		super(props.stacksTo(1));
 		this.rows = rows;
 	}
 
@@ -42,43 +42,46 @@ public class KeyRingItem extends Item
 		return new CapabilityProvider(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, new KeyRingInventory(stack, this.rows, 9));
 	}
 
-	@Override
-	public ActionResult<ItemStack> onItemRightClick(World world, PlayerEntity player, Hand hand)
+	public static boolean containsId(ItemStack stack, int id)
 	{
-		if(!player.world.isRemote)
-			NetworkHooks.openGui((ServerPlayerEntity) player, new KeyRingContainer.Provider(player.getHeldItem(hand)), new KeyRingContainer.Writer(hand));
-		return new ActionResult<>(ActionResultType.PASS, player.getHeldItem(hand));
+		IItemHandler inv = stack.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).orElse(null);
+		for(int a = 0; a < inv.getSlots(); ++a)
+			if(LockingItem.getOrSetId(inv.getStackInSlot(a)) == id)
+				return true;
+		return false;
 	}
 
 	@Override
-	public ActionResultType onItemUse(ItemUseContext ctx)
+	public ActionResult<ItemStack> use(World world, PlayerEntity player, Hand hand)
 	{
-		World world = ctx.getWorld();
-		BlockPos pos = ctx.getPos();
-		return world.getCapability(LocksCapabilities.LOCKABLES)
-			.map(lockables ->
-			{
-				return ctx.getItem().getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY)
-					.map(inv->
-					{
-						List<Lockable> intersecting = lockables.get().values().stream().filter(lockable1 -> lockable1.box.intersects(pos)).collect(Collectors.toList());
-						if(intersecting.isEmpty())
-							return ActionResultType.PASS;
-						for(int a = 0; a < inv.getSlots(); ++a)
-						{
-							int id = LockingItem.getOrSetId(inv.getStackInSlot(a));
-							List<Lockable> matching = intersecting.stream().filter(lockable1 -> lockable1.lock.id == id).collect(Collectors.toList());
-							if(matching.isEmpty())
-								continue;
-							for(Lockable lockable : matching)
-								lockable.lock.setLocked(!lockable.lock.isLocked());
-							world.playSound(ctx.getPlayer(), pos, LocksSoundEvents.LOCK_OPEN.get(), SoundCategory.BLOCKS, 1F, 1F);
-							return ActionResultType.SUCCESS;
-						}
-						return ActionResultType.PASS;
-					})
-					.orElse(ActionResultType.PASS);
-			})
-			.orElse(ActionResultType.PASS);
+		ItemStack stack = player.getItemInHand(hand);
+		if(!player.level.isClientSide)
+			NetworkHooks.openGui((ServerPlayerEntity) player, new KeyRingContainer.Provider(stack), new KeyRingContainer.Writer(hand));
+		return new ActionResult<>(ActionResultType.PASS, stack);
+	}
+
+	@Override
+	public ActionResultType useOn(ItemUseContext ctx)
+	{
+		World world = ctx.getLevel();
+		BlockPos pos = ctx.getClickedPos();
+		IItemHandler inv = ctx.getItemInHand().getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).orElse(null);
+		List<Lockable> intersect = LocksUtil.intersecting(world, pos).collect(Collectors.toList());
+		if(intersect.isEmpty())
+			return ActionResultType.PASS;
+		for(int a = 0; a < inv.getSlots(); ++a)
+		{
+			int id = LockingItem.getOrSetId(inv.getStackInSlot(a));
+			List<Lockable> match = intersect.stream().filter(lkb -> lkb.lock.id == id).collect(Collectors.toList());
+			if(match.isEmpty())
+				continue;
+			world.playSound(ctx.getPlayer(), pos, LocksSoundEvents.LOCK_OPEN.get(), SoundCategory.BLOCKS, 1f, 1f);
+			if(world.isClientSide)
+				return ActionResultType.SUCCESS;
+			for(Lockable lkb : match)
+				lkb.lock.setLocked(!lkb.lock.isLocked());
+			return ActionResultType.SUCCESS;
+		}
+		return ActionResultType.SUCCESS;
 	}
 }

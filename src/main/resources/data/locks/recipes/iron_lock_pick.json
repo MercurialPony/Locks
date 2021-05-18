@@ -1,0 +1,21 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"pattern":
+	[
+		" II",
+		" I ",
+		"I  "
+	],
+	"key":
+	{
+		"I":
+		{
+			"tag": "forge:ingots/iron"
+		}
+	},
+	"result":
+	{
+		"item": "locks:iron_lock_pick",
+		"count": 2
+	}
+}

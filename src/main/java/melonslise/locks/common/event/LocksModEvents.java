@@ -1,13 +1,10 @@
 package melonslise.locks.common.event;
 
 import melonslise.locks.Locks;
+import melonslise.locks.common.config.LocksConfig;
 import melonslise.locks.common.config.LocksServerConfig;
 import melonslise.locks.common.init.LocksCapabilities;
-import melonslise.locks.common.init.LocksFeatures;
-import melonslise.locks.common.init.LocksNetworks;
-import melonslise.locks.common.init.LocksPlacements;
-import net.minecraft.world.gen.placement.Placement;
-import net.minecraftforge.event.RegistryEvent;
+import melonslise.locks.common.init.LocksNetwork;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
@@ -19,17 +16,18 @@ public final class LocksModEvents
 	private LocksModEvents() {}
 
 	@SubscribeEvent
-	public static void onSetup(FMLCommonSetupEvent event)
+	public static void onSetup(FMLCommonSetupEvent e)
 	{
 		LocksCapabilities.register();
-		LocksNetworks.register();
-		LocksFeatures.addFeatures();
+		LocksNetwork.register();
 	}
 
 	@SubscribeEvent
-	public static void onConfigLoad(ModConfig.ModConfigEvent event)
+	public static void onConfigLoad(ModConfig.ModConfigEvent e)
 	{
-		if(event.getConfig().getSpec() == LocksServerConfig.SPEC)
-			LocksServerConfig.load();
+		if(e.getConfig().getSpec() == LocksConfig.SPEC)
+			LocksConfig.init();
+		if(e.getConfig().getSpec() == LocksServerConfig.SPEC)
+			LocksServerConfig.init();
 	}
 }

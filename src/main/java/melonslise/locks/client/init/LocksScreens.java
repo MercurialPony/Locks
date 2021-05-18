@@ -14,7 +14,7 @@ public final class LocksScreens
 
 	public static void register()
 	{
-		ScreenManager.registerFactory(LocksContainerTypes.LOCK_PICKING.get(), LockPickingScreen::new);
-		ScreenManager.registerFactory(LocksContainerTypes.KEY_RING.get(), KeyRingScreen::new);
+		ScreenManager.register(LocksContainerTypes.LOCK_PICKING.get(), LockPickingScreen::new);
+		ScreenManager.register(LocksContainerTypes.KEY_RING.get(), KeyRingScreen::new);
 	}
 }

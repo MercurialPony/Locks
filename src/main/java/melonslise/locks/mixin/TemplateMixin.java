@@ -12,6 +12,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import melonslise.locks.common.capability.ILockableHandler;
 import melonslise.locks.common.config.LocksConfig;
 import melonslise.locks.common.init.LocksCapabilities;
 import melonslise.locks.common.util.Cuboid6i;
@@ -19,8 +20,9 @@ import melonslise.locks.common.util.Lock;
 import melonslise.locks.common.util.Lockable;
 import melonslise.locks.common.util.LockableInfo;
 import melonslise.locks.common.util.LocksUtil;
-import melonslise.locks.common.util.Orientation;
+import melonslise.locks.common.util.Transform;
 import net.minecraft.block.Block;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.Direction;
@@ -34,77 +36,60 @@ import net.minecraftforge.common.util.Constants;
 @Mixin(Template.class)
 public class TemplateMixin
 {
-	private final List<LockableInfo> lockables = new ArrayList<>();
+	private final List<LockableInfo> lockableInfos = new ArrayList<>();
 
-	@Inject(at = @At("HEAD"), method = "takeBlocksFromWorld(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/util/math/BlockPos;ZLnet/minecraft/block/Block;)V")
-	public void takeBlocksFromWorld(World world, BlockPos start, BlockPos size, boolean takeEntities, @Nullable Block toIgnore, CallbackInfo ci)
+	@Inject(at = @At("HEAD"), method = "fillFromWorld(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/util/math/BlockPos;ZLnet/minecraft/block/Block;)V")
+	private void fillFromWorld(World world, BlockPos start, BlockPos size, boolean takeEntities, @Nullable Block toIgnore, CallbackInfo ci)
 	{
 		if (size.getX() >= 1 && size.getY() >= 1 && size.getZ() >= 1)
 		{
-			this.lockables.clear();
-			world.getCapability(LocksCapabilities.LOCKABLES)
-				.ifPresent(lockables ->
+			this.lockableInfos.clear();
+			ILockableHandler handler = world.getCapability(LocksCapabilities.LOCKABLE_HANDLER).orElse(null);
+			Cuboid6i bb = new Cuboid6i(start, start.offset(size.getX() - 1, size.getY() - 1, size.getZ() - 1));
+			handler.getLoaded().values().stream()
+				.filter(lkb -> lkb.bb.intersects(bb))
+				.forEach(lkb ->
 				{
-					Cuboid6i box = new Cuboid6i(start, start.add(size.getX() - 1, size.getY() - 1, size.getZ() - 1));
-					lockables.get().values().stream()
-						.filter(lockable1 -> lockable1.box.intersects(box))
-						.forEach(lockable ->
-						{
-							Cuboid6i newBox = box.intersection(lockable.box).offset(-start.getX(), -start.getY(), -start.getZ());
-							this.lockables.add(new LockableInfo(newBox, lockable.lock, lockable.orient));
-						});
+					Cuboid6i newBB = bb.intersection(lkb.bb).offset(-start.getX(), -start.getY(), -start.getZ());
+					this.lockableInfos.add(new LockableInfo(newBB, lkb.lock, lkb.tr, lkb.stack, lkb.id));
 				});
 		}
 	}
 
 	// Second return
-	@Inject(at = @At(value = "RETURN", ordinal = 1), method = "func_237146_a_(Lnet/minecraft/world/IServerWorld;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/world/gen/feature/template/PlacementSettings;Ljava/util/Random;I)Z")
-	public void addBlocksToWorld(IServerWorld world, BlockPos start, BlockPos size, PlacementSettings settings, Random rand, int i, CallbackInfoReturnable<Boolean> cir)
+	@Inject(at = @At(value = "RETURN", ordinal = 1), method = "placeInWorld(Lnet/minecraft/world/IServerWorld;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/world/gen/feature/template/PlacementSettings;Ljava/util/Random;I)Z")
+	private void placeInWorld(IServerWorld world, BlockPos start, BlockPos size, PlacementSettings settings, Random rng, int i, CallbackInfoReturnable<Boolean> cir)
 	{
-		world.getWorld().getCapability(LocksCapabilities.LOCKABLES)
-			.ifPresent(lockables ->
-			{
-				for(LockableInfo lockable : this.lockables)
-				{
-					BlockPos pos1 = LocksUtil.transformPos(lockable.box.x1, lockable.box.y1, lockable.box.z1, settings);
-					BlockPos pos2 = LocksUtil.transformPos(lockable.box.x2, lockable.box.y2, lockable.box.z2, settings);
-					Cuboid6i box = new Cuboid6i(pos1.getX() + start.getX(), pos1.getY() + start.getY(), pos1.getZ() + start.getZ(), pos2.getX() + start.getX(), pos2.getY() + start.getY(), pos2.getZ() + start.getZ());
-					Lock lock = LocksConfig.RANDOMIZE_LOADED_LOCKS.get() ? new Lock(world.getRandom().nextInt(), LocksConfig.randLockLen(world.getRandom()), true) : lockable.lock;
-					Orientation orient = Orientation.fromDirectionAndFace(settings.getRotation().rotate(settings.getMirror().toRotation(lockable.lockOrientation.dir).rotate(lockable.lockOrientation.dir)), lockable.lockOrientation.face, Direction.NORTH);
-					lockables.add(new Lockable(box, lock, orient));
-				}
-			});
+		ILockableHandler handler = world.getLevel().getCapability(LocksCapabilities.LOCKABLE_HANDLER).orElse(null);
+		for(LockableInfo lkb : this.lockableInfos)
+		{
+			BlockPos pos1 = LocksUtil.transform(lkb.bb.x1, lkb.bb.y1, lkb.bb.z1, settings);
+			BlockPos pos2 = LocksUtil.transform(lkb.bb.x2, lkb.bb.y2, lkb.bb.z2, settings);
+			Cuboid6i bb = new Cuboid6i(pos1.getX() + start.getX(), pos1.getY() + start.getY(), pos1.getZ() + start.getZ(), pos2.getX() + start.getX(), pos2.getY() + start.getY(), pos2.getZ() + start.getZ());
+			ItemStack stack = LocksConfig.RANDOMIZE_LOADED_LOCKS.get() ? LocksConfig.getRandomLock(rng) : lkb.stack;
+			Lock lock = LocksConfig.RANDOMIZE_LOADED_LOCKS.get() ? Lock.from(stack) : lkb.lock;
+			Transform tr = Transform.fromDirectionAndFace(settings.getRotation().rotate(settings.getMirror().getRotation(lkb.tr.dir).rotate(lkb.tr.dir)), lkb.tr.face, Direction.NORTH);
+			handler.add(new Lockable(bb, lock, tr, stack, world.getLevel()));
+		}
 	}
 
-	private static final String KEY_LOCKABLES = "lockables";
+	private static final String KEY_LOCKABLES = "Lockables";
 
-	@Inject(at = @At("HEAD"), method = "writeToNBT(Lnet/minecraft/nbt/CompoundNBT;)Lnet/minecraft/nbt/CompoundNBT;")
-	public void writeToNBT(CompoundNBT nbt, CallbackInfoReturnable<CompoundNBT> cir)
+	@Inject(at = @At("HEAD"), method = "save(Lnet/minecraft/nbt/CompoundNBT;)Lnet/minecraft/nbt/CompoundNBT;")
+	private void save(CompoundNBT nbt, CallbackInfoReturnable<CompoundNBT> cir)
 	{
-		ListNBT lockableNBTList = new ListNBT();
-		for(LockableInfo lockable : lockables)
-		{
-			CompoundNBT lockableNBT = new CompoundNBT();
-			lockableNBT.put(LocksUtil.KEY_BOX, LocksUtil.writeBoxToNBT(lockable.box));
-			lockableNBT.put(LocksUtil.KEY_LOCK, LocksUtil.writeLockToNBT(lockable.lock));
-			lockableNBT.putByte(LocksUtil.KEY_ORIENTATION, (byte) lockable.lockOrientation.ordinal());
-			lockableNBTList.add(lockableNBT);
-		}
-		nbt.put(KEY_LOCKABLES, lockableNBTList);
+		ListNBT list = new ListNBT();
+		for(LockableInfo lkb : this.lockableInfos)
+			list.add(LockableInfo.toNbt(lkb));
+		nbt.put(KEY_LOCKABLES, list);
 	}
 
-	@Inject(at = @At("HEAD"), method = "read(Lnet/minecraft/nbt/CompoundNBT;)V")
-	public void read(CompoundNBT nbt, CallbackInfo ci)
+	@Inject(at = @At("HEAD"), method = "load(Lnet/minecraft/nbt/CompoundNBT;)V")
+	private void read(CompoundNBT nbt, CallbackInfo ci)
 	{
-		this.lockables.clear();
-		ListNBT nbtList = nbt.getList(KEY_LOCKABLES, Constants.NBT.TAG_COMPOUND);
-		for(int a = 0, b = nbtList.size(); a < b; ++a)
-		{
-			CompoundNBT lockableNBT = nbtList.getCompound(a);
-			Cuboid6i box = LocksUtil.readBoxFromNBT(lockableNBT.getCompound(LocksUtil.KEY_BOX));
-			Lock lock = LocksUtil.readLockFromNBT(lockableNBT.getCompound(LocksUtil.KEY_LOCK));
-			Orientation orient = Orientation.values()[(int) lockableNBT.getByte(LocksUtil.KEY_ORIENTATION)];
-			this.lockables.add(new LockableInfo(box, lock, orient));
-		}
+		this.lockableInfos.clear();
+		ListNBT list = nbt.getList(KEY_LOCKABLES, Constants.NBT.TAG_COMPOUND);
+		for(int a = 0, b = list.size(); a < b; ++a)
+			this.lockableInfos.add(LockableInfo.fromNbt(list.getCompound(a)));
 	}
 }

@@ -4,6 +4,7 @@ import melonslise.locks.common.config.LocksClientConfig;
 import melonslise.locks.common.config.LocksConfig;
 import melonslise.locks.common.config.LocksServerConfig;
 import melonslise.locks.common.init.LocksContainerTypes;
+import melonslise.locks.common.init.LocksEnchantments;
 import melonslise.locks.common.init.LocksFeatures;
 import melonslise.locks.common.init.LocksItems;
 import melonslise.locks.common.init.LocksPlacements;
@@ -25,6 +26,7 @@ public final class Locks
 		ModLoadingContext.get().registerConfig(Type.CLIENT, LocksClientConfig.SPEC);
 
 		LocksItems.register();
+		LocksEnchantments.register();
 		LocksSoundEvents.register();
 		LocksPlacements.register();
 		LocksFeatures.register();

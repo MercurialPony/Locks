@@ -1,0 +1,17 @@
+{
+	"parent": "item/generated",
+	"textures":
+	{
+		"layer0": "locks:item/gold_lock"
+	},
+	"overrides":
+	[
+		{
+			"predicate":
+			{
+				"locks:open": 1
+			},
+			"model": "locks:item/open_gold_lock"
+		}
+	]
+}
