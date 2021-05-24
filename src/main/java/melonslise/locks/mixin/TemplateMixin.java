@@ -12,6 +12,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import melonslise.locks.Locks;
 import melonslise.locks.common.capability.ILockableHandler;
 import melonslise.locks.common.config.LocksConfig;
 import melonslise.locks.common.init.LocksCapabilities;
@@ -60,7 +61,17 @@ public class TemplateMixin
 	@Inject(at = @At(value = "RETURN", ordinal = 1), method = "placeInWorld(Lnet/minecraft/world/IServerWorld;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/world/gen/feature/template/PlacementSettings;Ljava/util/Random;I)Z")
 	private void placeInWorld(IServerWorld world, BlockPos start, BlockPos size, PlacementSettings settings, Random rng, int i, CallbackInfoReturnable<Boolean> cir)
 	{
-		ILockableHandler handler = world.getLevel().getCapability(LocksCapabilities.LOCKABLE_HANDLER).orElse(null);
+		World level;
+		try
+		{
+			level = world.getLevel();
+		}
+		catch(Exception e)
+		{
+			Locks.LOGGER.warn("IServerWorld#getLevel threw an error in Template#placeInWorld! Skipping the lockable placement for this template");
+			return;
+		}
+		ILockableHandler handler = level.getCapability(LocksCapabilities.LOCKABLE_HANDLER).orElse(null);
 		for(LockableInfo lkb : this.lockableInfos)
 		{
 			BlockPos pos1 = LocksUtil.transform(lkb.bb.x1, lkb.bb.y1, lkb.bb.z1, settings);
@@ -69,7 +80,7 @@ public class TemplateMixin
 			ItemStack stack = LocksConfig.RANDOMIZE_LOADED_LOCKS.get() ? LocksConfig.getRandomLock(rng) : lkb.stack;
 			Lock lock = LocksConfig.RANDOMIZE_LOADED_LOCKS.get() ? Lock.from(stack) : lkb.lock;
 			Transform tr = Transform.fromDirectionAndFace(settings.getRotation().rotate(settings.getMirror().getRotation(lkb.tr.dir).rotate(lkb.tr.dir)), lkb.tr.face, Direction.NORTH);
-			handler.add(new Lockable(bb, lock, tr, stack, world.getLevel()));
+			handler.add(new Lockable(bb, lock, tr, stack, level));
 		}
 	}
 

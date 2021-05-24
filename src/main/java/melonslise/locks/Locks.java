@@ -1,5 +1,8 @@
 package melonslise.locks;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import melonslise.locks.common.config.LocksClientConfig;
 import melonslise.locks.common.config.LocksConfig;
 import melonslise.locks.common.config.LocksServerConfig;
@@ -18,6 +21,8 @@ import net.minecraftforge.fml.config.ModConfig.Type;
 public final class Locks
 {
 	public static final String ID = "locks";
+
+	public static final Logger LOGGER = LogManager.getLogger();
 
 	public Locks()
 	{
