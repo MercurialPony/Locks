@@ -21,8 +21,11 @@
 	"item.locks.key_ring": "Key Ring",
 
 	"enchantment.locks.shocking": "Shocking",
+	"enchantment.locks.shocking.desc": "Shocks thieves that fail to pick the lock",
 	"enchantment.locks.sturdy": "Sturdy",
+	"enchantment.locks.sturdy.desc": "Reduces the strength of lock picks",
 	"enchantment.locks.complexity": "Complexity",
+	"enchantment.locks.complexity.desc": "Makes the lock too complex to pick with lower tier lock picks",
 
 	"death.attack.locks.shock": "%1$s was electrocuted after failing to pick an enchanted lock",
 	"death.attack.locks.shock.player": "%1$s was electrocuted by an enchanted lock whilst simultaneously picking it and fighting off %2$s",

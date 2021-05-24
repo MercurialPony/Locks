@@ -5,7 +5,7 @@ issueTrackerURL="https://github.com/Melonslise/Locks/issues"
 
 [[mods]]
 modId="locks"
-version="3.0"
+version="3.0.1"
 displayName="Locks"
 #updateJSONURL="https://change.me.example.invalid/updates.json"
 displayURL="https://minecraft.curseforge.com/projects/locks"

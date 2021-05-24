@@ -14,7 +14,7 @@ apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 
-version = '3.0'
+version = '3.0.1'
 group = 'melonslise.locks'
 archivesBaseName = 'locks'
 
