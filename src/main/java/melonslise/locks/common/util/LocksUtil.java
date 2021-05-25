@@ -159,7 +159,7 @@ public final class LocksUtil
 
 	public static Stream<Lockable> intersecting(World world, BlockPos pos)
 	{
-		return world.getCapability(LocksCapabilities.LOCKABLE_HANDLER).orElse(null).getInChunk(pos).values().stream().filter(lkb -> lkb.bb.intersects(pos));
+		return world.getCapability(LocksCapabilities.LOCKABLE_HANDLER).lazyMap(cap -> cap.getInChunk(pos).values().stream().filter(lkb -> lkb.bb.intersects(pos))).orElse(Stream.empty());
 	}
 
 	public static boolean locked(World world, BlockPos pos)

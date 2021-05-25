@@ -68,7 +68,7 @@ public class TemplateMixin
 		}
 		catch(Exception e)
 		{
-			Locks.LOGGER.warn("IServerWorld#getLevel threw an error in Template#placeInWorld! Skipping the lockable placement for this template");
+			Locks.LOGGER.warn(world + "#getLevel threw an error! Skipping lockable placement for this template ");
 			return;
 		}
 		ILockableHandler handler = level.getCapability(LocksCapabilities.LOCKABLE_HANDLER).orElse(null);

@@ -25,7 +25,7 @@ public class ChunkMixin
 	{
 		Chunk ch = (Chunk) (Object) this;
 		ILockableStorage st = ch.getCapability(LocksCapabilities.LOCKABLE_STORAGE).orElse(null);
-		ILockableHandler handler = ch.getLevel().getCapability(LocksCapabilities.LOCKABLE_HANDLER).orElse(null);
+		ILockableHandler handler = world.getCapability(LocksCapabilities.LOCKABLE_HANDLER).orElse(null);
 		// We trust that all checks pass (such as volume and intersect checks) due to this happening only during world gen
 		for(Lockable lkb : ((ILockableProvider) pr).getLockables())
 		{
