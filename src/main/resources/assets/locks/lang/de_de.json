@@ -1,0 +1,50 @@
+{
+    "itemGroup.locks": "Schlösser",
+
+    "item.locks.spring": "Sprungfeder",
+    "item.locks.wood_lock_mechanism": "Holzschloss-Mechanismus",
+    "item.locks.iron_lock_mechanism": "Eisenschloss-Mechanismus",
+    "item.locks.steel_lock_mechanism": "Stahlschloss-Mechanismus",
+    "item.locks.wood_lock": "Holzschloss",
+    "item.locks.iron_lock": "Eisenschloss",
+    "item.locks.steel_lock": "Stahlschloss",
+    "item.locks.gold_lock": "Vergoldetes Schloss",
+    "item.locks.diamond_lock": "Diamantiertes Schloss",
+    "item.locks.wood_lock_pick": "Haarklammer",
+    "item.locks.iron_lock_pick": "Eisendietrich",
+    "item.locks.steel_lock_pick": "Stahldietrich",
+    "item.locks.gold_lock_pick": "Golddietrich",
+    "item.locks.diamond_lock_pick": "Diamantdietrich",
+    "item.locks.key": "Schlüssel",
+    "item.locks.master_key": "Hauptschlüssel",
+    "item.locks.key_blank": "Musterschlüssel",
+    "item.locks.key_ring": "Schlüsselring",
+
+    "enchantment.locks.shocking": "Stromschlag",
+    "enchantment.locks.shocking.desc": "Schockt Diebe die beim Schlossknacken scheitern",
+    "enchantment.locks.sturdy": "Robust",
+    "enchantment.locks.sturdy.desc": "Schwächt Dietriche",
+    "enchantment.locks.complexity": "Komplexität",
+    "enchantment.locks.complexity.desc": "Macht Schlösser zu komplex für schwache Dietriche",
+
+    "death.attack.locks.shock": "%1$s hat beim Schlossknacken einen Stromschlag bekommen",
+    "death.attack.locks.shock.player": "%1$s hat beim Schlossknacken einen Stromschlag bekommen während dem Kämpfen mit %2$s",
+
+    "locks.gui.lockpicking.title": "Schloss knacken",
+    "locks.gui.lockpicking.open": "Drücke `ESC` zum Schloss öffnen",
+
+    "locks.subtitle.key_ring": "Schlüssel rasseln",
+    "locks.subtitle.lock.close": "Schloss klickt",
+    "locks.subtitle.lock.open": "Schlüssel gedreht",
+    "locks.subtitle.lock.rattle": "Schloss klappert",
+    "locks.subtitle.pin.fail": "Dietrich zerbricht",
+    "locks.subtitle.pin.match": "Pin klickt leicht",
+    "locks.subtitle.shock": "Elektrischer Schlag",
+
+    "locks.tooltip.id": "ID: %s",
+    "locks.tooltip.length": "Länge: %s",
+    "locks.tooltip.strength": "Stärke: %s",
+
+    "locks.status.locked": "Das ist verschlossen!",
+    "locks.status.too_complex": "Dieses Schloss kann damit nicht geknackt werden"
+}
