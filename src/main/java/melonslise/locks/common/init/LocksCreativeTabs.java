@@ -8,12 +8,12 @@ public final class LocksCreativeTabs
 {
 	private LocksCreativeTabs() {}
 
-	public static final CreativeTabs TAB = new CreativeTabs(Locks.ID)
+	public static final CreativeTabs TAB = (new CreativeTabs(Locks.ID)
 	{
 		@Override
 		public ItemStack getTabIconItem()
 		{
-			return new ItemStack(LocksItems.LOCK_PICK);
+			return new ItemStack(LocksItems.IRON_LOCK);
 		}
-	};
+	}).setRelevantEnchantmentTypes(LocksEnchantments.LOCK_TYPE);
 }

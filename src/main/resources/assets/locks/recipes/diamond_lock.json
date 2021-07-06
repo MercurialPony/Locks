@@ -2,24 +2,24 @@
 	"type": "minecraft:crafting_shaped",
 	"pattern":
 	[
-		"I ",
-		" L"
+		" D ",
+		"DLD",
+		"DDD"
 	],
 	"key":
 	{
-		"I":
+		"D":
 		{
 			"type": "forge:ore_dict",
-			"ore": "ingotIron"
+            "ore": "gemDiamond"
 		},
 		"L":
 		{
-			"type": "forge:ore_dict",
-			"ore": "leather"
+			"item": "locks:steel_lock_mechanism"
 		}
 	},
 	"result":
 	{
-		"item": "locks:lock_pick"
+		"item": "locks:diamond_lock"
 	}
 }

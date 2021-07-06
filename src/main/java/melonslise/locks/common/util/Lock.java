@@ -39,7 +39,7 @@ public class Lock extends Observable
 
 	public static Lock from(ItemStack stack)
 	{
-		return new Lock(LockingItem.getOrSetId(stack), LockItem.getOrSetLength(stack), true);
+		return new Lock(LockingItem.getOrSetId(stack), LockItem.getOrSetLength(stack), !LockItem.isOpen(stack));
 	}
 
 	public int getLength()
@@ -64,6 +64,11 @@ public class Lock extends Observable
 	public boolean checkPin(int index, int pin)
 	{
 		return this.combination[index] == pin;
+	}
+	
+	public byte getPin(int index)
+	{
+		return this.combination[index];
 	}
 
 	public void shuffle()

@@ -5,6 +5,7 @@ import melonslise.locks.common.init.LocksCapabilities;
 import melonslise.locks.common.util.Lockable;
 import melonslise.locks.common.util.LocksUtil;
 import net.minecraft.client.Minecraft;
+import net.minecraft.util.text.TextComponentString;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
@@ -44,7 +45,7 @@ public class AddLockablePacket implements IMessage
 				@Override
 				public void run()
 				{
-					mc.world.getCapability(LocksCapabilities.LOCKABLES, null).add(pkt.lockable);
+					mc.world.getCapability(LocksCapabilities.LOCKABLE_HANDLER, null).add(pkt.lockable);
 				}
 			});
 			return null;

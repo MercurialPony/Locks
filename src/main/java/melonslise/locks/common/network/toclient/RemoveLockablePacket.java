@@ -42,7 +42,7 @@ public class RemoveLockablePacket implements IMessage
 				@Override
 				public void run()
 				{
-					mc.world.getCapability(LocksCapabilities.LOCKABLES, null).remove(pkt.networkID);
+					mc.world.getCapability(LocksCapabilities.LOCKABLE_HANDLER, null).remove(pkt.networkID);
 				}
 			});
 			return null;

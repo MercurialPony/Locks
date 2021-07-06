@@ -1,0 +1,22 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"pattern":
+	[
+		" II",
+		" I ",
+		"I  "
+	],
+	"key":
+	{
+		"I":
+		{
+			"type": "forge:ore_dict",
+            "ore": "ingotIron"
+		}
+	},
+	"result":
+	{
+		"item": "locks:iron_lock_pick",
+		"count": 2
+	}
+}

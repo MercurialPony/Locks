@@ -7,13 +7,11 @@ import melonslise.locks.common.util.Lockable;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraftforge.common.util.INBTSerializable;
 
-public interface ILockableStorage extends INBTSerializable<NBTTagList>, Observer
+public interface ILockableStorage extends INBTSerializable<NBTTagList>
 {
-	void set(Int2ObjectMap<Lockable> lockables);
-
 	Int2ObjectMap<Lockable> get();
 
-	boolean add(Lockable lockable);
+	void add(Lockable lkb);
 
-	boolean remove(int networkID);
+	void remove(int id);
 }

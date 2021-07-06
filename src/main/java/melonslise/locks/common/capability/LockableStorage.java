@@ -1,99 +1,102 @@
 package melonslise.locks.common.capability;
 
-import java.util.Observable;
-
 import it.unimi.dsi.fastutil.ints.Int2ObjectLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;
 import melonslise.locks.Locks;
-import melonslise.locks.common.config.LocksConfig;
-import melonslise.locks.common.init.LocksNetworks;
-import melonslise.locks.common.network.toclient.AddLockablePacket;
-import melonslise.locks.common.network.toclient.RemoveLockablePacket;
-import melonslise.locks.common.network.toclient.UpdateLockablePacket;
+import melonslise.locks.common.init.LocksCapabilities;
 import melonslise.locks.common.util.Lockable;
 import melonslise.locks.common.util.LocksUtil;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.World;
+import net.minecraft.world.chunk.Chunk;
 
+/*
+ * Internal storage for lockables with almost no handling logic
+ * Also stores lockables which are shared by multiple chunks. Duplicate shared lockables are handled by checking if they have already been loaded before
+ */
 public class LockableStorage implements ILockableStorage
 {
-	public static final ResourceLocation ID = new ResourceLocation(Locks.ID, "lockables");
+	public static final ResourceLocation ID = new ResourceLocation(Locks.ID, "lockable_storage");
 
-	public final World world;
-	protected Int2ObjectMap<Lockable> lockables = new Int2ObjectLinkedOpenHashMap<Lockable>();
+	public final Chunk chunk;
 
-	public LockableStorage(World world)
+	public Int2ObjectMap<Lockable> lockables = new Int2ObjectLinkedOpenHashMap<Lockable>();
+
+	public LockableStorage(Chunk chunk)
 	{
-		this.world = world;
-	}
-
-	// TODO Sync
-	@Override
-	public void set(Int2ObjectMap<Lockable> lockables)
-	{
-		this.lockables = lockables;
+		this.chunk = chunk;
 	}
 
 	@Override
 	public Int2ObjectMap<Lockable> get()
 	{
-		return new Int2ObjectLinkedOpenHashMap<Lockable>(this.lockables);
+		return this.lockables;
 	}
 
 	@Override
-	public boolean add(Lockable lockable)
+	public void add(Lockable lkb)
 	{
-		if(lockable == null || lockable.box == null || lockable.lock == null || lockable.orient == null || lockable.box.volume() > LocksConfig.getServer(this.world).maxLockableVolume || this.lockables.values().stream().anyMatch(other -> other.box.intersects(lockable.box)))
-			return false;
-		this.lockables.put(lockable.networkID, lockable);
-		lockable.addObserver(this);
-		if(this.world.isRemote)
-			lockable.shake(10);
-		else
-			LocksNetworks.MAIN.sendToDimension(new AddLockablePacket(lockable), this.world.provider.getDimension());
-		return true;
+		this.lockables.put(lkb.networkID, lkb);
+		this.chunk.markDirty();
 	}
 
 	@Override
-	public boolean remove(int networkID)
+	public void remove(int id)
 	{
-		Lockable lockable = this.lockables.remove(networkID);
-		if(lockable == this.lockables.defaultReturnValue())
-			return false;
-		lockable.deleteObserver(this);
-		if(this.world.isRemote)
-			return true;
-		LocksNetworks.MAIN.sendToDimension(new RemoveLockablePacket(networkID), this.world.provider.getDimension());
-		return true;
-	}
-
-	@Override
-	public void update(Observable observable, Object data)
-	{
-		if(this.world.isRemote || !(observable instanceof Lockable))
-			return;
-		Lockable lockable = (Lockable) observable;
-		LocksNetworks.MAIN.sendToDimension(new UpdateLockablePacket(lockable.networkID, lockable.lock.isLocked()), this.world.provider.getDimension());
+		this.lockables.remove(id);
+		this.chunk.markDirty();
 	}
 
 	@Override
 	public NBTTagList serializeNBT()
 	{
 		NBTTagList list = new NBTTagList();
-		for(Lockable lockable : this.lockables.values())
-			list.appendTag(LocksUtil.writeLockableToNBT(lockable));
+		for(Lockable lkb : this.lockables.values())
+			list.appendTag(LocksUtil.writeLockableToNBT(lkb));
 		return list;
 	}
 
 	@Override
-	public void deserializeNBT(NBTTagList list)
+	public void deserializeNBT(NBTTagList nbt)
 	{
-		for(int a = 0; a < list.tagCount(); ++a)
+		//FIXME some concurrency crash in here that happens probably due to looking at lists while this thing changes them
+		//[Chunk I/O Executor Thread-1/ERROR] [FML]: Unhandled exception loading chunk
+		//java.lang.ArrayIndexOutOfBoundsException: -1
+		//at it.unimi.dsi.fastutil.ints.Int2ObjectLinkedOpenHashMap.rehash(Int2ObjectLinkedOpenHashMap.java:1665) ~[fastutil-7.1.0.jar:?]
+		//at it.unimi.dsi.fastutil.ints.Int2ObjectLinkedOpenHashMap.insert(Int2ObjectLinkedOpenHashMap.java:388) ~[fastutil-7.1.0.jar:?]
+		//at it.unimi.dsi.fastutil.ints.Int2ObjectLinkedOpenHashMap.put(Int2ObjectLinkedOpenHashMap.java:394) ~[fastutil-7.1.0.jar:?]
+		//at melonslise.locks.common.capability.LockableStorage.deserializeNBT(LockableStorage.java:73) ~[LockableStorage.class:?]
+		//at melonslise.locks.common.capability.LockableStorage.deserializeNBT(LockableStorage.java:18) ~[LockableStorage.class:?]
+		//at melonslise.locks.common.capability.CapabilityStorage.readNBT(CapabilityStorage.java:20) ~[CapabilityStorage.class:?]
+		//at melonslise.locks.common.capability.CapabilityStorage.readNBT(CapabilityStorage.java:9) ~[CapabilityStorage.class:?]
+		//at melonslise.locks.common.capability.SerializableCapabilityProvider.deserializeNBT(SerializableCapabilityProvider.java:23) ~[SerializableCapabilityProvider.class:?]
+		//at net.minecraftforge.common.capabilities.CapabilityDispatcher.deserializeNBT(CapabilityDispatcher.java:135) ~[CapabilityDispatcher.class:?]
+		//at net.minecraft.world.chunk.storage.AnvilChunkLoader.func_75823_a(AnvilChunkLoader.java:471) ~[aye.class:?]
+		//at net.minecraft.world.chunk.storage.AnvilChunkLoader.checkedReadChunkFromNBT__Async(AnvilChunkLoader.java:128) ~[aye.class:?]
+		//at net.minecraft.world.chunk.storage.AnvilChunkLoader.loadChunk__Async(AnvilChunkLoader.java:92) ~[aye.class:?]
+		//at net.minecraftforge.common.chunkio.ChunkIOProvider.run(ChunkIOProvider.java:70) ~[ChunkIOProvider.class:?]
+		//at java.util.concurrent.ThreadPoolExecutor.runWorker(Unknown Source) [?:1.8.0_151]
+		//at java.util.concurrent.ThreadPoolExecutor$Worker.run(Unknown Source) [?:1.8.0_151]
+		//at java.lang.Thread.run(Unknown Source) [?:1.8.0_151]
+		
+		//LockableHandler getLoaded was changed to be synchronized in an attempt to fix this
+		
+		ILockableHandler handler = this.chunk.getWorld().getCapability(LocksCapabilities.LOCKABLE_HANDLER, null);
+		Int2ObjectMap<Lockable> lkbs = handler.getLoaded();
+		
+		for(int a = 0; a < nbt.tagCount(); ++a)
 		{
-			Lockable lockable = LocksUtil.readLockableFromNBT(list.getCompoundTagAt(a));
-			this.lockables.put(lockable.networkID, lockable);
-			lockable.addObserver(this);
+			NBTTagCompound nbt1 = nbt.getCompoundTagAt(a);
+			Lockable lkb = lkbs.get(nbt1.getInteger(LocksUtil.KEY_ID));
+			if(lkb == lkbs.defaultReturnValue())
+			{
+				lkb = LocksUtil.readLockableFromNBT(nbt1);
+				lkb.addObserver(handler);
+				lkbs.put(lkb.networkID, lkb);
+			}
+			this.lockables.put(lkb.networkID, lkb);
 		}
 	}
 }

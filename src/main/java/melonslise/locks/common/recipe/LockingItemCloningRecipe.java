@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import com.google.common.collect.Lists;
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 
@@ -17,6 +18,7 @@ import net.minecraft.item.crafting.ShapedRecipes;
 import net.minecraft.util.JsonUtils;
 import net.minecraft.util.NonNullList;
 import net.minecraft.world.World;
+import net.minecraftforge.common.crafting.CraftingHelper;
 import net.minecraftforge.common.crafting.IRecipeFactory;
 import net.minecraftforge.common.crafting.JsonContext;
 import net.minecraftforge.common.util.RecipeMatcher;
@@ -100,7 +102,9 @@ public class LockingItemCloningRecipe extends IForgeRegistryEntry.Impl<IRecipe> 
 		@Override
 		public IRecipe parse(JsonContext ctx, JsonObject json)
 		{
-			Ingredient locking = ShapedRecipes.deserializeIngredient(json.get("locking"));
+			//Ingredient locking = ShapedRecipes.deserializeIngredient(json.get("locking"));
+			Ingredient locking = CraftingHelper.getIngredient(json.get("locking"), ctx); //OreDict Support
+			
 			NonNullList<Ingredient> blanks = deserializeIngredients(JsonUtils.getJsonArray(json, "blanks"));
 			if(blanks.isEmpty())
 				throw new JsonParseException("Not enough items for locking item cloning recipe");

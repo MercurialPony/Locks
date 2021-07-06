@@ -2,8 +2,9 @@
 	"type": "minecraft:crafting_shaped",
 	"pattern":
 	[
-		"I",
-		"I"
+		"NN",
+        "NN",
+        "I "
 	],
 	"key":
 	{
@@ -11,7 +12,12 @@
 		{
 			"type": "forge:ore_dict",
 			"ore": "ingotIron"
-		}
+		},
+		"N":
+        {
+            "type": "forge:ore_dict",
+            "ore": "nuggetIron"
+        }
 	},
 	"result":
 	{

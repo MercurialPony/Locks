@@ -1,5 +1,6 @@
 package melonslise.locks;
 
+import melonslise.locks.common.config.LocksConfig;
 import melonslise.locks.common.init.LocksCapabilities;
 import melonslise.locks.common.init.LocksNetworks;
 import net.minecraftforge.fml.common.Mod;
@@ -11,7 +12,7 @@ public final class Locks
 	public static final String
 		ID = "locks",
 		NAME = "Locks",
-		VERSION = "2.5.1",
+		VERSION = "3.0.0",
 		GAMEVERSIONS = "1.12.2";
 
 	@Mod.Instance(ID)
@@ -22,5 +23,6 @@ public final class Locks
 	{
 		LocksCapabilities.register();
 		LocksNetworks.register();
+		LocksConfig.init();
 	}
 }

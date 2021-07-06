@@ -28,5 +28,10 @@
 	{
 		"subtitle": "locks.subtitle.pin.match",
 		"sounds": [{"name": "locks:pin.match1"}, {"name": "locks:pin.match2"}]
-	}
+	},
+    "shock":
+    {
+        "subtitle": "locks.subtitle.pin.shock",
+        "sounds": [{"name": "locks:shock1"}, {"name": "locks:shock2"}]
+    }
 }

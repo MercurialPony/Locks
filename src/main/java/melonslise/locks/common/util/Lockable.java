@@ -10,10 +10,13 @@ import java.util.Observable;
 import java.util.Observer;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import melonslise.locks.common.init.LocksCapabilities;
+import melonslise.locks.common.item.LockItem;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.culling.ClippingHelper;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumFacing.Axis;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -64,32 +67,33 @@ public class Lockable extends Observable implements Observer
 			return dist < max * max;
 		}
 	}
-
-	private static final AtomicInteger networkIDs = new AtomicInteger();
-
+	
 	public final Cuboid6i box;
 	public final Lock lock;
 	public final Orientation orient;
 	public final int networkID;
+	public final ItemStack stack;
 
 	public Map<List<IBlockState>, State> cache = new HashMap<>();
 
 	public int prevShakeTicks, shakeTicks, maxShakeTicks;
 
 	// Server only
-	public Lockable(Cuboid6i box, Lock lock, Orientation orient)
+	public Lockable(Cuboid6i box, Lock lock, Orientation orient, ItemStack stack, World world)
 	{
-		this(box, lock, orient, networkIDs.incrementAndGet());
+		this(box, lock, orient, stack, world.getCapability(LocksCapabilities.LOCKABLE_HANDLER, null).nextId());
 	}
 
 	// Client only
-	public Lockable(Cuboid6i box, Lock lock, Orientation orient, int networkID)
+	public Lockable(Cuboid6i box, Lock lock, Orientation orient, ItemStack stack, int networkID)
 	{
 		this.box = box;
 		this.lock = lock;
 		lock.addObserver(this);
 		this.orient = orient;
+		this.stack = stack;
 		this.networkID = networkID;
+		
 	}
 
 	@Override
@@ -97,6 +101,7 @@ public class Lockable extends Observable implements Observer
 	{
 		this.setChanged();
 		this.notifyObservers();
+		LockItem.setOpen(this.stack, !this.lock.locked);
 	}
 
 	public void tick()

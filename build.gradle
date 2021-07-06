@@ -1,74 +1,78 @@
-buildscript
-{
-	repositories
-	{
-		maven
-		{
-			url = 'https://files.minecraftforge.net/maven'
-		}
-		jcenter()
-		mavenCentral()
-	}
-	dependencies
-	{
-		classpath 'net.minecraftforge.gradle:ForgeGradle:3.+'
-	}
+buildscript {
+    repositories {
+        jcenter()
+        maven { url = "https://maven.minecraftforge.net" }
+		maven { url = "https://repo.spongepowered.org/maven" }
+    }
+    dependencies {
+        classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
+		classpath 'org.spongepowered:mixingradle:0.6-SNAPSHOT'
+    }
 }
- 
-apply plugin: 'net.minecraftforge.gradle'
-apply plugin: 'eclipse'
-apply plugin: 'maven-publish'
+apply plugin: 'net.minecraftforge.gradle.forge'
+apply plugin: 'org.spongepowered.mixin'
 
-version = '2.5.1'
-group = 'melonslise.locks'
-archivesBaseName = 'locks'
-
-sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8'
-
-minecraft
-{
-	mappings channel: 'snapshot', version: '20171003-1.12'
-
-	runs
-	{
-		client
-		{
-			workingDirectory project.file('run')
-
-			property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
-
-			property 'forge.logging.console.level', 'debug'
-		}
-
-		server
-		{
-			property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
-
-			property 'forge.logging.console.level', 'debug'
-		}
-	}
+repositories {
+    maven { url 'https://repo.spongepowered.org/maven' }
 }
 
-dependencies
-{
-	minecraft 'net.minecraftforge:forge:1.12.2-14.23.5.2854'
+version = "1.12.2-3.0.0"
+group = "melonslise.locks" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
+archivesBaseName = "Locks"
+
+sourceCompatibility = targetCompatibility = '1.8' // Need this here so eclipse task generates correctly.
+compileJava {
+    sourceCompatibility = targetCompatibility = '1.8'
 }
 
-jar
-{
-	manifest
-	{
-		attributes
-		(
-			[
-				"Specification-Title": archivesBaseName,
-				"Specification-Vendor": "melonslise",
-				"Specification-Version": version,
-				"Implementation-Title": archivesBaseName,
-				"Implementation-Version": version,
-				"Implementation-Vendor" :"melonslise",
-				"Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
-			]
-		)
+minecraft {
+    version = "1.12.2-14.23.5.2838"
+    runDir = "run"
+    mappings = "snapshot_20171003"
+}
+
+configurations {
+    embed
+	implementation.extendsFrom(embed)
+}
+
+dependencies {
+    
+	embed("org.spongepowered:mixin:0.7.11-SNAPSHOT") { transitive = false } 
+
+}
+
+processResources {
+    inputs.property "version", project.version
+    inputs.property "mcversion", project.minecraft.version
+
+    from(sourceSets.main.resources.srcDirs) {
+        include 'mcmod.info'
+                
+        expand 'version':project.version, 'mcversion':project.minecraft.version
+    }
+        
+    from(sourceSets.main.resources.srcDirs) {
+        exclude 'mcmod.info'
+    }
+}
+
+sourceSets {
+	main {
+		ext.refMap = "mixins.locks.refmap.json"
 	}
+}
+
+jar {
+    from(configurations.embed.collect { it.isDirectory() ? it : zipTree(it) }) {
+        exclude "LICENSE.txt", "META-INF/MANIFSET.MF", "META-INF/maven/**", "META-INF/*.RSA", "META-INF/*.SF"
+    }
+    manifest.attributes(
+        "FMLCorePluginContainsFMLMod": "true",
+        "ForceLoadAsMod": "true",
+	    "TweakClass": "org.spongepowered.asm.launch.MixinTweaker",
+	    "TweakOrder": 0,
+        "MixinConfigs": "mixins.locks.json",
+        "FMLCorePlugin": "melonslise.locks.mixin.MixinLoader"
+    )
 }

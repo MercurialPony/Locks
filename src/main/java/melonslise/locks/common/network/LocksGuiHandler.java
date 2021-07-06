@@ -5,8 +5,10 @@ import melonslise.locks.client.gui.LockPickingGui;
 import melonslise.locks.common.container.KeyRingContainer;
 import melonslise.locks.common.container.LockPickingContainer;
 import melonslise.locks.common.init.LocksCapabilities;
+import melonslise.locks.common.util.LocksUtil;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.network.IGuiHandler;
 
@@ -24,7 +26,7 @@ public class LocksGuiHandler implements IGuiHandler
 		case KEY_RING_ID:
 			return new KeyRingContainer(player, player.getHeldItem(x == 0 ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND));
 		case LOCK_PICKING_ID:
-			return new LockPickingContainer(player, world.getCapability(LocksCapabilities.LOCKABLES, null).get().get(x));
+			return new LockPickingContainer(player, y == 0 ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND, world.getCapability(LocksCapabilities.LOCKABLE_HANDLER, null).getLoaded().get(x));
 		default:
 			return null;
 		}
