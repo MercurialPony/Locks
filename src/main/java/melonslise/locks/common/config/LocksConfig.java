@@ -7,12 +7,15 @@ import java.util.TreeMap;
 import java.util.regex.Pattern;
 
 import melonslise.locks.Locks;
+import melonslise.locks.common.item.LockItem;
 import melonslise.locks.common.util.LocksUtil;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import net.minecraftforge.common.config.Config;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
@@ -42,13 +45,11 @@ public final class LocksConfig
 		@Config.Name("Generation Chance")
 		@Config.Comment("Chance to generate a random lock on every new chest during world generation. Set to 0 to disable")
 		@Config.RangeDouble(min = 0d, max = 1d)
-		@Config.SlidingOption
 		public double generationChance = 0.85d;
 		
 		@Config.Name("Generation Enchant Chance")
 		@Config.Comment("Chance to randomly enchant a generated lock during world generation. Set to 0 to disable")
 		@Config.RangeDouble(min = 0d, max = 1d)
-		@Config.SlidingOption
 		public double generationEnchantChance = 0.4d;
 
 		@Config.Name("Generated Locks")
@@ -58,7 +59,15 @@ public final class LocksConfig
 		@Config.Name("Generated Lock Chances")
 		@Config.Comment("WARNING: THE AMOUNT OF NUMBERS SHOULD BE EQUAL TO THE AMOUNT OF GENERATED LOCK ITEMS!!! The relative probability that the corresponding lock item will be generated on a chest. Higher number = higher chance to generate")
 		public int[] generatedLockWeights = new int[]{3, 3, 2, 2, 1};
+		
+		@Config.Name("Generated Lock Pins")
+		@Config.Comment("WARNING: THE AMOUNT OF NUMBERS SHOULD BE EQUAL TO THE AMOUNT OF GENERATED LOCK ITEMS!!! The number of pins on the lock item. Overrides the defaults if not zero")
+		public int[] generatedLockPins = new int[]{0, 0, 0, 0, 0};
 
+		@Config.Name("Automatically Orient Placed Locks")
+		@Config.Comment("Placed locks will try to orient themselves smartly to doors and chests regardless of how they were placed")
+		public boolean automaticallyOrientPlacedLocks = false;
+		
 		//@Config.Name("Randomize Loaded Locks")
 		//@Config.Comment("Randomize lock IDs and combinations when loading them from a structure file. Randomization works just like during world generation")
 		//public boolean randomizeLoadedLocks = false;
@@ -85,7 +94,7 @@ public final class LocksConfig
 		@Config.Name("Easy Lock")
 		@Config.Comment("Lock blocks with just one click! It's magic! (Will probably fail spectacularly with custom doors, custom double chests, etc)")
 		public boolean easyLock = true;
-
+		
 		@Config.Ignore
 		public Pattern[] lockableBlocksRegex;
 
@@ -115,6 +124,8 @@ public final class LocksConfig
 	private LocksConfig() {}
 	
 	@Config.Ignore
+	public static NavigableMap<Integer, Integer> weightedGeneratedPins;
+	@Config.Ignore
 	public static NavigableMap<Integer, Item> weightedGeneratedLocks;
 	@Config.Ignore
 	public static int weightTotal;
@@ -122,13 +133,16 @@ public final class LocksConfig
 	public static void init()
 	{
 		weightedGeneratedLocks = new TreeMap<>();
+		weightedGeneratedPins = new TreeMap<>();
 		weightTotal = 0;
 		String[] locks = COMMON.generatedLocks;
 		int[] weights = COMMON.generatedLockWeights;
+		int[] pins = COMMON.generatedLockPins;
 		for(int a = 0; a < locks.length; ++a)
 		{
 			weightTotal += weights[a];
 			weightedGeneratedLocks.put(weightTotal, ForgeRegistries.ITEMS.getValue(new ResourceLocation(locks[a])));
+			weightedGeneratedPins.put(weightTotal, pins[a]);
 		}
 	}
 	
@@ -144,7 +158,25 @@ public final class LocksConfig
 
 	public static ItemStack getRandomLock(Random rng)
 	{
-		ItemStack stack = new ItemStack(weightedGeneratedLocks.ceilingEntry(rng.nextInt(weightTotal) + 1).getValue());
+		int rngNumber = rng.nextInt(weightTotal) + 1;
+		ItemStack stack = new ItemStack(weightedGeneratedLocks.ceilingEntry(rngNumber).getValue());
+		int pinout = MathHelper.clamp(weightedGeneratedPins.ceilingEntry(rngNumber).getValue(), 0, 30);
+		if(pinout != 0)
+		{
+			boolean replacePins = true;
+			if(stack.getItem() instanceof LockItem)
+			{
+				if(((LockItem)stack.getItem()).length == pinout)
+					replacePins = false;
+			}
+			
+			if(replacePins)
+			{
+				NBTTagCompound nbt = LocksUtil.getTag(stack);
+				nbt.setByte(LockItem.KEY_LENGTH, (byte)pinout);
+			}
+		}
+		
 		return canEnchant(rng) ? EnchantmentHelper.addRandomEnchantment(rng, stack, 5 + rng.nextInt(30), false) : stack;
 	}
 

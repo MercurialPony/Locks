@@ -15,6 +15,7 @@ import melonslise.locks.common.util.Lock;
 import melonslise.locks.common.util.Lockable;
 import melonslise.locks.common.util.LocksUtil;
 import melonslise.locks.common.util.Orientation;
+import net.minecraft.block.BlockChest;
 import net.minecraft.block.BlockDoor;
 import net.minecraft.block.BlockDoor.EnumDoorHalf;
 import net.minecraft.block.BlockDoor.EnumHingePosition;
@@ -176,11 +177,17 @@ public class LockItem extends LockingItem
 		
 		TileEntity te = world.getTileEntity(pos);
 		
+		Orientation placedOrientation = Orientation.fromDirection(face, player.getHorizontalFacing().getOpposite());
+		
 		if(te instanceof TileEntityChest)
 		{
 			BlockPos adjPos = LocksUtil.getAdjacentChest((TileEntityChest) te);
 			if(adjPos != null)
 				pos1 = adjPos;
+			
+			//Override orientation
+			if(LocksConfig.COMMON.automaticallyOrientPlacedLocks && state.getBlock() instanceof BlockChest) //Safety first
+				placedOrientation = Orientation.fromDirection(world.getBlockState(pos).getValue(BlockChest.FACING), EnumFacing.NORTH);
 		}
 		else if(state.getBlock() instanceof BlockDoor)
 		{
@@ -201,11 +208,24 @@ public class LockItem extends LockingItem
 			
 			//Make sure it's not some glitched door
 			IBlockState otherHalfState = world.getBlockState(pos1);
+			
+			//Top half of the door has no idea if it's open or not for some reason
+			//Top half of the door has no idea where it's facing for some reason
+			if(clickedDoorHalf == EnumDoorHalf.UPPER && otherHalfState.getBlock() instanceof BlockDoor)
+			{
+				isOpen = otherHalfState.getValue(BlockDoor.OPEN);
+				clickedDoorFacing = otherHalfState.getValue(BlockDoor.FACING);
+			}
+			
+			//Bottom half of the door has no idea which hinge it's on for some reason
+			if(clickedDoorHalf == EnumDoorHalf.LOWER && otherHalfState.getBlock() instanceof BlockDoor)
+				clickedDoorHinge = otherHalfState.getValue(BlockDoor.HINGE);
+			
 			if(!(otherHalfState.getBlock() instanceof BlockDoor) 
-					|| otherHalfState.getValue(BlockDoor.OPEN) != isOpen
-					|| otherHalfState.getValue(BlockDoor.HALF) == clickedDoorHalf 
-					|| otherHalfState.getValue(BlockDoor.HINGE) != clickedDoorHinge 
-					|| otherHalfState.getValue(BlockDoor.FACING) != clickedDoorFacing) 
+					//|| otherHalfState.getValue(BlockDoor.OPEN) != isOpen  //top half of the door has no idea if it's open or not for some reason
+					|| otherHalfState.getValue(BlockDoor.HALF) == clickedDoorHalf)
+					//|| otherHalfState.getValue(BlockDoor.HINGE) != clickedDoorHinge  //this is broken too, can you believe it?
+					//|| otherHalfState.getValue(BlockDoor.FACING) != clickedDoorFacing) //wow so is this
 			{
 				pos1 = pos;
 			}
@@ -238,13 +258,16 @@ public class LockItem extends LockingItem
 				if(otherTop.getBlock() instanceof BlockDoor && otherBottom.getBlock() instanceof BlockDoor)
 				{
 					//Must Be Closed
-					if(!otherTop.getValue(BlockDoor.OPEN) && !otherBottom.getValue(BlockDoor.OPEN))
+					//if(!otherTop.getValue(BlockDoor.OPEN) && !otherBottom.getValue(BlockDoor.OPEN))
+					if(!otherBottom.getValue(BlockDoor.OPEN))
 					{
 						//Same hinges to self and opposite the other door
-						if(otherTop.getValue(BlockDoor.HINGE) == otherBottom.getValue(BlockDoor.HINGE) && otherTop.getValue(BlockDoor.HINGE) == (clickedDoorHinge == EnumHingePosition.RIGHT ? EnumHingePosition.LEFT : EnumHingePosition.RIGHT))
+						//if(otherTop.getValue(BlockDoor.HINGE) == otherBottom.getValue(BlockDoor.HINGE) && otherTop.getValue(BlockDoor.HINGE) == (clickedDoorHinge == EnumHingePosition.RIGHT ? EnumHingePosition.LEFT : EnumHingePosition.RIGHT))
+						if(otherTop.getValue(BlockDoor.HINGE) == (clickedDoorHinge == EnumHingePosition.RIGHT ? EnumHingePosition.LEFT : EnumHingePosition.RIGHT))
 						{
 							//Facing is same as other door
-							if(otherTop.getValue(BlockDoor.FACING) == clickedDoorFacing && otherBottom.getValue(BlockDoor.FACING) == clickedDoorFacing)
+							//if(otherTop.getValue(BlockDoor.FACING) == clickedDoorFacing && otherBottom.getValue(BlockDoor.FACING) == clickedDoorFacing)
+							if(otherBottom.getValue(BlockDoor.FACING) == clickedDoorFacing)
 							{
 								//Finally, the halves
 								if(otherTop.getValue(BlockDoor.HALF) == EnumDoorHalf.UPPER && otherBottom.getValue(BlockDoor.HALF) == EnumDoorHalf.LOWER)
@@ -257,13 +280,39 @@ public class LockItem extends LockingItem
 					}
 				}
 			}
+			
+			//Override orientation
+			if(LocksConfig.COMMON.automaticallyOrientPlacedLocks)
+			{
+				if(isOpen)
+				{
+					EnumFacing curfacing = clickedDoorFacing;
+					switch(clickedDoorFacing)
+					{
+						case NORTH: 
+						case SOUTH: curfacing = EnumFacing.WEST; 
+							break;
+						case WEST:
+						case EAST: curfacing = EnumFacing.SOUTH; 
+							break;
+						default: 
+							break;
+					}
+					
+					placedOrientation = Orientation.fromDirection(curfacing.getOpposite(), EnumFacing.NORTH); //Inconsistent, but so is locking an open door
+				}
+				else
+				{
+					placedOrientation = Orientation.fromDirection(clickedDoorFacing.getOpposite(), EnumFacing.NORTH);
+				}
+			}
 		}
 		
 		ItemStack stack = player.getHeldItem(hand);
 		ItemStack lockStack = stack.copy();
 		lockStack.setCount(1);
 		
-		if (!lockables.add(new Lockable(new Cuboid6i(pos1, pos), Lock.from(lockStack), Orientation.fromDirection(face, player.getHorizontalFacing().getOpposite()), lockStack, world)))
+		if (!lockables.add(new Lockable(new Cuboid6i(pos1, pos), Lock.from(lockStack), placedOrientation, lockStack, world)))
 			return EnumActionResult.PASS;
 		if (!player.isCreative())
 			stack.shrink(1);
@@ -291,5 +340,16 @@ public class LockItem extends LockingItem
 		ITextComponent txt = new TextComponentTranslation(Locks.ID + ".tooltip.length", ItemStack.DECIMALFORMAT.format(length));
 		txt.getStyle().setColor(TextFormatting.DARK_GREEN);
 		lines.add(txt.getFormattedText());
+		
+		float resist = (int)this.resistance; //TODO nbt resistance?
+		String resistString = ".tooltip.resistance.weak";
+		if(resist >= 10.0f)
+			resistString = ".tooltip.resistance.strong";
+		if(resist >= 40.0f)
+			resistString = ".tooltip.resistance.supreme";
+		
+		ITextComponent txt2 = new TextComponentTranslation(Locks.ID + resistString);
+		txt2.getStyle().setColor(TextFormatting.DARK_GREEN);
+		lines.add(txt2.getFormattedText());
 	}
 }

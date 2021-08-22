@@ -50,6 +50,9 @@ locks.subtitle.shock=Sudden electric zap
 # Tooltips
 locks.tooltip.id=ID: %s
 locks.tooltip.length=Length: %s
+locks.tooltip.resistance.weak=Blast Resistance: Weak
+locks.tooltip.resistance.strong=Blast Resistance: Strong
+locks.tooltip.resistance.supreme=Blast Resistance: Supreme
 locks.tooltip.strength=Strength: %s
 
 # Status messages

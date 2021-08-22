@@ -293,8 +293,8 @@ public final class LocksEvents
 	@SubscribeEvent
 	public static void onChunkWatch(ChunkWatchEvent.Watch event)
 	{
-		//Try chest population
-		event.getChunkInstance().getCapability(LocksCapabilities.LOCKABLE_WORLDGEN_HANDLER, null).tryGeneratingLocks();
+		//Try chest population (non-delayed version)
+		//event.getChunkInstance().getCapability(LocksCapabilities.LOCKABLE_WORLDGEN_HANDLER, null).tryGeneratingLocks();
 		
 		EntityPlayerMP player = event.getPlayer();
 		event.getChunkInstance().getCapability(LocksCapabilities.LOCKABLE_STORAGE, null).get().values().stream().forEach(lkb -> 

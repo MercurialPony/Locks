@@ -1,10 +1,15 @@
 package melonslise.locks.client.gui;
 
+import java.awt.Rectangle;
 import java.io.IOException;
 import java.util.ArrayDeque;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.BiConsumer;
+
+import javax.annotation.Nullable;
 
 import org.lwjgl.input.Keyboard;
 
@@ -20,6 +25,7 @@ import melonslise.locks.client.gui.sprite.action.WaitAction;
 import melonslise.locks.common.container.LockPickingContainer;
 import melonslise.locks.common.init.LocksNetworks;
 import melonslise.locks.common.network.toserver.CheckPinPacket;
+import mezz.jei.api.gui.IAdvancedGuiHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.renderer.GlStateManager;
@@ -29,6 +35,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraftforge.fml.common.Optional.Interface;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -76,6 +83,7 @@ public class LockPickingGui extends GuiContainer
 	
 	protected boolean holdingLeft, holdingRight;
 	
+	
 	public LockPickingGui(LockPickingContainer cont)
 	{
 		super(cont);
@@ -83,8 +91,8 @@ public class LockPickingGui extends GuiContainer
 		this.pins = new boolean[this.length];
 		this.hand = cont.hand;
 		this.lockTex = getTextureFor(cont.lockable.stack);
-		this.xSize = (FRONT_WALL_TEX.width + this.length * (COLUMN_TEX.width + INNER_WALL_TEX.width)) * 2;
-		this.ySize = HANDLE_TEX.height * 2;
+		this.xSize = (FRONT_WALL_TEX.width + this.length * (COLUMN_TEX.width + INNER_WALL_TEX.width) + HANDLE_TEX.width);
+		this.ySize = HANDLE_TEX.height;
 		this.sprites = new ArrayDeque<>(this.length * 3 + 4);
 		this.pinTumblers = new Sprite[this.length];
 		this.upperPins = new Sprite[this.length];
@@ -103,6 +111,10 @@ public class LockPickingGui extends GuiContainer
 		this.leftPickPart = this.addSprite(new Sprite(new Texture(0, 0, 0, 12, 160, 16)).position(0f, this.lockPick.posY).rotation(-30f, -10f, this.lockPick.posY + 13f).alpha(0f));
 		this.holdingLeft = false;
 		this.holdingRight = false;
+		
+		//Inflate sizes for UI scale
+		this.xSize *= 2;
+		this.ySize *= 2;
 	}
 	
 	public static ResourceLocation getTextureFor(ItemStack stack)
@@ -136,8 +148,9 @@ public class LockPickingGui extends GuiContainer
 	public void drawGuiContainerBackgroundLayer(float partialTick, int mouseX, int mouseY) // TODO Final static constants for texture pos?
 	{
 		float pt = this.mc.getRenderPartialTicks(); // Don't know why, but partialTick param looks laggy af... Use getRenderPartialTicks instead.
-		int cornerX = (this.width - this.xSize) / 2;
-		int cornerY = (this.height - this.ySize) / 2;
+		
+		int cornerX = (this.width - xSize) / 2;
+		int cornerY = (this.height - ySize) / 2;
 		
 		GlStateManager.color(1f, 1f, 1f, 1f); //TODO is this necessary?
 		
@@ -315,5 +328,4 @@ public class LockPickingGui extends GuiContainer
 		this.pickTex = getTextureFor(Minecraft.getMinecraft().player.getHeldItem(this.hand));
 		this.lockPick.position(-22 - LOCK_PICK_TEX.width, this.lockPick.posY).alpha(1f).execute(AccelerateAction.to(32f, 0f, 4, false).then(unfreezeCb));
 	}
-	
 }
