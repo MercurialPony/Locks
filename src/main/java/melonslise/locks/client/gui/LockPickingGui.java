@@ -161,7 +161,7 @@ public class LockPickingGui extends GuiContainer
 		GlStateManager.scale(2f, 2f, 2f);
 		FRONT_WALL_TEX.draw(0f, 0f, 1f);
 		
-		for(int a = 0; a < this.length + 1; ++a)
+		for(int a = 0; a < this.length; ++a)
 		{
 			COLUMN_TEX.draw(FRONT_WALL_TEX.width + a * (COLUMN_TEX.width + INNER_WALL_TEX.width), 0f, 1f);
 			if(a != this.length - 1)

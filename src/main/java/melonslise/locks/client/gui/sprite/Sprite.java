@@ -63,7 +63,12 @@ public class Sprite
 		GlStateManager.translate(this.originX, this.originY, 0f);
 		GlStateManager.rotate(LocksClientUtil.lerp(this.oldRot, this.rot, partialTick), 0F, 0F, 1F);
 		GlStateManager.translate(-this.originX, -this.originY, 0f);
+		GlStateManager.enableAlpha();
+        GlStateManager.enableBlend();
+        GlStateManager.color(1f, 1f, 1f, LocksClientUtil.lerp(this.oldAlpha, this.alpha, partialTick));
 		this.tex.draw(LocksClientUtil.lerp(this.oldPosX, this.posX, partialTick), LocksClientUtil.lerp(this.oldPosY, this.posY, partialTick), LocksClientUtil.lerp(this.oldAlpha, this.alpha, partialTick));
+		GlStateManager.disableAlpha();
+        GlStateManager.disableBlend();
 		GlStateManager.popMatrix();
 	}
 
