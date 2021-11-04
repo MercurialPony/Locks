@@ -14,7 +14,9 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.RenderGlobal;
+import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.Vector3d;
+import net.minecraft.client.renderer.GlStateManager.CullFace;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.renderer.culling.ClippingHelperImpl;
@@ -68,6 +70,8 @@ public final class LocksClientEvents
 		BlockPos.MutableBlockPos mutPos = new BlockPos.MutableBlockPos();
 		ILockableHandler lockables = mc.world.getCapability(LocksCapabilities.LOCKABLE_HANDLER, null);
 		
+		GlStateManager.enableRescaleNormal();
+		
 		for(Lockable lockable : lockables.getLoaded().values())
 		{
 			Lockable.State state = lockable.getLockState(mc.world);
@@ -85,10 +89,16 @@ public final class LocksClientEvents
 			GlStateManager.scale(0.5f, 0.5f, 0.5f);
 			int light = mc.world.getCombinedLight(mutPos.setPos(state.pos.x, state.pos.y, state.pos.z), 0);
 			OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, light % 65536, light / 65536);
+			GlStateManager.color(1.0f, 1.0f, 1.0f, 1.0f);
 			mc.entityRenderer.enableLightmap();
+            RenderHelper.enableStandardItemLighting();
 			mc.getRenderItem().renderItem(lockable.stack, ItemCameraTransforms.TransformType.FIXED);
+            RenderHelper.disableStandardItemLighting();
+			mc.entityRenderer.disableLightmap();
 			GlStateManager.popMatrix();
 		}
+
+		GlStateManager.disableRescaleNormal();
 
 		ISelection select = mc.player.getCapability(LocksCapabilities.SELECTION, null);
 		BlockPos pos1 = select.get();

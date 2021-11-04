@@ -1,9 +1,12 @@
 package melonslise.locks.common.config;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.NavigableMap;
 import java.util.Random;
+import java.util.Set;
 import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
 import melonslise.locks.Locks;
@@ -68,6 +71,55 @@ public final class LocksConfig
 		@Config.Comment("Placed locks will try to orient themselves smartly to doors and chests regardless of how they were placed")
 		public boolean automaticallyOrientPlacedLocks = false;
 		
+		@Config.Name("Skip Generation Empty Chests")
+		@Config.Comment("Skip generating locks on empty chests")
+		public boolean skipGenerationEmptyChests = true;
+		
+		@Config.Name("Chest Item List Always Generate")
+		@Config.Comment("Always generate locks if the chests contain these items. Metadata can be specified (ex. minecraft:bed:0)")
+		public String[] chestItemListAlwaysGenerate = new String[]{"minecraft:nether_star"};
+		
+		@Config.Name("Chest Item List Skip Generating")
+		@Config.Comment("Worldgen assumes chests with only these items are empty. Metadata can be specified (ex. minecraft:bed:0)")
+		public String[] chestItemListSkipGenerating = new String[]{
+				"minecraft:beetroot_seeds",
+				"minecraft:bone",
+				"minecraft:book",
+				"minecraft:bowl",
+				"minecraft:bread",
+				"minecraft:brown_mushroom",
+				"minecraft:clay_ball",
+				"minecraft:cobblestone",
+				"minecraft:dirt",
+				"minecraft:dye",
+				"minecraft:egg",
+				"minecraft:gravel",
+				"minecraft:hay_block",
+				"minecraft:melon_seeds",
+				"minecraft:painting",
+				"minecraft:paper",
+				"minecraft:pumpkin_seeds",
+				"minecraft:red_mushroom",
+				"minecraft:rotten_flesh",
+				"minecraft:sapling",
+				"minecraft:sign",
+				"minecraft:spider_eye",
+				"minecraft:stick",
+				"minecraft:stone",
+				"minecraft:stone_button",
+				"minecraft:string",
+				"minecraft:vine",
+				"minecraft:waterlily",
+				"minecraft:web",
+				"minecraft:wheat",
+				"minecraft:wheat_seeds",
+				"minecraft:wooden_button",
+		};
+		
+		
+		
+		
+		
 		//@Config.Name("Randomize Loaded Locks")
 		//@Config.Comment("Randomize lock IDs and combinations when loading them from a structure file. Randomization works just like during world generation")
 		//public boolean randomizeLoadedLocks = false;
@@ -129,11 +181,18 @@ public final class LocksConfig
 	public static NavigableMap<Integer, Item> weightedGeneratedLocks;
 	@Config.Ignore
 	public static int weightTotal;
+	@Config.Ignore
+	public static Set<String> alwaysGenerateItems;
+	@Config.Ignore
+	public static Set<String> skipGeneratingItems;
 	
 	public static void init()
 	{
 		weightedGeneratedLocks = new TreeMap<>();
 		weightedGeneratedPins = new TreeMap<>();
+		alwaysGenerateItems = new HashSet<>();
+		skipGeneratingItems = new HashSet<>();
+		
 		weightTotal = 0;
 		String[] locks = COMMON.generatedLocks;
 		int[] weights = COMMON.generatedLockWeights;
@@ -144,6 +203,30 @@ public final class LocksConfig
 			weightedGeneratedLocks.put(weightTotal, ForgeRegistries.ITEMS.getValue(new ResourceLocation(locks[a])));
 			weightedGeneratedPins.put(weightTotal, pins[a]);
 		}
+		
+		for(int a = 0; a < COMMON.chestItemListAlwaysGenerate.length; a++)
+		{
+			alwaysGenerateItems.add(COMMON.chestItemListAlwaysGenerate[a].trim());
+		}
+		
+		for(int a = 0; a < COMMON.chestItemListSkipGenerating.length; a++)
+		{
+			skipGeneratingItems.add(COMMON.chestItemListSkipGenerating[a].trim());
+		}
+	}
+	
+	public static boolean isItemAlwaysLocked(ItemStack stack)
+	{
+		String regName = stack.getItem().getRegistryName().toString();
+		String regNameMeta = regName + ":" + stack.getMetadata();
+		return alwaysGenerateItems.contains(regName) || alwaysGenerateItems.contains(regNameMeta);
+	}
+	
+	public static boolean isItemSkipped(ItemStack stack)
+	{
+		String regName = stack.getItem().getRegistryName().toString();
+		String regNameMeta = regName + ":" + stack.getMetadata();
+		return skipGeneratingItems.contains(regName) || skipGeneratingItems.contains(regNameMeta);
 	}
 	
 	public static boolean canGen(Random rng)
@@ -179,5 +262,7 @@ public final class LocksConfig
 		
 		return canEnchant(rng) ? EnchantmentHelper.addRandomEnchantment(rng, stack, 5 + rng.nextInt(30), false) : stack;
 	}
+	
+	
 
 }

@@ -32,8 +32,10 @@ public class LockableHandler implements ILockableHandler
 	
 	//Synchronized to attempt to fix concurrency issue in chunk loading, see LockableStorage for details on the crash
 	public Int2ObjectMap<Lockable> lockables = Int2ObjectMaps.synchronize(new Int2ObjectLinkedOpenHashMap<Lockable>());
-
 	
+	//FIXME bandaid fix for double chests
+	//Need actual fix for double chest troubles
+	public Int2ObjectMap<Lockable> emptyLockables = new Int2ObjectLinkedOpenHashMap<Lockable>();
 	
 	public LockableHandler(World world)
 	{
@@ -54,7 +56,7 @@ public class LockableHandler implements ILockableHandler
 	@Override
 	public Int2ObjectMap<Lockable> getInChunk(BlockPos pos)
 	{
-		return LocksUtil.hasChunkAt(this.world, pos) ? this.world.getChunkFromBlockCoords(pos).getCapability(LocksCapabilities.LOCKABLE_STORAGE, null).get(): null;
+		return LocksUtil.hasChunkAt(this.world, pos) ? this.world.getChunkFromBlockCoords(pos).getCapability(LocksCapabilities.LOCKABLE_STORAGE, null).get(): emptyLockables;
 	}
 
 	@Override

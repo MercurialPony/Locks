@@ -87,7 +87,8 @@ public class LockPickingContainer extends Container
 		{
 			if(!this.tryBreakPick(player, currentPin))
 			{
-				this.player.world.playSound(null, this.pos.x, this.pos.y, this.pos.z, LocksSoundEvents.PIN_FAIL, SoundCategory.BLOCKS, 1F, 1F);
+				int pinDistance = Math.abs(this.lockable.lock.getPin(this.currentIndex) - currentPin);
+				this.player.world.playSound(null, this.pos.x, this.pos.y, this.pos.z, LocksSoundEvents.PIN_FAIL, SoundCategory.BLOCKS, 1F, pinDistance <= 1 ? 1.25F : 1F);
 			}
 			else
 			{
@@ -141,7 +142,7 @@ public class LockPickingContainer extends Container
 			return false;
 		
 		float sturdyModifier = this.sturdy == 0 ? 1f : 0.75f + this.sturdy * 0.5f;
-		float ch = LockPickItem.getOrSetStrength(pickStack) / sturdyModifier;
+		float ch = LockPickItem.getStrength(pickStack) / sturdyModifier;
 		float ex = (1f - ch) * (1f - this.getBreakChanceMultiplier(pin));
 		
 		if(player.world.rand.nextFloat() < ex + ch)

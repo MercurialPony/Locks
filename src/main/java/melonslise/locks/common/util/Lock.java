@@ -39,7 +39,7 @@ public class Lock extends Observable
 
 	public static Lock from(ItemStack stack)
 	{
-		return new Lock(LockingItem.getOrSetId(stack), LockItem.getOrSetLength(stack), !LockItem.isOpen(stack));
+		return new Lock(LockingItem.getOrSetId(stack), LockItem.getLength(stack), !LockItem.isOpen(stack));
 	}
 
 	public int getLength()
@@ -91,5 +91,17 @@ public class Lock extends Observable
 	public int hashCode()
 	{
 		return Objects.hash(this.id, this.combination, this.locked);
+	}
+	
+	@Override
+	public String toString()
+	{
+		StringBuilder sb = new StringBuilder();
+		sb.append("Lock{id: ");
+		sb.append(id);
+		sb.append(", locked: ");
+		sb.append(locked);
+		sb.append("}");
+		return sb.toString();
 	}
 }

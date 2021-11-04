@@ -90,11 +90,42 @@ public class LocksDelayEvents
 			Map.Entry<ChunkPos, ChunkDelay> entry = it.next();
 			if(entry.getValue().tick())
 			{
+				/*
 				ChunkPos cpos = entry.getKey();
 				//Only run delayed generation on loaded chunks
 				if(LocksUtil.hasChunk(world, cpos.x, cpos.z))
 					world.getChunkFromChunkCoords(cpos.x, cpos.z).getCapability(LocksCapabilities.LOCKABLE_WORLDGEN_HANDLER, null).tryGeneratingLocks();
 				it.remove();
+				*/
+				
+				ChunkPos cpos = entry.getKey();
+				//Only run delayed generation on loaded chunks
+				if(LocksUtil.hasChunk(world, cpos.x, cpos.z))
+				{
+					//If surrounding chunks are not loaded, delay this routine
+					//This should prevent a lot of issues
+					if(LocksUtil.hasChunk(world, cpos.x + 1, cpos.z)
+						&& LocksUtil.hasChunk(world, cpos.x - 1, cpos.z)
+						&& LocksUtil.hasChunk(world, cpos.x, cpos.z - 1)
+						&& LocksUtil.hasChunk(world, cpos.x, cpos.z + 1)
+					)
+					{
+						//Try generating
+						world.getChunkFromChunkCoords(cpos.x, cpos.z).getCapability(LocksCapabilities.LOCKABLE_WORLDGEN_HANDLER, null).tryGeneratingLocks();
+						//Remove, since chunk is now processed
+						it.remove();
+					}
+					else
+					{
+						//Don't remove after reset
+						entry.getValue().reset();
+					}
+				}
+				else
+				{
+					//Remove if chunk is unloaded
+					it.remove();
+				}
 			}
 		}
 	}
@@ -124,6 +155,11 @@ public class LocksDelayEvents
 		{
 			this.delay -= 1;
 			return this.delay <= 0;
+		}
+		
+		public void reset()
+		{
+			this.delay = LocksDelayEvents.delay;
 		}
 	}
 }

@@ -111,11 +111,21 @@ public class LockItem extends LockingItem
 	}
 	*/
 
+	/*
 	public static byte getOrSetLength(ItemStack stack)
 	{
 		NBTTagCompound nbt = LocksUtil.getTag(stack);
 		if(!nbt.hasKey(KEY_LENGTH))
 			nbt.setByte(KEY_LENGTH, (byte) ((LockItem)stack.getItem()).length);
+		return nbt.getByte(KEY_LENGTH);
+	}
+	*/
+	
+	public static byte getLength(ItemStack stack)
+	{
+		NBTTagCompound nbt = LocksUtil.getTag(stack);
+		if(!nbt.hasKey(KEY_LENGTH))
+			return (byte) ((LockItem)stack.getItem()).length;
 		return nbt.getByte(KEY_LENGTH);
 	}
 	

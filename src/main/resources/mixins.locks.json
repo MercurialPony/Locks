@@ -9,6 +9,7 @@
         "TileEntityBrewingStandMixin",
         "TileEntityChestMixin",
         "TileEntityFurnaceMixin",
+        "TileEntityLockableLootAccessor",
         "TileEntityLockableMixin",
         "VanillaInventoryCodeHooksMixin",
         "WorldMixin"

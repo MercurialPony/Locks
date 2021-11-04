@@ -83,19 +83,28 @@ public class LockableStorage implements ILockableStorage
 		
 		//LockableHandler getLoaded was changed to be synchronized in an attempt to fix this
 		
+		
+		//FIXME Storage is loading in locks but Handler is very, very frequently not adding them
+		
 		ILockableHandler handler = this.chunk.getWorld().getCapability(LocksCapabilities.LOCKABLE_HANDLER, null);
-		Int2ObjectMap<Lockable> lkbs = handler.getLoaded();
+		Int2ObjectMap<Lockable> loadedLockables = handler.getLoaded();
 		
 		for(int a = 0; a < nbt.tagCount(); ++a)
 		{
 			NBTTagCompound nbt1 = nbt.getCompoundTagAt(a);
-			Lockable lkb = lkbs.get(nbt1.getInteger(LocksUtil.KEY_ID));
-			if(lkb == lkbs.defaultReturnValue())
+			Lockable lkb = loadedLockables.get(nbt1.getInteger(LocksUtil.KEY_ID));
+			if(lkb == loadedLockables.defaultReturnValue())
 			{
 				lkb = LocksUtil.readLockableFromNBT(nbt1);
-				lkb.addObserver(handler);
-				lkbs.put(lkb.networkID, lkb);
+				//lkb.addObserver(handler);
+				
+				if(Locks.debug)
+					Locks.logger.debug("Storage deserializing with id: "+lkb.networkID+" ::: "+lkb.toString());
+				//loadedLockables.put(lkb.networkID, lkb); //trying out adding this in the chunk load handler instead
+				//if(Locks.debug)
+				//	Locks.logger.debug("Placing lockable into loaded with id: "+lkb.networkID+" ::: "+lkb.toString());
 			}
+			
 			this.lockables.put(lkb.networkID, lkb);
 		}
 	}

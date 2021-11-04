@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import melonslise.locks.Locks;
 import melonslise.locks.common.capability.ILockableHandler;
 import melonslise.locks.common.capability.ISelection;
@@ -38,6 +39,7 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
@@ -315,16 +317,166 @@ public final class LocksEvents
 		});
 	}
 	
+	/*
 	@SubscribeEvent
 	public static void onChunkUnload(ChunkEvent.Unload event)
 	{
+		//FIXME handler is forgetting loaded locks, and this could be the culprit
+		
 		Chunk ch = (Chunk) event.getChunk();
 		ILockableHandler handler = ch.getWorld().getCapability(LocksCapabilities.LOCKABLE_HANDLER, null);
 		ch.getCapability(LocksCapabilities.LOCKABLE_STORAGE, null).get().values().forEach(lkb ->
 		{
 			handler.getLoaded().remove(lkb.networkID);
 			lkb.deleteObserver(handler); //Redundant?
+			if(Locks.debug)
+				Locks.logger.debug("Removing lockable from loaded with id: "+lkb.networkID+" ::: "+lkb.toString());
+		});
+	}
+	*/
+
+	//ChunkEvent.Unload is unreliable?
+	@SubscribeEvent
+	public static void onChunkUnload(ChunkEvent.Unload event)
+	{
+		//FIXME handler is forgetting loaded locks, and this could be the culprit
+		
+		Chunk ch = (Chunk) event.getChunk();
+		World world = ch.getWorld();
+		
+		if(world.isRemote)
+			return;
+		
+		ILockableHandler handler = world.getCapability(LocksCapabilities.LOCKABLE_HANDLER, null);
+		ch.getCapability(LocksCapabilities.LOCKABLE_STORAGE, null).get().values().forEach(lkb ->
+		{
+			ChunkPos unloadPos = ch.getPos();
+			List<ChunkPos> chunkList = lkb.box.containedChunkPosList();
+			for(ChunkPos chunkPos : chunkList)
+			{
+				//Skip this chunk as it's unloading
+				if(unloadPos.equals(chunkPos))
+					continue;
+				
+				//Don't unload if any of the chunks are loaded
+				if(LocksUtil.hasChunk(world, chunkPos.x, chunkPos.z))
+					continue;
+			}
+			handler.getLoaded().remove(lkb.networkID);
+			lkb.deleteObserver(handler); //Redundant?
+			if(Locks.debug)
+				Locks.logger.debug("Removing lockable from loaded with id: "+lkb.networkID+" ::: "+lkb.toString());
 		});
 	}
 	
+	@SubscribeEvent
+	public static void onChunkLoad(ChunkEvent.Load event)
+	{
+		Chunk ch = (Chunk) event.getChunk();
+		World world = ch.getWorld();
+		
+		if(world.isRemote)
+			return;
+		
+		ILockableHandler handler = world.getCapability(LocksCapabilities.LOCKABLE_HANDLER, null);
+		Int2ObjectMap<Lockable> loadedLockables = handler.getLoaded();
+		ch.getCapability(LocksCapabilities.LOCKABLE_STORAGE, null).get().values().forEach(lkb ->
+		{
+			if(!loadedLockables.containsKey(lkb.networkID))
+			{
+				lkb.addObserver(handler);
+				loadedLockables.put(lkb.networkID, lkb);
+				if(Locks.debug)
+					Locks.logger.debug("Placing lockable into loaded with id: "+lkb.networkID+" ::: "+lkb.toString());
+			}
+		});
+	}
+
+	/*
+	@SubscribeEvent
+	public static void onChunkUnload(ChunkEvent.Unload event)
+	{
+		//FIXME handler is forgetting loaded locks, and this could be the culprit
+		
+		Chunk ch = (Chunk) event.getChunk();
+		World world = ch.getWorld();
+		
+		//Client relies on chunk unwatch and communication with the server
+		if(world.isRemote)
+			return;
+		
+		ILockableHandler handler = world.getCapability(LocksCapabilities.LOCKABLE_HANDLER, null);
+		
+		//Iterate through each lockable of the specified chunk
+		ch.getCapability(LocksCapabilities.LOCKABLE_STORAGE, null).get().values().forEach(lkb ->
+		{
+			//Schedule a lockable checking task for later
+			//Unload event is unreliable, so we have to do this ourselves later, which is really fun...
+			world.getMinecraftServer().addScheduledTask(new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					ILockableHandler handler = world.getCapability(LocksCapabilities.LOCKABLE_HANDLER, null);
+					if(handler == null)
+						return;
+					
+					//Add new lock to regularly check for unloading
+					handler.getServerUnloadSet().add(lkb.networkID);
+				}
+			});
+		});
+		
+		//Also schedule a task to check all locks in the unload set
+		world.getMinecraftServer().addScheduledTask(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				ILockableHandler handler = world.getCapability(LocksCapabilities.LOCKABLE_HANDLER, null);
+				
+				if(handler == null)
+					return;
+				
+				Int2ObjectMap<Lockable> loadedLockables = handler.getLoaded();
+				
+				Iterator<Integer> it = handler.getServerUnloadSet().iterator();
+				while(it.hasNext())
+				{
+					Integer networkId = it.next();
+					Lockable lkb = loadedLockables.get(networkId);
+					
+					//Check if id is missing already for some reason
+					if(lkb == loadedLockables.defaultReturnValue())
+					{
+						//Lock is already missing, remove network id from iteration
+						it.remove();
+						continue;
+					}
+					
+					List<ChunkPos> chunkList = lkb.box.containedChunkPosList();
+					//Go through every chunk the lockable is supposed to be in, and make sure all the chunks are already unloaded
+					if(Locks.debug)
+						Locks.logger.debug("ChunkList Size: "+chunkList.size());
+					
+					for(ChunkPos chunkPos : chunkList)
+					{
+						//Don't unload if any of the chunks are loaded
+						if(LocksUtil.hasChunk(world, chunkPos.x, chunkPos.z))
+							continue;
+					}
+					
+					//No more chunks are loaded, for real this time. Remove the lock.
+					loadedLockables.remove(lkb.networkID);
+					lkb.deleteObserver(handler); //Redundant?
+					if(Locks.debug)
+						Locks.logger.debug("Removing lockable from loaded with id: "+lkb.networkID+" ::: "+lkb.toString());
+					
+					//Now that the lock is removed, remove the network id from iteration
+					it.remove();
+				}
+			}
+		});
+	}
+	*/
 }

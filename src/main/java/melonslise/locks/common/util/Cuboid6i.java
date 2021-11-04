@@ -8,6 +8,7 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockPos.MutableBlockPos;
+import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.structure.StructureBoundingBox;
@@ -153,6 +154,30 @@ public class Cuboid6i
 			if(endEarly && t == null)
 				return null;
 			list.add(a, t);
+		}
+		return list;
+	}
+	
+	public List<ChunkPos> containedChunkPosList()
+	{
+		// Get the intersecting chunks and go through the checks
+		// Use bitshift because apparently / 16 behaves differently with certain negative numbers
+		int x1 = this.x1 >> 4;
+		int x2 = this.x2 >> 4;
+		int z1 = this.z1 >> 4;
+		int z2 = this.z2 >> 4;
+		// Prevents funky behavior at positive x/z chunk edges
+		if(this.x2 % 16 == 0)
+			x2 -= 1;
+		if(this.z2 % 16 == 0)
+			z2 -= 1;
+
+		int sizeX = x2 - x1 + 1;
+		int length = sizeX * (z2 - z1 + 1);
+		List<ChunkPos> list = new ArrayList<>(length);
+		for(int a = 0; a < length; ++a)
+		{
+			list.add(new ChunkPos(x1 + a % sizeX, z1 + a / sizeX));
 		}
 		return list;
 	}

@@ -1,6 +1,7 @@
 package melonslise.locks.common.util;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
@@ -8,6 +9,8 @@ import java.util.stream.Stream;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.util.internal.ThreadLocalRandom;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import melonslise.locks.Locks;
 import melonslise.locks.common.capability.ILockableHandler;
 import melonslise.locks.common.init.LocksCapabilities;
 import melonslise.locks.common.init.LocksNetworks;
@@ -375,6 +378,7 @@ public final class LocksUtil
 			
 			Set<EntityPlayerMP> playerSet = new HashSet<EntityPlayerMP>();
 
+			// TODO evaluate how well this routine actually works
 			//Get all the chunks in the bounds
 			bounds.containedChunksTo((x, z) -> 
 			{
@@ -402,7 +406,7 @@ public final class LocksUtil
 	
 	public static boolean hasChunk(World world, int xx, int zz)
 	{
-		return hasChunkAt(world, new BlockPos(xx << 4, 64, zz << 4));
+		return hasChunkAt(world, new BlockPos((xx << 4)+8, 64, (zz << 4)+8));
 	}
 	
 }

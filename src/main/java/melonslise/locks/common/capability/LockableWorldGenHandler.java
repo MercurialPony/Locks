@@ -1,6 +1,6 @@
 package melonslise.locks.common.capability;
 
-import java.util.Map.Entry;
+import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -12,12 +12,14 @@ import melonslise.locks.common.util.Lock;
 import melonslise.locks.common.util.Lockable;
 import melonslise.locks.common.util.LocksUtil;
 import melonslise.locks.common.util.Orientation;
+import melonslise.locks.mixin.TileEntityLockableLootAccessor;
 import net.minecraft.block.BlockChest;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagInt;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityChest;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -51,6 +53,11 @@ public class LockableWorldGenHandler implements ILockableWorldGenHandler
 	public void tryGeneratingLocks()
 	{
 		// TODO Retrogen for existing chunks? (NONE)
+		
+		
+		//FIXME need to skip generation if surrounding chunks are unloaded
+		//If they are unloaded, skip and re-queue self 
+		
 		if(this.phase.get() == SHOULD_GENERATE)
 		{
 			//Do chunk chest generation
@@ -62,13 +69,63 @@ public class LockableWorldGenHandler implements ILockableWorldGenHandler
 			Random rand = world.rand;
 			
 			ILockableHandler lockables = world.getCapability(LocksCapabilities.LOCKABLE_HANDLER, null);
-			for(Entry<BlockPos, TileEntity> entry : chunk.getTileEntityMap().entrySet())
+			for(Map.Entry<BlockPos, TileEntity> entry : chunk.getTileEntityMap().entrySet())
 			{
-				if(!LocksConfig.canGen(rand))
+				BlockPos pos = entry.getKey();
+				if(!(entry.getValue() instanceof TileEntityChest) || !(world.getBlockState(pos).getBlock() instanceof BlockChest) || lockables.getInChunk(pos).values().stream().anyMatch(lockable1 -> lockable1.box.intersects(pos)))
 					continue;
 				
-				BlockPos pos = entry.getKey();
-				if(!(entry.getValue() instanceof TileEntityChest) || lockables.getInChunk(pos).values().stream().anyMatch(lockable1 -> lockable1.box.intersects(pos)))
+				
+				//LocksConfig.COMMON.skipGenerationEmptyChests
+				//Do some checks for chests
+				TileEntityChest te = (TileEntityChest)(entry.getValue());
+				
+				boolean isForced = false;
+				boolean isEmpty = true;
+
+				//System.out.println("Chest: "+te.getPos());
+				
+				if(te.getLootTable() == null)
+				{
+					NonNullList<ItemStack> stacks = ((TileEntityLockableLootAccessor)te).getItems();
+					for(ItemStack stack : stacks)
+					{
+						//Check empty
+						if(!stack.isEmpty())
+						{
+							//Stack is not empty, check if it's forced
+							if(LocksConfig.isItemAlwaysLocked(stack))
+							{
+								//System.out.println("Forced: "+stack.getItem().getRegistryName().toString());
+								isForced = true;
+								break;
+							}
+							
+							//Check if the present item is treated as empty, if not, consider the chest filled
+							if(isEmpty && !LocksConfig.isItemSkipped(stack))
+							{
+								//if(isEmpty)
+									//System.out.println("Nonempty: "+stack.getItem().getRegistryName().toString());
+								isEmpty = false;
+							}
+						}
+					}
+				}
+				else
+				{
+					//System.out.println("Loot: "+te.getLootTable().toString());
+					//Has loot table
+					//TODO loot table
+					isForced = false;
+					isEmpty = false;
+				}
+				
+				//Skip empty or worthless if configured
+				if(isEmpty && LocksConfig.COMMON.skipGenerationEmptyChests)
+					continue;
+				
+				//Roll randomness if not forced
+				if(!isForced && !LocksConfig.canGen(rand))
 					continue;
 				
 				BlockPos adjPos = LocksUtil.getAdjacentChest((TileEntityChest) entry.getValue());

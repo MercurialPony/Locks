@@ -42,7 +42,7 @@ public class LockPickItem extends Item
 		this.strength = strength;
 	}
 
-	
+	/*
 	public static float getOrSetStrength(ItemStack stack)
 	{
 		NBTTagCompound nbt = LocksUtil.getTag(stack);
@@ -50,10 +50,23 @@ public class LockPickItem extends Item
 			nbt.setFloat(KEY_STRENGTH, ((LockPickItem)stack.getItem()).strength);
 		return nbt.getFloat(KEY_STRENGTH);
 	}
+	*/
+	
+	public static float getStrength(ItemStack stack)
+	{
+		//Avoid creating blank tag compounds
+		if(!stack.hasTagCompound())
+			return ((LockPickItem)stack.getItem()).strength;
+			
+		NBTTagCompound nbt = stack.getTagCompound();
+		if(!nbt.hasKey(KEY_STRENGTH))
+			return ((LockPickItem)stack.getItem()).strength;
+		return nbt.getFloat(KEY_STRENGTH);
+	}
 	
 	public static boolean canPick(ItemStack stack, int cmp)
 	{
-		return getOrSetStrength(stack) > cmp * 0.25f;
+		return getStrength(stack) > cmp * 0.25f;
 	}
 	
 	public static boolean canPick(ItemStack stack, Lockable lkb)

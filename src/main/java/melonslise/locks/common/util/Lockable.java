@@ -187,4 +187,21 @@ public class Lockable extends Observable implements Observer
 	{
 		return Objects.hash(this.box, this.lock, this.orient, this.networkID);
 	}
+	
+	@Override
+	public String toString()
+	{
+		StringBuilder sb = new StringBuilder();
+		sb.append("Lockable{");
+		sb.append("networkID: ");
+		sb.append(networkID);
+		sb.append(", ");
+		sb.append(box);
+		sb.append(", ");
+		sb.append(lock);
+		sb.append(", ");
+		sb.append(orient);
+		sb.append("}");
+		return sb.toString();
+	}
 }

@@ -34,6 +34,7 @@ public class LockingItem extends Item
 		return to;
 	}
 
+	//Assigns a random ID if one isn't present
 	public static int getOrSetId(ItemStack stack)
 	{
 		NBTTagCompound nbt = LocksUtil.getTag(stack);

@@ -1,11 +1,13 @@
 package melonslise.locks.common.capability;
 
 import java.util.Observer;
+import java.util.Set;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import melonslise.locks.common.util.Lockable;
 import net.minecraft.nbt.NBTTagInt;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ChunkPos;
 import net.minecraftforge.common.util.INBTSerializable;
 
 public interface ILockableHandler extends INBTSerializable<NBTTagInt>, Observer
@@ -15,7 +17,7 @@ public interface ILockableHandler extends INBTSerializable<NBTTagInt>, Observer
 	Int2ObjectMap<Lockable> getLoaded();
 
 	Int2ObjectMap<Lockable> getInChunk(BlockPos pos);
-
+	
 	boolean add(Lockable lkb);
 
 	boolean remove(int id);

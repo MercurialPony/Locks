@@ -24,11 +24,15 @@ public class VanillaInventoryCodeHooksMixin
 	@Inject(at = @At("HEAD"), method = "getItemHandler(Lnet/minecraft/world/World;DDDLnet/minecraft/util/EnumFacing;)Lorg/apache/commons/lang3/tuple/Pair;", cancellable = true, remap = false)
 	private static void getItemHandler(World world, double x, double y, double z, final EnumFacing side, CallbackInfoReturnable<Pair> cir)
 	{
+		//Rare situation where world is null
+		if(world == null)
+			return;
+		
 		BlockPos pos = new BlockPos(x,y,z);
 		if(LocksUtil.locked(world, pos))
 		{
 			TileEntity te = world.getTileEntity(pos);
-
+			
 			if(te == null)
 				cir.setReturnValue(null);
 			else
