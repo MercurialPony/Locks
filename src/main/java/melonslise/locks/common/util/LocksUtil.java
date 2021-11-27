@@ -1,7 +1,6 @@
 package melonslise.locks.common.util;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
@@ -9,8 +8,6 @@ import java.util.stream.Stream;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.util.internal.ThreadLocalRandom;
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import melonslise.locks.Locks;
 import melonslise.locks.common.capability.ILockableHandler;
 import melonslise.locks.common.init.LocksCapabilities;
 import melonslise.locks.common.init.LocksNetworks;
@@ -18,6 +15,7 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.PacketBuffer;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerChunkMap;
 import net.minecraft.server.management.PlayerChunkMapEntry;
 import net.minecraft.tileentity.TileEntityChest;
@@ -27,6 +25,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
+import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 
 public final class LocksUtil
@@ -396,6 +395,20 @@ public final class LocksUtil
 			
 			playerSet.clear();
 		}
+	}
+	
+	public static long getOverworldSeed()
+	{
+		MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
+		if(server != null)
+		{
+			World world = server.getEntityWorld();
+			if(world != null)
+				return world.getSeed();
+		}
+		
+		//Fall back to 1 on client
+		return 1L;
 	}
 	
 	//Utilities from 1.16 

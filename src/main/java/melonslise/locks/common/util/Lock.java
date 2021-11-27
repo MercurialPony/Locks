@@ -21,7 +21,7 @@ public class Lock extends Observable
 	protected Lock(int id, byte[] combination, boolean locked)
 	{
 		this.id = id;
-		this.rng = new Random(id);
+		this.rng = createNewRng(id);
 		this.combination = combination;
 		this.locked = locked;
 	}
@@ -29,12 +29,19 @@ public class Lock extends Observable
 	public Lock(int id, int length, boolean locked)
 	{
 		this.id = id;
-		this.rng = new Random(id);
+		this.rng = createNewRng(id);
 		this.combination = new byte[length];
 		for(byte a = 0; a < length; ++a)
 			combination[a] = a;
 		this.shuffle();
 		this.locked = locked;
+	}
+	
+	private Random createNewRng(int id)
+	{
+		//Create RNG that relies on the overworld seed as well as the ID
+		long overworldSeed = LocksUtil.getOverworldSeed();
+		return new Random(id ^ Math.abs(overworldSeed) * 17317L + overworldSeed);
 	}
 
 	public static Lock from(ItemStack stack)
