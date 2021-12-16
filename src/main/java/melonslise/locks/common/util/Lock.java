@@ -21,7 +21,7 @@ public class Lock extends Observable
 	protected Lock(int id, byte[] combination, boolean locked)
 	{
 		this.id = id;
-		this.rng = new Random(id);
+		this.rng = createNewRng(id);
 		this.combination = combination;
 		this.locked = locked;
 	}
@@ -29,17 +29,24 @@ public class Lock extends Observable
 	public Lock(int id, int length, boolean locked)
 	{
 		this.id = id;
-		this.rng = new Random(id);
+		this.rng = createNewRng(id);
 		this.combination = new byte[length];
 		for(byte a = 0; a < length; ++a)
 			combination[a] = a;
 		this.shuffle();
 		this.locked = locked;
 	}
+	
+	private Random createNewRng(int id)
+	{
+		//Create RNG that relies on the overworld seed as well as the ID
+		long overworldSeed = LocksUtil.getOverworldSeed();
+		return new Random(id ^ Math.abs(overworldSeed) * 17317L + overworldSeed);
+	}
 
 	public static Lock from(ItemStack stack)
 	{
-		return new Lock(LockingItem.getOrSetId(stack), LockItem.getOrSetLength(stack), true);
+		return new Lock(LockingItem.getOrSetId(stack), LockItem.getLength(stack), !LockItem.isOpen(stack));
 	}
 
 	public int getLength()
@@ -65,6 +72,11 @@ public class Lock extends Observable
 	{
 		return this.combination[index] == pin;
 	}
+	
+	public byte getPin(int index)
+	{
+		return this.combination[index];
+	}
 
 	public void shuffle()
 	{
@@ -86,5 +98,17 @@ public class Lock extends Observable
 	public int hashCode()
 	{
 		return Objects.hash(this.id, this.combination, this.locked);
+	}
+	
+	@Override
+	public String toString()
+	{
+		StringBuilder sb = new StringBuilder();
+		sb.append("Lock{id: ");
+		sb.append(id);
+		sb.append(", locked: ");
+		sb.append(locked);
+		sb.append("}");
+		return sb.toString();
 	}
 }

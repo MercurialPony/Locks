@@ -1,8 +1,10 @@
 package melonslise.locks.common.world;
 
-import melonslise.locks.common.capability.ILockableStorage;
+import java.util.stream.Collectors;
+
+import melonslise.locks.common.capability.ILockableHandler;
 import melonslise.locks.common.init.LocksCapabilities;
-import melonslise.locks.common.item.LockItem;
+import melonslise.locks.common.util.LocksUtil;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
@@ -21,15 +23,17 @@ public final class LocksWorldEventListener implements IWorldEventListener
 	{
 		if(world.isRemote || oldState.getBlock() == newState.getBlock())
 			return;
-		ILockableStorage lockables = world.getCapability(LocksCapabilities.LOCKABLES, null);
-		lockables.get().values().stream().filter(lockable1 -> lockable1.box.intersects(pos)).forEach(lockable ->
+		
+		ILockableHandler lockables = world.getCapability(LocksCapabilities.LOCKABLE_HANDLER, null);
+		// create buffer list because otherwise we will be deleting elements while iterating (BAD!!)
+		LocksUtil.intersecting(lockables, pos).collect(Collectors.toList()).forEach(lockable ->
 		{
 			world.playSound(null, pos, SoundEvents.ENTITY_ITEM_BREAK, SoundCategory.BLOCKS, 0.8f, 0.8f + world.rand.nextFloat() * 0.4f);
-			world.spawnEntity(new EntityItem(world, (double) pos.getX() + 0.5d, (double) pos.getY() + 0.5d, (double) pos.getZ() + 0.5d, LockItem.from(lockable.lock)));
+			world.spawnEntity(new EntityItem(world, (double) pos.getX() + 0.5d, (double) pos.getY() + 0.5d, (double) pos.getZ() + 0.5d, lockable.stack));
 			lockables.remove(lockable.networkID);
 		});
 	}
-
+	
 	@Override
 	public void notifyLightSet(BlockPos pos) {}
 

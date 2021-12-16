@@ -1,0 +1,21 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"pattern":
+	[
+		" S ",
+		"S S",
+		"SS "
+	],
+	"key":
+	{
+		"S":
+		{
+			"type": "forge:ore_dict",
+            "ore": "stickWood"
+		}
+	},
+	"result":
+	{
+		"item": "locks:wood_lock_pick"
+	}
+}

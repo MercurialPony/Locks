@@ -11,6 +11,7 @@ import melonslise.locks.common.init.LocksCapabilities;
 import melonslise.locks.common.init.LocksSoundEvents;
 import melonslise.locks.common.network.LocksGuiHandler;
 import melonslise.locks.common.util.Lockable;
+import melonslise.locks.common.util.LocksUtil;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -64,9 +65,8 @@ public class KeyRingItem extends Item
 	@Override
 	public EnumActionResult onItemUse(EntityPlayer player, World world, BlockPos pos, EnumHand hand, EnumFacing facing, float x, float y, float z)
 	{
-		ILockableStorage lockables = world.getCapability(LocksCapabilities.LOCKABLES, null);
 		IItemHandler inv = player.getHeldItem(hand).getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
-		List<Lockable> intersecting = lockables.get().values().stream().filter(lockable1 -> lockable1.box.intersects(pos)).collect(Collectors.toList());
+		List<Lockable> intersecting = LocksUtil.intersecting(world, pos).collect(Collectors.toList());
 		if(intersecting.isEmpty())
 			return EnumActionResult.PASS;
 		for(int a = 0; a < inv.getSlots(); ++a)
@@ -75,11 +75,22 @@ public class KeyRingItem extends Item
 			List<Lockable> matching = intersecting.stream().filter(lockable1 -> lockable1.lock.id == id).collect(Collectors.toList());
 			if(matching.isEmpty())
 				continue;
+			world.playSound(player, pos, LocksSoundEvents.LOCK_OPEN, SoundCategory.BLOCKS, 1F, 1F);
+			if(world.isRemote)
+				return EnumActionResult.SUCCESS;
 			for(Lockable lockable : matching)
 				lockable.lock.setLocked(!lockable.lock.isLocked());
-			world.playSound(player, pos, LocksSoundEvents.LOCK_OPEN, SoundCategory.BLOCKS, 1F, 1F);
 			return EnumActionResult.SUCCESS;
 		}
-		return EnumActionResult.PASS;
+		return EnumActionResult.SUCCESS;
+	}
+	
+	public static boolean containsId(ItemStack stack, int id)
+	{
+		IItemHandler inv = stack.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
+		for(int a = 0; a < inv.getSlots(); ++a)
+			if(LockingItem.getOrSetId(inv.getStackInSlot(a)) == id)
+				return true;
+		return false;
 	}
 }

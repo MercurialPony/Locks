@@ -26,7 +26,7 @@ public class LockingItem extends Item
 		this.setMaxStackSize(1);
 	}
 
-	public static final String KEY_ID = "id";
+	public static final String KEY_ID = "Id";
 
 	public static ItemStack copyId(ItemStack from, ItemStack to)
 	{
@@ -34,6 +34,7 @@ public class LockingItem extends Item
 		return to;
 	}
 
+	//Assigns a random ID if one isn't present
 	public static int getOrSetId(ItemStack stack)
 	{
 		NBTTagCompound nbt = LocksUtil.getTag(stack);

@@ -1,0 +1,24 @@
+{
+	"package": "melonslise.locks.mixin",
+	"refmap": "mixins.locks.refmap.json",
+	"compatibilityLevel": "JAVA_8",
+	"mixins": [
+		"BlockMixin",
+		"BlockChestMixin",
+        "BlockPistonBaseMixin",
+        "TileEntityBrewingStandMixin",
+        "TileEntityChestMixin",
+        "TileEntityFurnaceMixin",
+        "TileEntityLockableLootAccessor",
+        "TileEntityLockableMixin",
+        "VanillaInventoryCodeHooksMixin",
+        "WorldMixin"
+	],
+	"client": [
+	],
+	"injectors":
+	{
+		"defaultRequire": 1
+	},
+	"minVersion": "0.6"
+}

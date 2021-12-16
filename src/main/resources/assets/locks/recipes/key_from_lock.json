@@ -2,7 +2,8 @@
 	"type": "locks:locking_item_cloning",
 	"locking":
 	{
-		"item": "locks:lock"
+		"type": "forge:ore_dict",
+        "ore": "locksLock"
 	},
 	"blanks":
 	[

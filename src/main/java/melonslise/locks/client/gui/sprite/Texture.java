@@ -20,8 +20,8 @@ public class Texture
 		this.canvasHeight = canvasHeight;
 	}
 
-	public void draw(float x, float y)
+	public void draw(float x, float y, float alpha)
 	{
-		LocksClientUtil.drawTexturedRectangle(x, y, this.startX, this.startY, this.width, this.height, this.canvasWidth, this.canvasHeight);
+		LocksClientUtil.drawTexturedRectangle(x, y, this.startX, this.startY, this.width, this.height, this.canvasWidth, this.canvasHeight, alpha);
 	}
 }

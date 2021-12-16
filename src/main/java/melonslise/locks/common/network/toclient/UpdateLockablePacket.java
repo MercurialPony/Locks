@@ -47,7 +47,7 @@ public class UpdateLockablePacket implements IMessage
 				@Override
 				public void run()
 				{
-					mc.world.getCapability(LocksCapabilities.LOCKABLES, null).get().get(pkt.networkID).lock.setLocked(pkt.locked);
+					mc.world.getCapability(LocksCapabilities.LOCKABLE_HANDLER, null).getLoaded().get(pkt.networkID).lock.setLocked(pkt.locked);
 				}
 			});
 			return null;

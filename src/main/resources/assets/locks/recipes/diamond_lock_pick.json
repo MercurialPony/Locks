@@ -1,0 +1,22 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"pattern":
+	[
+		" DD",
+		" D ",
+		"D  "
+	],
+	"key":
+	{
+		"D":
+        {
+            "type": "forge:ore_dict",
+            "ore": "gemDiamond"
+        }
+	},
+	"result":
+	{
+		"item": "locks:diamond_lock_pick",
+		"count": 2
+	}
+}

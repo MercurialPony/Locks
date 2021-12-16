@@ -1,0 +1,25 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"pattern":
+	[
+		" S ",
+		"SLS",
+		"SSS"
+	],
+	"key":
+	{
+		"S":
+		{
+			"type": "forge:ore_dict",
+            "ore": "ingotSteel"
+		},
+		"L":
+		{
+			"item": "locks:steel_lock_mechanism"
+		}
+	},
+	"result":
+	{
+		"item": "locks:steel_lock"
+	}
+}

@@ -1,10 +1,12 @@
 package melonslise.locks.common.network.toclient;
 
 import io.netty.buffer.ByteBuf;
+import melonslise.locks.Locks;
 import melonslise.locks.common.init.LocksCapabilities;
 import melonslise.locks.common.util.Lockable;
 import melonslise.locks.common.util.LocksUtil;
 import net.minecraft.client.Minecraft;
+import net.minecraft.util.text.TextComponentString;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
@@ -33,7 +35,7 @@ public class AddLockablePacket implements IMessage
 	}
 
 	public static class Handler implements IMessageHandler<AddLockablePacket, IMessage>
-	{
+	{	
 		@Override
 		public IMessage onMessage(AddLockablePacket pkt, MessageContext ctx)
 		{
@@ -44,7 +46,15 @@ public class AddLockablePacket implements IMessage
 				@Override
 				public void run()
 				{
-					mc.world.getCapability(LocksCapabilities.LOCKABLES, null).add(pkt.lockable);
+					if(!mc.world.getCapability(LocksCapabilities.LOCKABLE_HANDLER, null).add(pkt.lockable))
+					{
+						if(Locks.debug)
+						{
+							String message = "Lock Failed: "+pkt.lockable.toString();
+							mc.player.sendMessage(new TextComponentString(message));
+						}
+					}
+					
 				}
 			});
 			return null;

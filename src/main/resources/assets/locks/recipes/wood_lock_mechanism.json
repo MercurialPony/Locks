@@ -1,0 +1,31 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"pattern":
+	[
+		"SSS",
+		"TTT",
+		"WWW"
+	],
+	"key":
+	{
+		"S":
+		{
+            "type": "forge:ore_dict",
+            "ore": "string"
+		},
+		"T":
+		{
+			"type": "forge:ore_dict",
+            "ore": "stickWood"
+		},
+		"W":
+		{
+			"type": "forge:ore_dict",
+            "ore": "plankWood"
+		}
+	},
+	"result":
+	{
+		"item": "locks:wood_lock_mechanism"
+	}
+}

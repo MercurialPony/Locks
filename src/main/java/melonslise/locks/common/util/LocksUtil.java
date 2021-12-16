@@ -1,19 +1,36 @@
 package melonslise.locks.common.util;
 
+import java.io.IOException;
+import java.util.HashSet;
 import java.util.Random;
+import java.util.Set;
+import java.util.stream.Stream;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.util.internal.ThreadLocalRandom;
+import melonslise.locks.common.capability.ILockableHandler;
+import melonslise.locks.common.init.LocksCapabilities;
+import melonslise.locks.common.init.LocksNetworks;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.network.PacketBuffer;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.management.PlayerChunkMap;
+import net.minecraft.server.management.PlayerChunkMapEntry;
 import net.minecraft.tileentity.TileEntityChest;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 
 public final class LocksUtil
 {
+	
 	private LocksUtil() {}
 
 
@@ -66,8 +83,21 @@ public final class LocksUtil
 		return dir == EnumFacing.UP ? AttachFace.CEILING : dir == EnumFacing.DOWN ? AttachFace.FLOOR : AttachFace.WALL;
 	}
 
-
-
+	public static Stream<Lockable> intersecting(World world, BlockPos pos)
+	{
+		return intersecting(world.getCapability(LocksCapabilities.LOCKABLE_HANDLER, null), pos);
+	}
+	
+	public static Stream<Lockable> intersecting(ILockableHandler handler, BlockPos pos)
+	{
+		return handler.getInChunk(pos).values().stream().filter(lkb -> lkb.box.intersects(pos));
+	}
+	
+	public static boolean locked(World world, BlockPos pos)
+	{
+		return intersecting(world, pos).anyMatch(LocksPredicates.LOCKED);
+	}
+	
 	/*
 	 * 
 	 * NBT
@@ -142,7 +172,7 @@ public final class LocksUtil
 		return nbt;
 	}
 
-	public static final String KEY_BOX = "box", KEY_LOCK = "lock", KEY_ORIENTATION = "orientation", KEY_OLD_SIDE = "side";
+	public static final String KEY_BOX = "box", KEY_LOCK = "lock", KEY_ORIENTATION = "orientation", KEY_OLD_SIDE = "side", KEY_STACK = "Stack";
 
 	/**
 	 * Reads a lockable as a consecutive box, lock and enum from the given compound NBT. Does not include the lockable's network ID.
@@ -151,7 +181,7 @@ public final class LocksUtil
 	public static Lockable readLockableFromNBT(NBTTagCompound nbt)
 	{
 		Orientation orient = nbt.hasKey(KEY_ORIENTATION) ? Orientation.values()[(int) nbt.getByte(KEY_ORIENTATION)] : Orientation.fromDirection(EnumFacing.getFront((int) nbt.getByte(KEY_OLD_SIDE)), EnumFacing.NORTH);
-		return new Lockable(readBoxFromNBT(nbt.getCompoundTag(KEY_BOX)), readLockFromNBT(nbt.getCompoundTag(KEY_LOCK)), orient);
+		return new Lockable(readBoxFromNBT(nbt.getCompoundTag(KEY_BOX)), readLockFromNBT(nbt.getCompoundTag(KEY_LOCK)), orient, new ItemStack(nbt.getCompoundTag(KEY_STACK)), nbt.getInteger(KEY_ID));
 	}
 
 	/**
@@ -163,6 +193,8 @@ public final class LocksUtil
 		nbt.setTag(KEY_BOX, writeBoxToNBT(lockable.box));
 		nbt.setTag(KEY_LOCK, writeLockToNBT(lockable.lock));
 		nbt.setByte(KEY_ORIENTATION, (byte) lockable.orient.ordinal());
+		nbt.setTag(KEY_STACK, lockable.stack.serializeNBT());
+		nbt.setInteger(KEY_ID, lockable.networkID);
 		return nbt;
 	}
 
@@ -218,6 +250,7 @@ public final class LocksUtil
 	{
 		return new Lock(buf.readInt(), (int) buf.readByte(), buf.readBoolean());
 	}
+	
 
 	/**
 	 * Writes a lock as a consecutive integer, byte and boolean to the given buffer. Does not include the lock's combination.
@@ -229,12 +262,33 @@ public final class LocksUtil
 		buf.writeBoolean(lock.isLocked());
 	}
 
+	public static ItemStack readItemStackFromBuffer(ByteBuf buf)
+	{
+		try
+		{
+			return (new PacketBuffer(buf)).readItemStack();
+		}
+		catch (IOException e)
+		{
+			//TODO why can this throw an exception? Where?
+			//Nothing actually throws this exception inside?
+			//ByteBufUtils does the same and is equally as confused
+			e.printStackTrace();
+			return ItemStack.EMPTY.copy();
+		}
+	}
+	
+	public static void writeItemStackToBuffer(ByteBuf buf, ItemStack stack)
+	{
+		(new PacketBuffer(buf)).writeItemStack(stack);
+	}
+
 	/**
 	 * Reads a lockable as a consecutive box, lock, enum and int from the given buffer.
 	 */
 	public static Lockable readLockableFromBuffer(ByteBuf buf)
 	{
-		return new Lockable(readBoxFromBuffer(buf), readLockFromBuffer(buf), readEnumFromBuffer(buf, Orientation.class), buf.readInt());
+		return new Lockable(readBoxFromBuffer(buf), readLockFromBuffer(buf), readEnumFromBuffer(buf, Orientation.class), readItemStackFromBuffer(buf), buf.readInt());
 	}
 
 	/**
@@ -245,6 +299,7 @@ public final class LocksUtil
 		writeBoxToBuffer(buf, lockable.box);
 		writeLockToBuffer(buf, lockable.lock);
 		writeEnumToBuffer(buf, lockable.orient);
+		writeItemStackToBuffer(buf, lockable.stack);
 		buf.writeInt(lockable.networkID);
 	}
 
@@ -304,4 +359,67 @@ public final class LocksUtil
 		return new AxisAlignedBB(point1.x, point1.y, point1.z, point2.x, point2.y, point2.z);
 	}
 	*/
+	
+	public static boolean chance(Random rng, double ch)
+	{
+		return ch == 1d || ch != 0d && rng.nextDouble() <= ch;
+	}
+	
+	
+	// Networking for 1.12.2
+	public static void sendToTrackingPlayers(Cuboid6i bounds, IMessage message, World world)
+	{
+		//long timestamp_A = System.nanoTime();
+		if(world instanceof WorldServer)
+		{
+			WorldServer worldServer = (WorldServer)world;
+			PlayerChunkMap playerchunkmap = worldServer.getPlayerChunkMap();
+			
+			Set<EntityPlayerMP> playerSet = new HashSet<EntityPlayerMP>();
+
+			// TODO evaluate how well this routine actually works
+			//Get all the chunks in the bounds
+			bounds.containedChunksTo((x, z) -> 
+			{
+				PlayerChunkMapEntry entry = playerchunkmap.getEntry(x, z);
+				if(entry != null)
+					playerSet.addAll(entry.getWatchingPlayers());
+				return null;
+			}, false).clear();
+			
+			playerSet.stream().forEach(player -> LocksNetworks.MAIN.sendTo(message, player));
+			
+			//long timestamp_B = System.nanoTime();
+			
+			//DebugUL.messageAll("Sending packet to "+playerSet.size()+" players with nanotime "+(timestamp_B - timestamp_A));
+			
+			playerSet.clear();
+		}
+	}
+	
+	public static long getOverworldSeed()
+	{
+		MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
+		if(server != null)
+		{
+			World world = server.getEntityWorld();
+			if(world != null)
+				return world.getSeed();
+		}
+		
+		//Fall back to 1 on client
+		return 1L;
+	}
+	
+	//Utilities from 1.16 
+	public static boolean hasChunkAt(World world, BlockPos pos)
+	{
+		return world.isBlockLoaded(pos);
+	}
+	
+	public static boolean hasChunk(World world, int xx, int zz)
+	{
+		return hasChunkAt(world, new BlockPos((xx << 4)+8, 64, (zz << 4)+8));
+	}
+	
 }

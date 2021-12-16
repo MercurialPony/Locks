@@ -2,7 +2,7 @@ package melonslise.locks.client.event;
 
 import melonslise.locks.Locks;
 import melonslise.locks.client.util.LocksClientUtil;
-import melonslise.locks.common.capability.ILockableStorage;
+import melonslise.locks.common.capability.ILockableHandler;
 import melonslise.locks.common.capability.ISelection;
 import melonslise.locks.common.config.LocksConfig;
 import melonslise.locks.common.init.LocksCapabilities;
@@ -14,6 +14,9 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.RenderGlobal;
+import net.minecraft.client.renderer.RenderHelper;
+import net.minecraft.client.renderer.Vector3d;
+import net.minecraft.client.renderer.GlStateManager.CullFace;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.renderer.culling.ClippingHelperImpl;
@@ -24,6 +27,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.client.event.ModelRegistryEvent;
+import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.fml.common.Mod;
@@ -49,15 +53,13 @@ public final class LocksClientEvents
 		Minecraft mc = Minecraft.getMinecraft();
 		if(event.phase == TickEvent.Phase.END || mc.world == null || mc.isGamePaused())
 			return;
-		mc.world.getCapability(LocksCapabilities.LOCKABLES, null).get().values().forEach(lockable ->
+		mc.world.getCapability(LocksCapabilities.LOCKABLE_HANDLER, null).getLoaded().values().forEach(lockable ->
 		{
 			if(lockable.box.loaded(mc.world))
 				lockable.tick();
 		});
 	}
-
-	public static final ItemStack LOCK_STACK = new ItemStack(LocksItems.LOCK);
-
+	
 	// TODO Use voxel shapes instead
 	// TODO Move render to Lockable?
 	@SubscribeEvent
@@ -66,9 +68,11 @@ public final class LocksClientEvents
 		Minecraft mc = Minecraft.getMinecraft();
 		Vec3d origin = new Vec3d(TileEntityRendererDispatcher.staticPlayerX, TileEntityRendererDispatcher.staticPlayerY, TileEntityRendererDispatcher.staticPlayerZ);
 		BlockPos.MutableBlockPos mutPos = new BlockPos.MutableBlockPos();
-		ILockableStorage lockables = mc.world.getCapability(LocksCapabilities.LOCKABLES, null);
+		ILockableHandler lockables = mc.world.getCapability(LocksCapabilities.LOCKABLE_HANDLER, null);
 		
-		for(Lockable lockable : lockables.get().values())
+		GlStateManager.enableRescaleNormal();
+		
+		for(Lockable lockable : lockables.getLoaded().values())
 		{
 			Lockable.State state = lockable.getLockState(mc.world);
 			if(state == null || !state.inRange(origin) || !state.inView(ClippingHelperImpl.getInstance(), origin))
@@ -85,12 +89,18 @@ public final class LocksClientEvents
 			GlStateManager.scale(0.5f, 0.5f, 0.5f);
 			int light = mc.world.getCombinedLight(mutPos.setPos(state.pos.x, state.pos.y, state.pos.z), 0);
 			OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, light % 65536, light / 65536);
+			GlStateManager.color(1.0f, 1.0f, 1.0f, 1.0f);
 			mc.entityRenderer.enableLightmap();
-			mc.getRenderItem().renderItem(LOCK_STACK, ItemCameraTransforms.TransformType.FIXED);
+            RenderHelper.enableStandardItemLighting();
+			mc.getRenderItem().renderItem(lockable.stack, ItemCameraTransforms.TransformType.FIXED);
+            RenderHelper.disableStandardItemLighting();
+			mc.entityRenderer.disableLightmap();
 			GlStateManager.popMatrix();
 		}
 
-		ISelection select = mc.player.getCapability(LocksCapabilities.LOCK_SELECTION, null);
+		GlStateManager.disableRescaleNormal();
+
+		ISelection select = mc.player.getCapability(LocksCapabilities.SELECTION, null);
 		BlockPos pos1 = select.get();
 		if(pos1 == null)
 			return;
