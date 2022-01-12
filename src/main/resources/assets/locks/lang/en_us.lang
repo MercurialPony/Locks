@@ -45,7 +45,7 @@ locks.subtitle.lock.open=Key turned in lock
 locks.subtitle.lock.rattle=Lock rattles
 locks.subtitle.pin.fail=Pin clacks hollowly
 locks.subtitle.pin.match=Pin clicks lightly
-locks.subtitle.shock=Sudden electric zap
+locks.subtitle.pin.shock=Sudden electric zap
 
 # Tooltips
 locks.tooltip.id=ID: %s
