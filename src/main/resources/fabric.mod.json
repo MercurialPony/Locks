@@ -1,0 +1,46 @@
+{
+	"schemaVersion": 1,
+	"id": "locks",
+	"version": "${version}",
+	"name": "Locks",
+	"description": "This is an example description! Tell everyone what your mod is about!",
+	"authors": [
+		"Me!"
+	],
+	"contact": {
+		"homepage": "https://fabricmc.net/",
+		"sources": "https://github.com/FabricMC/fabric-example-mod"
+	},
+	"license": "CC0-1.0",
+	"icon": "assets/locks/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"melonslise.locks.LocksCore"
+		],
+		"client": [
+			"melonslise.locks.LocksClient"
+		],
+		"cardinal-components": [ "melonslise.locks.init.ModComponents" ],
+		"tweed4:config": [ "melonslise.locks.config.ModConfig" ]
+	},
+	"mixins": [
+		"locks.mixins.json",
+		{
+			"config": "locks.client.mixins.json",
+			"environment": "client"
+		}
+	],
+	"depends": {
+		"fabricloader": ">=0.14.21",
+		"minecraft": "~1.20.1",
+		"java": ">=17",
+		"fabric-api": "*"
+	},
+	"suggests": {
+		"another-mod": "*"
+	},
+	"custom": {
+		"cardinal-components": [ "locks:lockable_storage" ]
+	}
+}

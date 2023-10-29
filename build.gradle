@@ -1,99 +1,84 @@
-buildscript {
-    repositories {
-        maven { url = 'https://maven.minecraftforge.net' }
-		maven { url = 'https://repo.spongepowered.org/repository/maven-public/' }
-        mavenCentral()
-    }
-    dependencies {
-        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '4.1.+', changing: true
-		classpath group: 'org.spongepowered', name: 'mixingradle', version: '0.7-SNAPSHOT'
-    }
+plugins {
+	id 'fabric-loom' version '1.3-SNAPSHOT'
 }
 
-apply plugin: 'net.minecraftforge.gradle'
-apply plugin: 'eclipse'
-apply plugin: 'maven-publish'
+version = project.mod_version
+group = project.maven_group
 
-version = '3.0.3'
-group = 'melonslise.locks'
-archivesBaseName = 'locks'
+base {
+	archivesName = project.archives_base_name
+}
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(8)
-
-minecraft {
-	mappings channel: 'official', version: '1.16.5'
-    
-	accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
-
-	runs {
-		client {
-			workingDirectory project.file('run')
-
-			arg "-mixin.config=" + archivesBaseName + ".mixins.json"
-
-			property 'forge.logging.console.level', 'info'
-
-			mods {
-				locks {
-					source sourceSets.main
-				}
-			}
-		}
-
-		server {
-			workingDirectory project.file('run')
-
-			arg "-mixin.config=" + archivesBaseName + ".mixins.json"
-
-			property 'forge.logging.console.level', 'info'
-
-			mods {
-				locks {
-					source sourceSets.main
-				}
-			}
-		}
-
-		data {
-			workingDirectory project.file('run')
-
-			property 'forge.logging.console.level', 'info'
-
-			args '--mod', 'locks', '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
-
-			mods {
-				locks {
-					source sourceSets.main
-				}
-			}
-		}
+repositories {
+	maven {
+		url "https://maven.ladysnake.org/releases"
+	}
+	maven {
+		url "https://maven.terraformersmc.com/releases/"
+	}
+	maven {
+		url "https://maven.siphalor.de/"
 	}
 }
 
-sourceSets.main.resources { srcDir 'src/generated/resources' }
+loom {
+	splitEnvironmentSourceSets()
+
+	mods {
+		"locks" {
+			sourceSet sourceSets.main
+			sourceSet sourceSets.client
+		}
+	}
+
+}
 
 dependencies {
-	minecraft 'net.minecraftforge:forge:1.16.5-36.1.4'
-	annotationProcessor 'org.spongepowered:mixin:0.8:processor'
+	minecraft "com.mojang:minecraft:$minecraft_version"
+	mappings "net.fabricmc:yarn:$yarn_mappings:v2"
+	modImplementation "net.fabricmc:fabric-loader:$loader_version"
+
+	modImplementation "net.fabricmc.fabric-api:fabric-api:$fabric_version"
+
+	include modImplementation("dev.onyxstudios.cardinal-components-api:cardinal-components-base:$cardinal_components_version")
+	include modImplementation("dev.onyxstudios.cardinal-components-api:cardinal-components-chunk:$cardinal_components_version")
+	include modImplementation("dev.onyxstudios.cardinal-components-api:cardinal-components-world:$cardinal_components_version")
+
+	include modApi(platform("de.siphalor.tweed4:tweed4-bom-$tweed_minecraft_version:$tweed_version"))
+	include modApi("de.siphalor.tweed4:tweed4-base-$tweed_minecraft_version")
+	include modApi("de.siphalor.tweed4:tweed4-annotated-$tweed_minecraft_version")
+	//include modApi("de.siphalor.tweed4:tweed4-data-$tweed_minecraft_version")
+	include modApi("de.siphalor.tweed4:tweed4-data-gson-$tweed_minecraft_version")
+	include modApi("de.siphalor.tweed4:tweed4-tailor-screen-$tweed_minecraft_version")
+	include modApi("de.siphalor.tweed4:tweed4-tailor-coat-$tweed_minecraft_version")
+	include modApi("de.siphalor:coat-$tweed_minecraft_version:$coat_version")
+
+	modClientImplementation "com.terraformersmc:modmenu:$mod_menu_version"
+
+	include implementation("io.reactivex.rxjava3:rxjava:$rxjava_version")
+}
+
+processResources {
+	inputs.property "version", project.version
+
+	filesMatching("fabric.mod.json") {
+		expand "version": project.version
+	}
+}
+
+tasks.withType(JavaCompile).configureEach {
+	it.options.release = 17
+}
+
+java {
+	withSourcesJar()
+
+	sourceCompatibility = JavaVersion.VERSION_17
+	targetCompatibility = JavaVersion.VERSION_17
 }
 
 jar {
-	manifest {
-		attributes([
-			"Specification-Title": archivesBaseName,
-			"Specification-Vendor": "melonslise",
-			"Specification-Version": version,
-			"Implementation-Title": archivesBaseName,
-			"Implementation-Version": version,
-			"Implementation-Vendor" :"melonslise",
-			"Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
-			"MixinConfigs": archivesBaseName + ".mixins.json"
-		])
+	from("LICENSE") {
+		rename { "${it}_${project.base.archivesName.get()}"}
 	}
-}
-
-apply plugin: 'org.spongepowered.mixin'
-
-mixin {
-    add sourceSets.main, archivesBaseName + ".refmap.json"
 }
