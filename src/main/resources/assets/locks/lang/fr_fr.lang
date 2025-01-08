@@ -1,0 +1,60 @@
+# Creative tabs
+itemGroup.locks=Locks
+
+# Items
+item.locks.spring.name=Ressort
+item.locks.wood_lock_mechanism.name=Mécanisme de cadenas en bois
+item.locks.iron_lock_mechanism.name=Mécanisme de cadenas en fer
+item.locks.steel_lock_mechanism.name=Mécanisme de cadenas en acier
+item.locks.wood_lock.name=Cadenas en bois
+item.locks.iron_lock.name=Cadenas en fer
+item.locks.steel_lock.name=Cadenas en acier
+item.locks.gold_lock.name=Cadenas plaquée en or
+item.locks.diamond_lock.name=Cadenas plaquée en diamant
+item.locks.wood_lock_pick.name=Crochet de serrure en bois
+item.locks.iron_lock_pick.name=Crochet de serrure en fer
+item.locks.steel_lock_pick.name=Crochet de serrure en acier
+item.locks.gold_lock_pick.name=Crochet de serrure en or
+item.locks.diamond_lock_pick.name=Crochet de serrure en diamant
+item.locks.key.name=Clé
+item.locks.master_key.name=Clé de maître
+item.locks.key_blank.name=Clé vierge
+item.locks.key_ring.name=Trousseau de clés
+
+# Enchantments
+enchantment.locks.shocking=Électrisé
+enchantment.locks.shocking.desc=Électrifie les voleurs qui ne parviennent pas à crocheter le cadenas
+enchantment.locks.sturdy=Robustesse
+enchantment.locks.sturdy.desc=Réduit la force des crochets de cadenas
+enchantment.locks.complexity=Complexité
+enchantment.locks.complexity.desc=Rend le cadenas trop complexe pour être crochetée avec des crochets de qualité inférieure
+
+# Death Mesages
+death.attack.locks.shock=%1$s a été électrocuté après avoir échoué à crocheter un cadenas enchantée
+death.attack.locks.shock.player=%1$s a été électrocuté après avoir échoué à crocheter un cadenas enchantée en tentant de combattre un ou une %2$s
+
+
+# GUIs
+locks.gui.lockpicking.title=Crochetage de serrure
+locks.gui.lockpicking.open=Appuyez sur `ESC` pour ouvrir
+
+# Subtitles
+locks.subtitle.key_ring=Bruits de clés
+locks.subtitle.lock.close=Clics de cadenas
+locks.subtitle.lock.open=Clé tournée dans la serrure
+locks.subtitle.lock.rattle=La serrure cliquette
+locks.subtitle.pin.fail=Un crochet de serrure se casse
+locks.subtitle.pin.match=Un crochet s'enfonce dans un cadenas
+locks.subtitle.shock=Zap électrique soudain
+
+# Tooltips
+locks.tooltip.id=ID : %s
+locks.tooltip.length=Longueur : %s
+locks.tooltip.resistance.weak=Résistance aux explosions : Faible
+locks.tooltip.resistance.strong=Résistance aux explosions : Fort
+locks.tooltip.resistance.supreme=Résistance aux explosions : Suprême
+locks.tooltip.strength=Force : %s
+
+# Status messages
+locks.status.locked=Ce bloc est cadenassé
+locks.status.too_complex=Ce cadenas est trop complexe pour ce crochet de serrure
